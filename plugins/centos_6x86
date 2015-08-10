@@ -28,7 +28,7 @@ PING=/sbin/ping
 #*******************************************
 # Install mysql
 #*******************************************
-_install_mysql () {
+_install_mysql() {
 wget http://dev.mysql.com/get/Downloads/MySQL-5.6/MySQL-5.6.16-1.el6.x86_64.rpm-bundle.tar
 mkdir MySQL
 cd MySQL
@@ -41,7 +41,7 @@ yum install MySQL*rpm
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
 #*********************************************************
-_install_epel () {
+_install_epel() {
  wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
  rpm -ivh epel-release-6-8.noarch.rpm
 }
@@ -49,6 +49,6 @@ _install_epel () {
 #*******************************************
 #  Pre install
 #*******************************************
-pre_install () {
+pre_install() {
 _install_epel;
 }
