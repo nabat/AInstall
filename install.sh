@@ -9,7 +9,7 @@ VERSION=4.94
 
 
 # LIB FUNCTION 
-. alib.sh
+. ./alib.sh
 
 TMPOPTIONSFILE="/tmp/abills.tmp"
 CMD_LOG="/tmp/ports_builder_cmd.log"
@@ -41,8 +41,7 @@ GetVersionFromFile() {
 # run before install
 #************************************************
 pre_install () {
-  
-  
+ echo "default pre_install"  
 }
 
 
@@ -50,8 +49,7 @@ pre_install () {
 # run after install
 #************************************************
 post_install () {
-  
-  
+ echo "deafult post_install"  
 }
 
 
