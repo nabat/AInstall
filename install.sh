@@ -6,12 +6,10 @@
 #**************************************************************
 
 VERSION=4.94
-#CentOS Support
-#custom ipcad build
 
 
 # LIB FUNCTION 
-. alib.sh
+. ./alib.sh
 
 TMPOPTIONSFILE="/tmp/abills.tmp"
 CMD_LOG="/tmp/ports_builder_cmd.log"
@@ -43,8 +41,7 @@ GetVersionFromFile() {
 # run before install
 #************************************************
 pre_install () {
-  
-  
+ echo "default pre_install"  
 }
 
 
@@ -52,8 +49,7 @@ pre_install () {
 # run after install
 #************************************************
 post_install () {
-  
-  
+ echo "deafult post_install"  
 }
 
 
@@ -2499,8 +2495,9 @@ while [ "${OS_NAME}" = "" ]; do
     echo " "`cat ${plugin} | grep OS`
   done;
  
-  echo "Use plugin [enter for default plugin]: ";
-  read USE_PLUGIN=
+  #echo "Use plugin [enter for default plugin]: ";
+  #Changed by AnyKey
+  read -p "Use plugin [enter for default plugin]: " USE_PLUGIN
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
