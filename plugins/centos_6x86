@@ -1,5 +1,5 @@
 #OS CentOS 6_x86
-#COMMENTS CentOS You cant install accel-ipoe on CentOS
+#COMMENTS CentOS comments
 #M update:upgrade:yum -y update
 #M mysql:MySQL:_install mariadb mariadb-devel mariadb-libs mariadb-server; systemctl start mariadb; systemctl enable mariadb
 #M apache:apache:_install apache24
