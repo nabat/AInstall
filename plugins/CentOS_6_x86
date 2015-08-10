@@ -1,5 +1,5 @@
 #OS CentOS_6_x86
-#COMMENTS CentOS
+#COMMENTS CentOS comments
 #M update:upgrade:yum -y update
 #M mysql:MySQL:_install_mysql
 #M apache:apache:_install apache24
