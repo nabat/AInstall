@@ -1,7 +1,7 @@
 #OS CentOS 6_x86
 #COMMENTS CentOS comments
 #M update:upgrade:yum -y update
-#M mysql:MySQL:_install mariadb mariadb-devel mariadb-libs mariadb-server; systemctl start mariadb; systemctl enable mariadb
+#M mysql:MySQL:_install_mysql
 #M apache:apache:_install apache24
 #M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
 #M freeradius:Freeradius_Server:_install freeradius
@@ -28,21 +28,21 @@ PING=/sbin/ping
 #  Pre install
 #*******************************************
 pre_install() {
-yum -y install wget dialog;
-_install_epel;
+  yum -y install wget dialog;
+  _install_epel;
 }
 
 #*******************************************
 # Install mysql
 #*******************************************
 _install_mysql() {
-wget http://dev.mysql.com/get/Downloads/MySQL-5.6/MySQL-5.6.16-1.el6.x86_64.rpm-bundle.tar
-mkdir MySQL
-cd MySQL
-tar -xvf ../MySQL-5.6.16-1.el6.x86_64.rpm-bundle.tar
-rm -f MySQL-test*rpm
-rm -f MySQL-embedded*rpm
-yum install MySQL*rpm
+  wget http://dev.mysql.com/get/Downloads/MySQL-5.6/MySQL-5.6.16-1.el6.x86_64.rpm-bundle.tar
+  mkdir MySQL
+  cd MySQL
+  tar -xvf ../MySQL-5.6.16-1.el6.x86_64.rpm-bundle.tar
+  rm -f MySQL-test*rpm
+  rm -f MySQL-embedded*rpm
+  yum install MySQL*rpm
 }
 
 #*********************************************************
