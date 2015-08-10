@@ -53,5 +53,6 @@ _install_epel() {
 #  Pre install
 #*******************************************
 pre_install() {
+_install dialog;
 _install_epel;
 }
