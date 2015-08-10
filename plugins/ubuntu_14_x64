@@ -1,0 +1,59 @@
+#OS Ubuntu 14 x64
+#COMMENTS Ubuntu comments
+#M update:apt-get update
+#M mysql:MYSQL:_install_mysql
+#M apache:Apache:_install_apache
+
+
+
+
+
+
+
+#******************************************************************
+#!!!!!!!!!!!!!!!!!!!!!!!!!!PRE INSTALL
+#******************************************************************
+
+
+
+
+
+
+
+
+
+
+#******************************************************************
+#!!!!!!!!!!!!!!!!!!!!!!!!!INSTALL PROGRAMMS
+#******************************************************************
+
+#Install Apache
+_install_apache()
+{
+
+	apt-get install apache apache2-doc apache2-utils apache2-mpm-prefork
+	
+	
+}
+
+#Install MYSQL
+_install_mysql()
+{
+
+	apt-get install mysql-server mysql-client libmysqlclient-devs
+
+}
+
+#Install Perl-Modules
+_install_perl_modules()
+{
+
+	
+
+}
+
+
+
+#******************************************************************
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!POST INSTALL
+#******************************************************************
