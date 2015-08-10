@@ -28,7 +28,7 @@ PING=/sbin/ping
 #  Pre install
 #*******************************************
 pre_install() {
-_install wget;
+yum -y install wget dialog;
 _install_epel;
 }
 
