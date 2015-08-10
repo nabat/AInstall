@@ -24,6 +24,13 @@ RESTART_APACHE=/usr/local/etc/rc.d/apache24
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
 
+#*******************************************
+#  Pre install
+#*******************************************
+pre_install() {
+_install wget;
+_install_epel;
+}
 
 #*******************************************
 # Install mysql
@@ -46,10 +53,3 @@ _install_epel() {
  rpm -ivh epel-release-6-8.noarch.rpm
 }
 
-#*******************************************
-#  Pre install
-#*******************************************
-pre_install() {
-_install wget;
-_install_epel;
-}
