@@ -6,8 +6,6 @@
 #**************************************************************
 
 VERSION=4.94
-#CentOS Support
-#custom ipcad build
 
 
 # LIB FUNCTION 
