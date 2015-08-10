@@ -1,4 +1,4 @@
-#OS CentOS_6_x86
+#OS CentOS 6_x86
 #COMMENTS CentOS comments
 #M update:upgrade:yum -y update
 #M mysql:MySQL:_install_mysql
