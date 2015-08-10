@@ -2495,8 +2495,9 @@ while [ "${OS_NAME}" = "" ]; do
     echo " "`cat ${plugin} | grep OS`
   done;
  
-  echo "Use plugin [enter for default plugin]: ";
-  read USE_PLUGIN=
+  #echo "Use plugin [enter for default plugin]: ";
+  #Changed by AnyKey
+  read -p "Use plugin [enter for default plugin]: "; USE_PLUGIN
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
