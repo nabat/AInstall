@@ -2497,7 +2497,7 @@ while [ "${OS_NAME}" = "" ]; do
  
   #echo "Use plugin [enter for default plugin]: ";
   #Changed by AnyKey
-  read -p "Use plugin [enter for default plugin]: "; USE_PLUGIN
+  read -p "Use plugin [enter for default plugin]: " USE_PLUGIN
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
