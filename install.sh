@@ -2492,7 +2492,7 @@ while [ "${OS_NAME}" = "" ]; do
   echo "============Select plugin:============ "
   for plugin in ${PLUGINS_DIR}/*; do
     echo "${plugin}"
-    echo " "`cat ${plugin} | grep OS`
+    echo " "`cat ${plugin} | grep '\^#OS\'`
   done;
  
   #echo "Use plugin [enter for default plugin]: ";
