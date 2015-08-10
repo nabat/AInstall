@@ -1,5 +1,5 @@
 #OS CentOS 6_x86
-#COMMENTS CentOS You cant install accel-ipoe on CentOS
+#COMMENTS CentOS
 #M update:upgrade:yum -y update
 #M mysql:MySQL:_install_mysql
 #M apache:apache:_install apache24
