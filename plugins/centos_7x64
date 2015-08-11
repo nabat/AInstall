@@ -111,7 +111,11 @@ fi;
 FREERADIUS_VERSION="2.2.7"
 RADIUS_SERVER_USER="freerad"
  
-wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+if [ -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
+  echo "Freeradius_Server already downloaded"
+else
+  wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+fi
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
   echo "Can\'t download freeradius. PLease download and install manual";
