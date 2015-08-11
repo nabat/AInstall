@@ -1,34 +1,33 @@
 #OS CentOS 6_x86
 #COMMENTS CentOS comments
 #M update:upgrade:yum -y update
-#M mysql:MySQL:yum -y mysql-server; _install_mysql;
-#M apache:apache: _install_httpd;
-#M perl_modules:Perl_modules:yum -y expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Crypt-PasswdMD5 perl-Digest-SHA1 perl-Time-HiRes
-#M freeradius:Freeradius_Server:_install freeradius
-#M DHCP:Dhcp_server:_install dhcp
-#M Mail:Mail_server:install_mail
+#M mysql:MySQL:_install_mysql
+#M apache:apache:_install_httpd
+#M perl_modules:Perl_modules:_install_perl_modules
+#M freeradius:Freeradius_Server:yum -y install freeradius
+#M DHCP:Dhcp_server:yum -y install dhcp
+#dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
 # fsbackup=
-#M build_kernel:Build_Kernel:echo test
 # perl_speedy 
-#M utils:Utils:_install vim tmux bash git
+#M utils:Utils:yum -y install vim tmux bash git
 
 # Variable
 
-WEB_SERVER_USER=www
-APACHE_CONF_DIR=/usr/local/etc/mysqld
-RESTART_MYSQL=/usr/local/etc/rc.d/apache24
-RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
-RESTART_APACHE=/usr/local/etc/rc.d/apache24
-RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
-PING=/sbin/ping
+WEB_SERVER_USER=apache
+APACHE_CONF_DIR=/etc/httpd/conf.d
+RESTART_MYSQL=/etc/init.d/mysqld
+RESTART_RADIUS=/etc/init.d/radiusd
+RESTART_APACHE=/etc/init.d/httpd
+RESTART_DHCP=/etc/init.d/dhcpd
+PING=/bin/ping
 
 #*******************************************
 #  Pre install
 #*******************************************
 pre_install() {
-  yum -y install wget dialog;
+  yum -y install wget dialog tmux bash;
   _install_epel;
 }
 
@@ -36,29 +35,43 @@ pre_install() {
 #  Install MySQL
 #*********************************************************
 _install_mysql(){
+  yum -y install mysql-server
   mysql_install_db --user=mysql --ldata=/var/lib/mysql
-  chown -R mysql /var/lib/mysql
-  chgrp -R mysql /var/lib/mysql
+  chown -R mysql:mysql /var/lib/mysql
 }
-
-#*********************************************************
-#  Install apache
-#*********************************************************
-#_install_httpd(){
-#
-#}
 
 #*********************************************************
 #  Install apache
 #*********************************************************
 _install_httpd(){
   yum -y install httpd httpd-devel httpd-tools mod_perl
-} 
+}
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
 #*********************************************************
 _install_epel() {
  wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
  rpm -ivh epel-release-6-8.noarch.rpm
+ rm -f epel-release-6-8.noarch.rpm*
+}
+
+#*********************************************************
+#  Install EPEL repository CentOS (RedHat)
+#*********************************************************
+_install_perl_modules() {
+ yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Crypt-PasswdMD5 perl-Digest-SHA1 perl-Time-HiRes
+}
+
+#*******************************************
+#  Post install
+#*******************************************
+post_install() {
+ echo "#########        Opening firewall port 9443      ############" 
+   firewall-cmd --zone=public --add-port=9443/tcp --permanent
+   firewall-cmd --reload
+ echo "#########        Disabling selinux               ############"
+   sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
+   cat config2 > /etc/selinux/config
+   rm -f config2
 }
 
