@@ -1,11 +1,11 @@
 #OS CentOS 6_x86
 #COMMENTS CentOS comments
 #M update:upgrade:yum -y update
-#M mysql:MySQL:_install_mysql
-#M apache:apache:_install apache24
-#M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
+#M mysql:MySQL:yum -y mysql-server; _install_mysql;
+#M apache:apache:yum -y httpd mod_perl; _install_httpd;
+#M perl_modules:Perl_modules:yum -y expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Crypt-PasswdMD5 perl-Digest-SHA1 perl-Time-HiRes
 #M freeradius:Freeradius_Server:_install freeradius
-#M DHCP:Dhcp_server:_install isc-dhcp43-server
+#M DHCP:Dhcp_server:_install dhcp
 #M Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -32,19 +32,28 @@ pre_install() {
   _install_epel;
 }
 
-#*******************************************
-# Install mysql
-#*******************************************
-_install_mysql() {
-  wget http://dev.mysql.com/get/Downloads/MySQL-5.6/MySQL-5.6.16-1.el6.x86_64.rpm-bundle.tar
-  mkdir MySQL
-  cd MySQL
-  tar -xvf ../MySQL-5.6.16-1.el6.x86_64.rpm-bundle.tar
-  rm -f MySQL-test*rpm
-  rm -f MySQL-embedded*rpm
-  yum install MySQL*rpm
+#*********************************************************
+#  Install MySQL
+#*********************************************************
+_install_mysql(){
+
+
 }
 
+#*********************************************************
+#  Install apache
+#*********************************************************
+_install_httpd(){
+
+}
+
+#*********************************************************
+#  Install apache
+#*********************************************************
+_install_httpd(){
+
+
+} 
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
 #*********************************************************
