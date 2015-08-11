@@ -4,7 +4,7 @@
 #   This script test how here doc cat is working      #
 #######################################################
 
-cat << 'EOF' > radiusd
+cat << 'EOF' > /etc/init.d/radiusd
 #!/bin/bash
 #
 # radiusd       This shell script takes care of starting and stopping
