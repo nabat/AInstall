@@ -1,59 +1,66 @@
-#OS Ubuntu 14 x64
+#OS Ubuntu 14_x64
 #COMMENTS Ubuntu comments
-#M update:apt-get update
-#M mysql:MYSQL:_install_mysql
-#M apache:Apache:_install_apache
+#M update:upgrade:_install update
+#M mysql:MySQL:_install mysql-server-5.6 mysql-client libmysqlclient-devs
+#M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork
+#M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
+#M freeradius:Freeradius_Server:_install freeradius
+#M DHCP:Dhcp_server:_install isc-dhcp43-server
+#M Mail:Mail_server:install_mail
+# MRTG=
+# IPN=
+# fsbackup=
+#M build_kernel:Build_Kernel:echo test
+# perl_speedy 
+#M utils:Utils:_install vim tmux bash git
 
+# Variable
 
-
-
+YES="-y"
+BUILD_OPTIONS=" sudo apt-get ${YES} install "
+WEB_SERVER_USER=www
+APACHE_CONF_DIR=/usr/local/etc/mysqld
+RESTART_MYSQL=/usr/local/etc/rc.d/apache24
+RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
+RESTART_APACHE=/usr/local/etc/rc.d/apache24
+RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
+PING=/sbin/ping
 
 
 
 #******************************************************************
-#!!!!!!!!!!!!!!!!!!!!!!!!!!PRE INSTALL
+#PRE INSTALL
 #******************************************************************
-
-
-
-
-
-
-
+pre_install () {
+  echo "hi";
+}
 
 
 
 #******************************************************************
-#!!!!!!!!!!!!!!!!!!!!!!!!!INSTALL PROGRAMMS
+#INSTALL PROGRAMS
 #******************************************************************
 
+#******************************************************************
 #Install Apache
-_install_apache()
-{
-
-	apt-get install apache apache2-doc apache2-utils apache2-mpm-prefork
-	
-	
+#******************************************************************
+install_apache () {
+ echo "apache"
+ # apt-get install apache2 apache2-doc apache2-utils apache2-mpm-prefork;
 }
 
 #Install MYSQL
-_install_mysql()
-{
+install_mysql () {
 
-	apt-get install mysql-server mysql-client libmysqlclient-devs
-
-}
-
-#Install Perl-Modules
-_install_perl_modules()
-{
-
-	
+	apt-get install mysql-server-5.6 mysql-client libmysqlclient-devs;
 
 }
 
 
 
 #******************************************************************
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!POST INSTALL
+#POST INSTALL
 #******************************************************************
+post_install () {
+	echo "goodbye";
+}
