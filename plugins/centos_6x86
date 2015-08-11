@@ -87,7 +87,7 @@ _install_freeradius() {
   
 yum -y install gcc
   
-PERL_LIB_DIRS="/usr/lib/"
+PERL_LIB_DIRS="/usr/lib"
   
 for dir in ${PERL_LIB_DIRS}; do
   if [ "${DEBUG}" = 1 ]; then
