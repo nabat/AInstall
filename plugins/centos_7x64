@@ -1,0 +1,301 @@
+#OS CentOS 7_x64
+#COMMENTS CentOS comments
+#M update:upgrade:yum -y update
+#M mysql:MySQL:_install_mysql
+#M apache:apache:_install_httpd
+#M perl_modules:Perl_modules:_install_perl_modules
+#M freeradius:Freeradius_Server:_install_freeradius
+#M DHCP:Dhcp_server:_install_dhcp
+#dM Mail:Mail_server:install_mail
+# MRTG=
+# IPN=
+# fsbackup=
+# perl_speedy 
+#M utils:Utils:_install_utils
+
+# Variable
+
+WEB_SERVER_USER=apache
+APACHE_CONF_DIR=/etc/httpd/conf.d
+RESTART_MYSQL=/etc/init.d/mysqld
+RESTART_RADIUS=/etc/init.d/radiusd
+RESTART_APACHE=/etc/init.d/httpd
+RESTART_DHCP=/etc/init.d/dhcpd
+PING=/bin/ping
+
+#*******************************************
+#  Pre install
+#*******************************************
+pre_install() {
+  yum -y install wget dialog tmux bash gcc;
+  _install_epel;
+}
+
+#*********************************************************
+#  Install MySQL
+#*********************************************************
+_install_mysql(){
+  yum install -y mariadb mariadb-devel mariadb-libs mariadb-server
+  systemctl start mariadb
+  systemctl enable mariadb
+}
+
+#*********************************************************
+#  Install apache
+#*********************************************************
+_install_httpd(){
+  yum -y install httpd httpd-devel httpd-tools mod_perl
+  chkconfig httpd on
+  service httpd start
+  
+   echo "#########        Opening firewall ports         ############" 
+  iptables -I INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+  iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
+  service iptables save
+ echo "#########        Disabling selinux               ############"
+   sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
+   cat config2 > /etc/selinux/config
+   rm -f config2
+   cat /etc/selinux/config | grep 'SELINUX='
+}
+#*********************************************************
+#  Install EPEL repository CentOS (RedHat)
+#*********************************************************
+_install_epel() {
+  wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+ rpm -ivh epel-release-7-5.noarch.rpm
+ 
+}
+
+#*********************************************************
+#  Install Perl modules
+#*********************************************************
+_install_perl_modules() {
+ yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes
+}
+
+#*******************************************
+#  Radius 
+#*******************************************
+_install_freeradius() {
+  
+  if [ -d /usr/local/freeradius/ ]; then
+    echo "Radius exists: /usr/local/freeradius/";
+    return 0 ;
+  fi;
+  
+  PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
+  
+for dir in ${PERL_LIB_DIRS}; do
+  if [ "${DEBUG}" = 1 ]; then
+    echo "ls ${dir}/libperl* | head -1"  
+  fi;
+
+  PERL_LIB=`ls ${dir}/libperl* | head -1`;
+  if [ x"${PERL_LIB}" != x ]; then
+    PERL_LIB_DIR=${dir}
+    if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
+      ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
+    fi;
+  fi;
+done;
+
+
+if [ x"${PERL_LIB_DIR}" = x ]; then
+  echo "Perl lib not found";
+  exit;
+else
+  echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
+fi;
+
+FREERADIUS_VERSION="2.2.7"
+ 
+wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+
+if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
+  echo "Can\'t download freeradius. PLease download and install manual";
+  exit;
+fi;
+
+tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+
+cd freeradius-server-${FREERADIUS_VERSION}
+./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
+make && make install
+
+ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+
+#Add user
+groupadd ${RADIUS_SERVER_USER}
+useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
+chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
+
+(cat <<EOF
+#!/bin/bash
+#
+# radiusd       This shell script takes care of starting and stopping
+#               freeradius.
+#
+# chkconfig: - 58 74
+# description: radiusd is service access provider Daemon. \
+
+### BEGIN INIT INFO
+# Provides: radiusd
+# Should-Start: radiusd
+# Should-Stop: radiusd
+# Short-Description: start and stop radiusd
+# Description: radiusd is access provider service Daemon.
+### END INIT INFO
+
+# Source function library.
+. /etc/init.d/functions
+
+prog=/usr/local/freeradius/sbin/radiusd
+lockfile=/var/lock/subsys/$prog
+
+start() {
+        # Start daemons.
+        echo -n $"Starting $prog: "
+        daemon $prog $OPTIONS
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        return $RETVAL
+}
+stop() {
+        [ "$EUID" != "0" ] && exit 4
+        echo -n $"Shutting down $prog: "
+        killproc $prog
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f $lockfile
+        return $RETVAL
+}
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status $prog
+        ;;
+  restart|force-reload)
+        stop
+        start
+        ;;
+  try-restart|condrestart)
+        if status $prog > /dev/null; then
+            stop
+            start
+        fi
+        ;;
+  reload)
+        exit 3
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
+        exit 2
+esac
+
+EOF)
+  
+else
+(cat <<EOF
+#!/bin/sh
+# Start/stop the FreeRADIUS daemon. (ABillS)
+
+### BEGIN INIT INFO
+# Provides:          freeradius
+# Required-Start:    $remote_fs $network $syslog
+# Should-Start:      $time mysql slapd postgresql samba krb5-kdc
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Radius Daemon
+# Description:       Extensible, configurable radius daemon
+### END INIT INFO
+
+set -e
+
+if [ -f /lib/lsb/init-functions ]; then
+. /lib/lsb/init-functions
+elif [ -f /lib/lsb/init-functions ]; then
+. /etc/init.d/functions
+fi;
+
+PROG="freeradius"
+PROGRAM="/usr/sbin/radiusd"
+PIDFILE="/var/run/radiusd/radiusd.pid"
+DESCR="FreeRADIUS daemon"
+
+test -f \$PROGRAM || exit 0
+
+# /var/run may be a tmpfs
+if [ ! -d /var/run/radiusd ]; then
+ mkdir -p /var/run/radiusd
+ chown freerad:freerad /var/run/radiusd
+fi
+
+export PATH="\${PATH:+\$PATH:}/usr/sbin:/sbin"
+
+ret=0
+
+case "\$1" in
+        start)
+                log_daemon_msg "Starting \$DESCR" "\$PROG"
+                start-stop-daemon --start --quiet --pidfile \$PIDFILE --exec \$PROGRAM || ret=\$?
+                log_end_msg \$ret
+                exit \$ret;
+                ;;
+        stop)
+                log_daemon_msg "Stopping \$DESCR" "\$PROG"
+                if [ -f "\$PIDFILE" ] ; then
+                  start-stop-daemon --stop --retry=TERM/30/KILL/5 --quiet --pidfile \$PIDFILE || ret=\$?
+                  log_end_msg \$ret
+                else
+                  log_action_cont_msg "\$PIDFILE not found"
+                  log_end_msg 0
+                fi
+                ;;
+        restart|force-reload)
+                \$0 stop
+                \$0 start
+                ;;
+        *)
+                echo "Usage: \$0 start|stop|restart|force-reload"
+                exit 1
+                ;;
+esac
+
+exit 0
+
+EOF
+) > /etc/init.d/freeradius
+
+  chmod +x /etc/init.d/freeradius
+  chkconfig freeradius add
+  chkconfig freeradius on
+
+AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
+}
+
+#*******************************************
+#  Dhcp server
+#*******************************************
+_install_dhcp() {
+  yum -y install dhcp
+}
+
+#*******************************************
+#  Utils 
+#*******************************************
+_install_utils() {
+  yum -y install vim tmux bash git
+}
+
+
+
