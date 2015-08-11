@@ -2,7 +2,7 @@
 #COMMENTS CentOS comments
 #M update:upgrade:yum -y update
 #M mysql:MySQL:yum -y mysql-server; _install_mysql;
-#M apache:apache:yum -y httpd mod_perl; _install_httpd;
+#M apache:apache: _install_httpd;
 #M perl_modules:Perl_modules:yum -y expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Crypt-PasswdMD5 perl-Digest-SHA1 perl-Time-HiRes
 #M freeradius:Freeradius_Server:_install freeradius
 #M DHCP:Dhcp_server:_install dhcp
@@ -36,23 +36,23 @@ pre_install() {
 #  Install MySQL
 #*********************************************************
 _install_mysql(){
-
-
+  mysql_install_db --user=mysql --ldata=/var/lib/mysql
+  chown -R mysql /var/lib/mysql
+  chgrp -R mysql /var/lib/mysql
 }
 
 #*********************************************************
 #  Install apache
 #*********************************************************
-_install_httpd(){
-
-}
+#_install_httpd(){
+#
+#}
 
 #*********************************************************
 #  Install apache
 #*********************************************************
 _install_httpd(){
-
-
+  yum -y install httpd httpd-devel httpd-tools mod_perl
 } 
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
