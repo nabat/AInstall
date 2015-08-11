@@ -27,7 +27,7 @@ PING=/bin/ping
 #  Pre install
 #*******************************************
 pre_install() {
-  yum -y install wget dialog tmux bash;
+  yum -y install wget tmux bash;
   _install_epel;
 }
 
@@ -54,10 +54,13 @@ _install_httpd(){
   iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
   service iptables save
  echo "#########        Disabling selinux               ############"
+   STATUS=`cat /etc/selinux/config | grep 'SELINUX=' | grep -v 'SELINUX='`
+   echo "CURRENT STATUS is ${STATUS}"
    sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
    cat config2 > /etc/selinux/config
    rm -f config2
-   cat /etc/selinux/config | grep 'SELINUX='
+   STATUS=`cat /etc/selinux/config | grep 'SELINUX=' | grep -v 'SELINUX='`
+   echo "CURRENT STATUS is ${STATUS}"
 }
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
