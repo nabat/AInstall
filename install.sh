@@ -64,19 +64,28 @@ show_dialog () {
  COMMENTS=`cat ${PLUGINS_DIR}/${plugin_name} | grep '#COMMENTS'`;
  DIALOG_TITLE="Options for ABillS ${PLUGIN_OS} ${COMMENTS}"
 
+
  OLD_IFS=${IFS};
  IFS=$'\n'
- for line in `cat ${PLUGINS_DIR}/${plugin_name} | grep '#M'`; do
+
+ #DEBUG=2;
+ #for line in `cat "${PLUGINS_DIR}/${plugin_name}" | grep '^#M'`; do
+ while read line; do 
+   
    if [ "${DEBUG}" != "" ]; then
-     echo "${line}"
+     echo " >> ${line}"
    fi;
 
-   NAME=`echo ${line} | awk -F: '{print $1 }'`
-   NAME=`echo ${NAME} | awk '{print $2 }'`
-   DESCRIBE=`echo ${line} | awk -F: '{print $2 }'`
-   COMMAND=`echo ${line} | awk -F: '{print $3 }'`
+   NAME=`echo "${line}" | grep '^#M ' | awk -F: '{print $1 }'`
+   if [ "$NAME" = "" ]; then
+     continue;
+   fi;
+
+   NAME=`echo "${NAME}" | awk '{print $2 }'`
+   DESCRIBE=`echo "${line}" | awk -F: '{print $2 }'`
+   COMMAND=`echo "${line}" | awk -F: '{print $3 }'`
    vars=${vars}"${NAME} \"${DESCRIBE}\" on ";
- done;
+ done < "${PLUGINS_DIR}/${plugin_name}";
 
  IFS=${OLD_IFS};
  #echo ${vars};
@@ -118,7 +127,8 @@ if [ "${RESULT}" = "" ]; then
   return;
 fi;
 
-. ${PLUGINS_DIR}/${plugin_name}
+. "${PLUGINS_DIR}/${plugin_name}"
+
 
 pre_install;
 
@@ -154,7 +164,6 @@ done;
 run_plugin () {
 
   show_dialog "$1" ;
-
   run_cmd ;
 }
 
@@ -373,6 +382,7 @@ echo "
   -v     Show Version
   -y     Auto confirm action
   -u     Uninstall (abills mysql)
+  -p     use plugin [plugin name]
   -h     This help
 "
   exit;
@@ -2400,8 +2410,9 @@ if [ "$1" != "" ]; then
     echo "plugin: '${plugin_name}' not exists";
     exit;
   fi;
+ 
+  run_plugin "${plugin_name}";
 
-  run_plugin ${plugin_name};
   port_install;
 
   if [ x"${BILLING_WEB_IP}" = x ]; then
@@ -2464,6 +2475,9 @@ for _switch ; do
         -u)     UNINSTALL=1;
                 shift; shift
                 ;;
+        -p)     USE_PLUGIN=$2;
+                shift; shift;
+                ;;
         -h)
                 help
                 exit;
@@ -2497,7 +2511,9 @@ while [ "${OS_NAME}" = "" ]; do
  
   #echo "Use plugin [enter for default plugin]: ";
   #Changed by AnyKey
-  read -p "Use plugin [enter for default plugin]: " USE_PLUGIN
+  if [ "${USE_PLUGIN}" = "" ]; then
+    read -p "Use plugin [enter for default plugin]: " USE_PLUGIN  
+  fi;
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
