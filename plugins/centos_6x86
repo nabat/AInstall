@@ -85,9 +85,7 @@ _install_freeradius() {
     return 0 ;
   fi;
   
-yum -y install gcc perl-ExtUtils-Embed gdbm gdbm-devel mysql-devel
-  
-PERL_LIB_DIRS="/usr/lib/perl5/CORE"
+  PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
   
 for dir in ${PERL_LIB_DIRS}; do
   if [ "${DEBUG}" = 1 ]; then
@@ -112,7 +110,7 @@ else
 fi;
 
 FREERADIUS_VERSION="2.2.7"
-${RADIUS_SERVER_USER}="freerad"
+ 
 wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
@@ -155,28 +153,28 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 . /etc/init.d/functions
 
 prog=/usr/local/freeradius/sbin/radiusd
-lockfile=/var/lock/subsys/$prog
+lockfile=/var/lock/subsys/\$prog
 
 start() {
         # Start daemons.
-        echo -n $"Starting $prog: "
-        daemon $prog $OPTIONS
-        RETVAL=$?
+        echo -n \$"Starting \$prog: "
+        daemon \$prog \$OPTIONS
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && touch $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && touch \$lockfile
+        return \$RETVAL
 }
 stop() {
-        [ "$EUID" != "0" ] && exit 4
-        echo -n $"Shutting down $prog: "
-        killproc $prog
-        RETVAL=$?
+        [ "\$EUID" != "0" ] && exit 4
+        echo -n \$"Shutting down \$prog: "
+        killproc \$prog
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && rm -f $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && rm -f \$lockfile
+        return \$RETVAL
 }
 # See how we were called.
-case "$1" in
+case "\$1" in
   start)
         start
         ;;
@@ -184,14 +182,14 @@ case "$1" in
         stop
         ;;
   status)
-        status $prog
+        status \$prog
         ;;
   restart|force-reload)
         stop
         start
         ;;
   try-restart|condrestart)
-        if status $prog > /dev/null; then
+        if status \$prog > /dev/null; then
             stop
             start
         fi
@@ -200,81 +198,9 @@ case "$1" in
         exit 3
         ;;
   *)
-        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
+        echo \$"Usage: \$0 {start|stop|status|restart|try-restart|force-reload}"
         exit 2
 esac
-
-EOF)
-  
-else
-(cat <<EOF
-#!/bin/sh
-# Start/stop the FreeRADIUS daemon. (ABillS)
-
-### BEGIN INIT INFO
-# Provides:          freeradius
-# Required-Start:    $remote_fs $network $syslog
-# Should-Start:      $time mysql slapd postgresql samba krb5-kdc
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Radius Daemon
-# Description:       Extensible, configurable radius daemon
-### END INIT INFO
-
-set -e
-
-if [ -f /lib/lsb/init-functions ]; then
-. /lib/lsb/init-functions
-elif [ -f /lib/lsb/init-functions ]; then
-. /etc/init.d/functions
-fi;
-
-PROG="freeradius"
-PROGRAM="/usr/sbin/radiusd"
-PIDFILE="/var/run/radiusd/radiusd.pid"
-DESCR="FreeRADIUS daemon"
-
-test -f \$PROGRAM || exit 0
-
-# /var/run may be a tmpfs
-if [ ! -d /var/run/radiusd ]; then
- mkdir -p /var/run/radiusd
- chown freerad:freerad /var/run/radiusd
-fi
-
-export PATH="\${PATH:+\$PATH:}/usr/sbin:/sbin"
-
-ret=0
-
-case "\$1" in
-        start)
-                log_daemon_msg "Starting \$DESCR" "\$PROG"
-                start-stop-daemon --start --quiet --pidfile \$PIDFILE --exec \$PROGRAM || ret=\$?
-                log_end_msg \$ret
-                exit \$ret;
-                ;;
-        stop)
-                log_daemon_msg "Stopping \$DESCR" "\$PROG"
-                if [ -f "\$PIDFILE" ] ; then
-                  start-stop-daemon --stop --retry=TERM/30/KILL/5 --quiet --pidfile \$PIDFILE || ret=\$?
-                  log_end_msg \$ret
-                else
-                  log_action_cont_msg "\$PIDFILE not found"
-                  log_end_msg 0
-                fi
-                ;;
-        restart|force-reload)
-                \$0 stop
-                \$0 start
-                ;;
-        *)
-                echo "Usage: \$0 start|stop|restart|force-reload"
-                exit 1
-                ;;
-esac
-
-exit 0
 
 EOF
 ) > /etc/init.d/freeradius
@@ -282,7 +208,8 @@ EOF
   chmod +x /etc/init.d/freeradius
   chkconfig freeradius add
   chkconfig freeradius on
-  
+
+AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
 }
 
 #*******************************************
