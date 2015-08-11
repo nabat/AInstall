@@ -4,14 +4,14 @@
 #M mysql:MySQL:_install_mysql
 #M apache:apache:_install_httpd
 #M perl_modules:Perl_modules:_install_perl_modules
-#M freeradius:Freeradius_Server:yum -y install freeradius
-#M DHCP:Dhcp_server:yum -y install dhcp
+#M freeradius:Freeradius_Server:install_freeradius
+#M DHCP:Dhcp_server:_install_dhcp
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
 # fsbackup=
 # perl_speedy 
-#M utils:Utils:yum -y install vim tmux bash git
+#M utils:Utils:_install_utils
 
 # Variable
 
@@ -38,6 +38,7 @@ _install_mysql(){
   yum -y install mysql-server
   mysql_install_db --user=mysql --ldata=/var/lib/mysql
   chown -R mysql:mysql /var/lib/mysql
+  chkconfig mysqld on
 }
 
 #*********************************************************
@@ -45,6 +46,18 @@ _install_mysql(){
 #*********************************************************
 _install_httpd(){
   yum -y install httpd httpd-devel httpd-tools mod_perl
+  chkconfig httpd on
+  service httpd start
+  
+   echo "#########        Opening firewall ports         ############" 
+  iptables -I INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+  iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
+  service iptables save
+ echo "#########        Disabling selinux               ############"
+   sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
+   cat config2 > /etc/selinux/config
+   rm -f config2
+   cat /etc/selinux/config | grep 'SELINUX='
 }
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
@@ -63,15 +76,46 @@ _install_perl_modules() {
 }
 
 #*******************************************
-#  Post install
+#  Radius 
 #*******************************************
-post_install() {
- echo "#########        Opening firewall port 9443      ############" 
-   firewall-cmd --zone=public --add-port=9443/tcp --permanent
-   firewall-cmd --reload
- echo "#########        Disabling selinux               ############"
-   sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
-   cat config2 > /etc/selinux/config
-   rm -f config2
+#_install_freeradius() {
+#
+## Собрать с портов
+# yum -y install perl-ExtUtils-Embed gcc
+# cd /usr/src/
+# wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.2.7.tar.gz
+# tar zxvf freeradius-server-2.2.7.tar.gz
+# cd freeradius-server-2.2.7
+# ./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=/usr/lib/perl5/CORE --with-openssl=no > 1
+# make && make install
+## Скопировать настройки abills
+# ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+# cp -f /usr/abills/misc/freeradius/v2/radiusd.conf /usr/local/freeradius/etc/raddb/radiusd.conf
+# rm -f /usr/local/freeradius/etc/raddb/sites-enabled/*
+# cp -f /usr/abills/misc/freeradius/v2/default_rlm_perl /usr/local/freeradius/etc/raddb/sites-enabled/abills_default
+# cp -f /usr/abills/misc/freeradius/v2/users_perl /usr/local/freeradius/etc/raddb/users
+# cp -f /usr/abills/misc/freeradius/v2/perl /usr/local/freeradius/etc/raddb/modules/
+# #
+#  groupadd freerad
+#  useradd -g freerad -s /bash/bash freerad
+#  chown -R freerad:freerad /usr/local/freeradius/etc/raddb
+#  mkdir /var/run/radiusd/
+#  chown freerad:freerad /var/run/radiusd/
+#}
+
+#*******************************************
+#  Dhcp server
+#*******************************************
+_install_dhcp() {
+  yum -y install dhcp
 }
+
+#*******************************************
+#  Utils 
+#*******************************************
+_install_utils() {
+  yum -y install vim tmux bash git
+}
+
+
 
