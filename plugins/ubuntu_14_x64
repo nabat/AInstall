@@ -1,59 +1,156 @@
-#OS Ubuntu 14 x64
+#OS Ubuntu 14_x64
 #COMMENTS Ubuntu comments
-#M update:apt-get update
-#M mysql:MYSQL:_install_mysql
-#M apache:Apache:_install_apache
+#M update:upgrade:_install update
+#M mysql:MySQL:_install mysql-server-5.6 mysql-client libmysqlclient-dev
+#M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork
+#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
+#M freeradius:Freeradius_Server:install_freeradius
+#M DHCP:Dhcp_server:_install isc-dhcp43-server
+#M Mail:Mail_server:install_mail
+# MRTG=
+# IPN=
+# fsbackup=
+#M build_kernel:Build_Kernel:echo test
+# perl_speedy 
+#M utils:Utils:_install vim tmux bash git
 
+# Variable
 
-
-
+YES="-y"
+BUILD_OPTIONS=" sudo apt-get ${YES} install "
+WEB_SERVER_USER=apache
+APACHE_CONF_DIR=/etc/apache2/apache2.conf
+RESTART_MYSQL=/etc/init.d/mysql
+RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
+RESTART_APACHE=/etc/init.d/apache2
+RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
+PING=/sbin/ping
 
 
 
 #******************************************************************
-#!!!!!!!!!!!!!!!!!!!!!!!!!!PRE INSTALL
+#PRE INSTALL
 #******************************************************************
-
-
-
-
-
-
-
-
-
-
-#******************************************************************
-#!!!!!!!!!!!!!!!!!!!!!!!!!INSTALL PROGRAMMS
-#******************************************************************
-
-#Install Apache
-_install_apache()
-{
-
-	apt-get install apache apache2-doc apache2-utils apache2-mpm-prefork
-	
-	
-}
-
-#Install MYSQL
-_install_mysql()
-{
-
-	apt-get install mysql-server mysql-client libmysqlclient-devs
-
-}
-
-#Install Perl-Modules
-_install_perl_modules()
-{
-
-	
-
+pre_install () {
+  echo "hi";
 }
 
 
 
 #******************************************************************
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!POST INSTALL
+#INSTALL FREERADIUS
 #******************************************************************
+
+install_freeradius () {
+	LIBPERLSO_VER="5.18.2"
+	ln -s /usr/lib/libperl.so.${LIBPERLSO_VER} /usr/lib/libperl.so
+	
+	FREERADIUS_VERSION="2.2.7"
+	
+	wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+	cd freeradius-server-${FREERADIUS_VERSION}
+	
+	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=/usr/lib/ --without-openssl --with-dhcp > 1
+	make && make install
+	
+	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+	
+	#settings freeradius
+	cp /usr/abills/misc/freeradius/v2/radiusd.conf /usr/local/freeradius/etc/raddb/radiusd.conf
+	rm /usr/local/freeradius/etc/raddb/sites-enabled/*
+	cp /usr/abills/misc/freeradius/v2/users_perl /usr/local/freeradius/etc/raddb/users
+	cp /usr/abills/misc/freeradius/v2/default_rlm_perl /usr/local/freeradius/etc/raddb/sites-enabled/abills_default
+	cp /usr/abills/misc/freeradius/v2/perl /usr/local/freeradius/etc/raddb/modules/
+	
+	
+	
+	
+	#add user
+	groupadd freerad
+	useradd -g freerad -s /bash/bash freerad
+	
+	chown -R freerad:freerad /usr/local/freeradius/etc/raddb
+	mkdir /var/run/radiusd/
+	chown -R freerad:freerad /var/run/radiusd/
+	
+(cat <<EOF
+#!/bin/sh
+# Start/stop the FreeRADIUS daemon.
+
+### BEGIN INIT INFO
+# Provides:          freeradius
+# Required-Start:    $remote_fs $network $syslog
+# Should-Start:      $time mysql slapd postgresql samba krb5-kdc
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Radius Daemon
+# Description:       Extensible, configurable radius daemon
+### END INIT INFO
+
+set -e
+
+. /lib/lsb/init-functions
+
+PROG="freeradius"
+PROGRAM="/usr/sbin/radiusd"
+PIDFILE="/var/run/radiusd/radiusd.pid"
+DESCR="FreeRADIUS daemon"
+
+test -f $PROGRAM || exit 0
+
+# /var/run may be a tmpfs
+if [ ! -d /var/run/radiusd ]; then
+ mkdir -p /var/run/radiusd
+ chown freerad:freerad /var/run/radiusd
+fi
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+
+ret=0
+
+case "$1" in
+        start)
+                log_daemon_msg "Starting $DESCR" "$PROG"
+                start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $PROGRAM || ret=$?
+                log_end_msg $ret
+                exit $ret
+                ;;
+        stop)
+                log_daemon_msg "Stopping $DESCR" "$PROG"
+                if [ -f "$PIDFILE" ] ; then
+                  start-stop-daemon --stop --retry=TERM/30/KILL/5 --quiet --pidfile $PIDFILE || ret=$?
+                  log_end_msg $ret
+                else
+                  log_action_cont_msg "$PIDFILE not found"
+                  log_end_msg 0
+                fi
+                ;;
+        restart|force-reload)
+                $0 stop
+                $0 start
+                ;;
+        *)
+                echo "Usage: $0 start|stop|restart|force-reload"
+                exit 1
+                ;;
+esac
+
+exit 0
+
+EOF
+) > /etc/init.d/freeradius
+	
+	chmod +x /etc/init.d/freeradius
+	update-rc.d freeradius defaults
+}
+
+
+
+#******************************************************************
+#POST INSTALL
+#******************************************************************
+post_install () {
+	echo "goodbye";
+}

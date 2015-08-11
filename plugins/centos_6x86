@@ -112,8 +112,12 @@ else
 fi;
 
 FREERADIUS_VERSION="2.2.7"
+<<<<<<< HEAD
 RADIUS_SERVER_USER="freerad"
 
+=======
+${RADIUS_SERVER_USER}="freerad"
+>>>>>>> 55634f5821e7a33b6ed17c1249cb596d53a6554e
 wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then

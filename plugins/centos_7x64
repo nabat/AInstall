@@ -71,7 +71,7 @@ _install_epel() {
 #  Install Perl modules
 #*********************************************************
 _install_perl_modules() {
- yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed
+ yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File
 }
 
 #*******************************************
@@ -110,7 +110,11 @@ fi;
 
 FREERADIUS_VERSION="2.2.7"
  
-wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+if [ -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
+  echo "Freeradius_Server already downloaded"
+else
+  wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+fi
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
   echo "Can\'t download freeradius. PLease download and install manual";
