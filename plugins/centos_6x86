@@ -87,7 +87,7 @@ _install_freeradius() {
   
 yum -y install gcc perl-ExtUtils-Embed gdbm gdbm-devel
   
-PERL_LIB_DIRS="/usr/lib"
+PERL_LIB_DIRS="/usr/lib/perl5/CORE"
   
 for dir in ${PERL_LIB_DIRS}; do
   if [ "${DEBUG}" = 1 ]; then
