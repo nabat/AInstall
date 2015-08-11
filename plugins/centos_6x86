@@ -85,9 +85,7 @@ _install_freeradius() {
     return 0 ;
   fi;
   
-yum -y install gcc perl-ExtUtils-Embed gdbm gdbm-devel mysql-devel
-  
-PERL_LIB_DIRS="/usr/lib/perl5/CORE"
+  PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
   
 for dir in ${PERL_LIB_DIRS}; do
   if [ "${DEBUG}" = 1 ]; then
@@ -112,12 +110,7 @@ else
 fi;
 
 FREERADIUS_VERSION="2.2.7"
-<<<<<<< HEAD
-RADIUS_SERVER_USER="freerad"
-
-=======
-${RADIUS_SERVER_USER}="freerad"
->>>>>>> 55634f5821e7a33b6ed17c1249cb596d53a6554e
+ 
 wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
@@ -136,7 +129,7 @@ ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
 #Add user
 groupadd ${RADIUS_SERVER_USER}
-useradd  ${RADIUS_SERVER_USER}
+useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
 
 (cat <<EOF
@@ -160,28 +153,28 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 . /etc/init.d/functions
 
 prog=/usr/local/freeradius/sbin/radiusd
-lockfile=/var/lock/subsys/$prog
+lockfile=/var/lock/subsys/\$prog
 
 start() {
         # Start daemons.
-        echo -n $"Starting $prog: "
-        daemon $prog $OPTIONS
-        RETVAL=$?
+        echo -n \$"Starting \$prog: "
+        daemon \$prog \$OPTIONS
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && touch $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && touch \$lockfile
+        return \$RETVAL
 }
 stop() {
-        [ "$EUID" != "0" ] && exit 4
-        echo -n $"Shutting down $prog: "
-        killproc $prog
-        RETVAL=$?
+        [ "\$EUID" != "0" ] && exit 4
+        echo -n \$"Shutting down \$prog: "
+        killproc \$prog
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && rm -f $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && rm -f \$lockfile
+        return \$RETVAL
 }
 # See how we were called.
-case "$1" in
+case "\$1" in
   start)
         start
         ;;
@@ -189,14 +182,14 @@ case "$1" in
         stop
         ;;
   status)
-        status $prog
+        status \$prog
         ;;
   restart|force-reload)
         stop
         start
         ;;
   try-restart|condrestart)
-        if status $prog > /dev/null; then
+        if status \$prog > /dev/null; then
             stop
             start
         fi
@@ -205,16 +198,18 @@ case "$1" in
         exit 3
         ;;
   *)
-        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
+        echo \$"Usage: \$0 {start|stop|status|restart|try-restart|force-reload}"
         exit 2
 esac
 
-EOF) > /etc/init.d/freeradius
+EOF
+) > /etc/init.d/freeradius
 
-  chmod +x /etc/init.d/radiusd
-  chkconfig radiusd add
-  chkconfig radiusd on
-  
+  chmod +x /etc/init.d/freeradius
+  chkconfig freeradius add
+  chkconfig freeradius on
+
+AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
 }
 
 #*******************************************
