@@ -85,7 +85,7 @@ _install_freeradius() {
     return 0 ;
   fi;
   
-yum -y install gcc
+yum -y install gcc perl-ExtUtils-Embed gdbm gdbm-devel
   
 PERL_LIB_DIRS="/usr/lib"
   
