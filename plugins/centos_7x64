@@ -109,6 +109,7 @@ else
 fi;
 
 FREERADIUS_VERSION="2.2.7"
+RADIUS_SERVER_USER="freerad"
  
 wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
@@ -280,7 +281,6 @@ EOF
   chkconfig freeradius add
   chkconfig freeradius on
 
-AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
 }
 
 #*******************************************
