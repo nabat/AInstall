@@ -6,6 +6,8 @@
 #M perl_modules:Perl_modules:_install_perl_modules
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install_dhcp
+#M IPN:Flow-tools:_install_flowtools
+#M Ipcad:Ipcad:_install_ipcad
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -153,28 +155,28 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 . /etc/init.d/functions
 
 prog=/usr/local/freeradius/sbin/radiusd
-lockfile=/var/lock/subsys/$prog
+lockfile=/var/lock/subsys/\$prog
 
 start() {
         # Start daemons.
-        echo -n $"Starting $prog: "
-        daemon $prog $OPTIONS
-        RETVAL=$?
+        echo -n \$"Starting \$prog: "
+        daemon \$prog \$OPTIONS
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && touch $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && touch \$lockfile
+        return \$RETVAL
 }
 stop() {
-        [ "$EUID" != "0" ] && exit 4
-        echo -n $"Shutting down $prog: "
-        killproc $prog
-        RETVAL=$?
+        [ "\$EUID" != "0" ] && exit 4
+        echo -n \$"Shutting down \$prog: "
+        killproc \$prog
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && rm -f $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && rm -f \$lockfile
+        return \$RETVAL
 }
 # See how we were called.
-case "$1" in
+case "\$1" in
   start)
         start
         ;;
@@ -182,14 +184,14 @@ case "$1" in
         stop
         ;;
   status)
-        status $prog
+        status \$prog
         ;;
   restart|force-reload)
         stop
         start
         ;;
   try-restart|condrestart)
-        if status $prog > /dev/null; then
+        if status \$prog > /dev/null; then
             stop
             start
         fi
@@ -198,12 +200,12 @@ case "$1" in
         exit 3
         ;;
   *)
-        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
+        echo \$"Usage: \$0 {start|stop|status|restart|try-restart|force-reload}"
         exit 2
 esac
 
 EOF
-)  > /etc/init.d/freeradius
+) > /etc/init.d/freeradius
 
   chmod +x /etc/init.d/freeradius
   chkconfig freeradius add
@@ -225,5 +227,112 @@ _install_utils() {
   yum -y install vim tmux bash git
 }
 
+#*******************************************
+# Flow-tools
+#*******************************************
+_install_flowtools() {
+	wget ftp://ftp.eng.oar.net/pub/flow-tools/flow-tools-0.66.tar.gz
+  tar zxvf flow-tools-0.66.tar.gz
+  cd flow-tools-0.66
+  ./configure
+  make 
+  make install
+}
 
+#**********************************************************
+# Ipcad
+#**********************************************************
+_install_ipcad() {
 
+_install libpcap-dev;
+yum install libpcap libpcap-devel;
+#  if [ "${OS}" = "Ubuntu" -o "${OS}" = "Debian" -o "${OS}" = "CentOS"]; then
+  
+  echo '********************************************************************';
+  echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
+  echo '********************************************************************';
+  
+  # will be installed in /usr/
+  cd /usr/
+  
+  #remove if already extracted
+  if [ -d /usr/ipcad-3.7.3 ]; then
+    rm -rf ipcad-3.7.3
+  fi;
+  
+  # do not download if present
+  if [ -f "ipcad-3.7.3.tar.gz" ]; then
+    echo "INFO: Already downloaded";
+  else
+    wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
+  fi;
+  
+  tar -xvzf ipcad-3.7.3.tar.gz
+  cd ipcad-3.7.3
+  
+  LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
+  LINE2_NUM=$(( LINE1_NUM + 2 ));
+  
+  sed -i "${LINE2_NUM}d" headers.h;
+  sed -i "${LINE1_NUM}d" headers.h;
+  
+  echo
+  
+  if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
+    echo "INFO:  Error "
+  else
+    echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
+  fi;
+  
+  
+  sed -i "1i #include \"signal.h\"" main.c;
+  
+  echo
+  
+  sed -i "1i #include \"headers.h\"" pps.c;
+  sed -i "1i #include \"signal.h\"" pps.c;
+  
+  echo "INFO: Added to pps.c"
+    
+  sed -i "1i #include \"signal.h\"" servers.h;
+  
+  echo "INFO: Added to servers.h"
+  
+  ./configure && make && make install
+  
+  if [ -d  /var/ipcad/ ]; then
+    echo "directory /var/ipcad/ exists";
+  else
+    mkdir /var/ipcad/;
+  fi;
+  
+
+(cat <<EOF
+# Интерфейсы для сбора статистики
+interface eth0;
+# детализация по портам 
+#capture-ports enable;
+
+# Агрегировать порты, уменьшает размер базы детализации 
+#aggregate 1024-65535    into 65535;     /* Aggregate wildly */
+#aggregate 3128-3128     into 3128;      /* Protect these ports */
+#aggregate 150-1023      into 1023;      /* General low range */
+
+# Експортирование статистики на адрес 127.0.0.1 порт 9996
+netflow export destination 127.0.0.1 9996;
+netflow export version 5;       # NetFlow export format version {1|5}
+netflow timeout active 30;      # Timeout when flow is active, in minutes
+netflow timeout inactive 15;    # Flow inactivity timeout, in seconds
+netflow engine-type 73;         # v5 engine_type; 73='I' for "IPCAD"
+netflow engine-id 1;            # Useful to differentiate multiple ipcads.
+
+dumpfile = ipcad.dump;
+chroot = /var/ipcad/;
+pidfile = ipcad.pid;  
+
+rsh enable at 127.0.0.1;
+memory_limit = 16m;
+EOF
+) > /usr/local/etc/ipcad.conf
+
+}
