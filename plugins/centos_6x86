@@ -85,7 +85,9 @@ _install_freeradius() {
     return 0 ;
   fi;
   
-  PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
+yum -y install gcc perl-ExtUtils-Embed gdbm gdbm-devel mysql-devel
+  
+PERL_LIB_DIRS="/usr/lib/perl5/CORE"
   
 for dir in ${PERL_LIB_DIRS}; do
   if [ "${DEBUG}" = 1 ]; then
@@ -110,7 +112,7 @@ else
 fi;
 
 FREERADIUS_VERSION="2.2.7"
- 
+${RADIUS_SERVER_USER}="freerad"
 wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
@@ -280,8 +282,7 @@ EOF
   chmod +x /etc/init.d/freeradius
   chkconfig freeradius add
   chkconfig freeradius on
-
-AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
+  
 }
 
 #*******************************************
