@@ -109,12 +109,9 @@ else
 fi;
 
 FREERADIUS_VERSION="2.2.7"
+RADIUS_SERVER_USER="freerad"
  
-if [ -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
-  echo "Freeradius_Server already downloaded"
-else
-  wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
-fi
+wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
   echo "Can\'t download freeradius. PLease download and install manual";
@@ -205,86 +202,13 @@ case "$1" in
         exit 2
 esac
 
-EOF)
-  
-else
-(cat <<EOF
-#!/bin/sh
-# Start/stop the FreeRADIUS daemon. (ABillS)
-
-### BEGIN INIT INFO
-# Provides:          freeradius
-# Required-Start:    $remote_fs $network $syslog
-# Should-Start:      $time mysql slapd postgresql samba krb5-kdc
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Radius Daemon
-# Description:       Extensible, configurable radius daemon
-### END INIT INFO
-
-set -e
-
-if [ -f /lib/lsb/init-functions ]; then
-. /lib/lsb/init-functions
-elif [ -f /lib/lsb/init-functions ]; then
-. /etc/init.d/functions
-fi;
-
-PROG="freeradius"
-PROGRAM="/usr/sbin/radiusd"
-PIDFILE="/var/run/radiusd/radiusd.pid"
-DESCR="FreeRADIUS daemon"
-
-test -f \$PROGRAM || exit 0
-
-# /var/run may be a tmpfs
-if [ ! -d /var/run/radiusd ]; then
- mkdir -p /var/run/radiusd
- chown freerad:freerad /var/run/radiusd
-fi
-
-export PATH="\${PATH:+\$PATH:}/usr/sbin:/sbin"
-
-ret=0
-
-case "\$1" in
-        start)
-                log_daemon_msg "Starting \$DESCR" "\$PROG"
-                start-stop-daemon --start --quiet --pidfile \$PIDFILE --exec \$PROGRAM || ret=\$?
-                log_end_msg \$ret
-                exit \$ret;
-                ;;
-        stop)
-                log_daemon_msg "Stopping \$DESCR" "\$PROG"
-                if [ -f "\$PIDFILE" ] ; then
-                  start-stop-daemon --stop --retry=TERM/30/KILL/5 --quiet --pidfile \$PIDFILE || ret=\$?
-                  log_end_msg \$ret
-                else
-                  log_action_cont_msg "\$PIDFILE not found"
-                  log_end_msg 0
-                fi
-                ;;
-        restart|force-reload)
-                \$0 stop
-                \$0 start
-                ;;
-        *)
-                echo "Usage: \$0 start|stop|restart|force-reload"
-                exit 1
-                ;;
-esac
-
-exit 0
-
 EOF
-) > /etc/init.d/freeradius
+)  > /etc/init.d/freeradius
 
   chmod +x /etc/init.d/freeradius
   chkconfig freeradius add
   chkconfig freeradius on
 
-AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
 }
 
 #*******************************************
