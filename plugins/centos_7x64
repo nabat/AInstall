@@ -231,12 +231,87 @@ _install_utils() {
 # Flow-tools
 #*******************************************
 _install_flowtools() {
-	wget ftp://ftp.eng.oar.net/pub/flow-tools/flow-tools-0.66.tar.gz
-  tar zxvf flow-tools-0.66.tar.gz
-  cd flow-tools-0.66
-  ./configure
-  make 
-  make install
+	
+	yum install -y flow-tools
+	touch /etc/rc.d/init.d/flow-capture
+	
+	cat << 'EOF' > /etc/rc.d/init.d/flow-capture
+#!/bin/sh
+#
+# flow-tools Tool set for working with NetFlow data
+#
+# chkconfig:    - 44 44
+# description:  flow-tools.
+#
+# processname: flow-capture
+# pidfile: /var/run/flow-capture.pid 
+
+# Source function library
+. /etc/rc.d/init.d/functions 
+
+# Get network config
+. /etc/sysconfig/network 
+
+RETVAL=0
+
+start() {
+       echo -n $"Starting Flow-capture daemon: "
+       daemon /usr/bin/flow-capture -S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996
+       RETVAL=$?
+       echo
+       [ $RETVAL -eq 0 ] && touch /var/lock/subsys/flow-capture
+       return $RETVAL
+}
+
+stop() {
+       echo -n $"Stopping Flow-Capture daemon: "
+       killproc flow-capture
+       RETVAL=$?
+       echo
+       [ $RETVAL -eq 0 ] && rm -f /var/run/flow-capture.pid /var/lock/subsys/flow-capture
+       return $RETVAL
+}
+
+restart() {
+       stop
+       start
+}
+
+reload() {
+       return $RETVAL
+}
+
+case "$1" in
+ start)
+       start
+       ;;
+ stop)
+       stop
+       ;;
+ status)
+       status flow-capture
+       ;;
+ restart)
+       restart
+       ;;
+ condrestart)
+       [ -f /var/lock/subsys/flow-capture ] && restart || :
+       ;;
+ reload)
+       reload
+       ;;
+ *)
+       echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
+       exit 1
+esac
+
+exit $?
+
+EOF
+
+	chkconfig --add flow-capture
+	chkconfig --level 345 flow-capture on
+	
 }
 
 #**********************************************************
@@ -244,9 +319,9 @@ _install_flowtools() {
 #**********************************************************
 _install_ipcad() {
 
-_install libpcap-dev;
+
 yum install libpcap libpcap-devel;
-#  if [ "${OS}" = "Ubuntu" -o "${OS}" = "Debian" -o "${OS}" = "CentOS"]; then
+
   
   echo '********************************************************************';
   echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
