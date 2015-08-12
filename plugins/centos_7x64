@@ -123,9 +123,9 @@ fi;
 tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 cd freeradius-server-${FREERADIUS_VERSION}
-./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+#./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
 echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
-make && make install
+#make && make install
 
 ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
@@ -210,7 +210,7 @@ EOF
   chmod +x /etc/init.d/freeradius
   chkconfig freeradius add
   chkconfig freeradius on
-
+	echo " FREE RADIUS ##################################################################################################"
 }
 
 #*******************************************
@@ -231,10 +231,12 @@ _install_utils() {
 # Flow-tools
 #*******************************************
 _install_flowtools() {
-	
+	echo "Installign Flow-Tools"
 	yum install -y flow-tools
-	touch /etc/rc.d/init.d/flow-capture
 	
+	mkdir /usr/abills/var/log/ipn/
+	touch /etc/rc.d/init.d/flow-capture
+	echo "Create file and add some script in it"
 	cat << 'EOF' > /etc/rc.d/init.d/flow-capture
 #!/bin/sh
 #
@@ -308,7 +310,7 @@ esac
 exit $?
 
 EOF
-
+	echo "Add flow-capture in autostart"
 	chkconfig --add flow-capture
 	chkconfig --level 345 flow-capture on
 	
