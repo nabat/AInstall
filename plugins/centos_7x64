@@ -6,8 +6,8 @@
 #M perl_modules:Perl_modules:_install_perl_modules
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install_dhcp
-#M IPN:Flow-tools:install_flowtools
-#M Ipcad:Ipcad:install_ipcad
+#M IPN:Flow-tools:_install_flowtools
+#M Ipcad:Ipcad:_install_ipcad
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -230,7 +230,7 @@ _install_utils() {
 #*******************************************
 # Flow-tools
 #*******************************************
-install_flowtools() {
+_install_flowtools() {
 	wget ftp://ftp.eng.oar.net/pub/flow-tools/flow-tools-0.66.tar.gz
   tar zxvf flow-tools-0.66.tar.gz
   cd flow-tools-0.66
@@ -242,7 +242,7 @@ install_flowtools() {
 #**********************************************************
 # Ipcad
 #**********************************************************
-install_ipcad() {
+_install_ipcad() {
 
 _install libpcap-dev;
 yum install libpcap libpcap-devel;
