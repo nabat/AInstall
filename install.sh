@@ -2505,8 +2505,8 @@ while [ "${OS_NAME}" = "" ]; do
   echo "OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM}"
   echo "============Select plugin:============ "
   for plugin in ${PLUGINS_DIR}/*; do
-    echo "${plugin}"
-    echo " "`cat ${plugin} | grep -e '#OS'`
+    echo 
+    echo " "`cat ${plugin} | grep -e '#OS'`":         ${plugin}"
   done;
  
   #echo "Use plugin [enter for default plugin]: ";
