@@ -27,8 +27,9 @@ PING=/bin/ping
 #  Pre install
 #*******************************************
 pre_install() {
-  yum -y install wget dialog tmux bash;
-  _install_epel;
+  #yum -y install wget tmux bash;
+  #_install_epel;
+  CURRENT_DIR=`pwd`
 }
 
 #*********************************************************
@@ -54,10 +55,13 @@ _install_httpd(){
   iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
   service iptables save
  echo "#########        Disabling selinux               ############"
+   STATUS=`cat /etc/selinux/config | grep 'SELINUX=' | grep -v 'SELINUX='`
+   echo "CURRENT STATUS is ${STATUS}"
    sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
    cat config2 > /etc/selinux/config
    rm -f config2
-   cat /etc/selinux/config | grep 'SELINUX='
+   STATUS=`cat /etc/selinux/config | grep 'SELINUX=' | grep -v 'SELINUX='`
+   echo "CURRENT STATUS is ${STATUS}"
 }
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
@@ -65,7 +69,7 @@ _install_httpd(){
 _install_epel() {
  wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
  rpm -ivh epel-release-6-8.noarch.rpm
- #rm -f epel-release-6-8.noarch.rpm*
+ rm -f ${CURRENT_DIR}epel-release-6-8.noarch.rpm*
 }
 
 #*********************************************************
@@ -119,6 +123,7 @@ if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
 fi;
 
 tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+rm -f freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 cd freeradius-server-${FREERADIUS_VERSION}
 ./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
@@ -131,16 +136,31 @@ ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 groupadd ${RADIUS_SERVER_USER}
 useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
+#mkdir /var/run/radiusd
+#chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /var/run/radiusd
 
-(cat <<EOF
-#!/bin/bash
+cat << 'EOF' > /etc/init.d/radiusd
+#!/bin/sh
 #
-# radiusd       This shell script takes care of starting and stopping
-#               freeradius.
+# radiusd	Start the radius daemon.
 #
-# chkconfig: - 58 74
-# description: radiusd is service access provider Daemon. \
-
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+#
+#    Copyright (C) 2001-2008 The FreeRADIUS Project http://www.freeradius.org
+#   chkconfig: - 58 74
+#   description: radiusd is service access provider Daemon.
 ### BEGIN INIT INFO
 # Provides: radiusd
 # Should-Start: radiusd
@@ -149,36 +169,87 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 # Description: radiusd is access provider service Daemon.
 ### END INIT INFO
 
-# Source function library.
-. /etc/init.d/functions
+prefix=/usr/local/freeradius
+exec_prefix=${prefix}
+sbindir=${exec_prefix}/sbin
+localstatedir=/var
+logdir=${localstatedir}/log/radius
+rundir=${localstatedir}/run/radiusd
+sysconfdir=${prefix}/etc
+#
+#  If you have issues with OpenSSL, uncomment these next lines.
+#
+#  Something similar may work for MySQL, and you may also
+#  have to LD_PRELOAD libz.so
+#
+#LD_LIBRARY_PATH=
+#LD_RUN_PATH=:
+#LD_PRELOAD=libcrypto.so
+export LD_LIBRARY_PATH LD_RUN_PATH LD_PRELOAD
 
-prog=/usr/local/freeradius/sbin/radiusd
-lockfile=/var/lock/subsys/\$prog
+RADIUSD=$sbindir/radiusd
+RADDBDIR=${sysconfdir}/raddb
+RADIUS_USER='freerad'
+DESC="FreeRADIUS"
 
-start() {
-        # Start daemons.
-        echo -n \$"Starting \$prog: "
-        daemon \$prog \$OPTIONS
-        RETVAL=\$?
-        echo
-        [ \$RETVAL -eq 0 ] && touch \$lockfile
-        return \$RETVAL
-}
-stop() {
-        [ "\$EUID" != "0" ] && exit 4
-        echo -n \$"Shutting down \$prog: "
-        killproc \$prog
-        RETVAL=\$?
-        echo
-        [ \$RETVAL -eq 0 ] && rm -f \$lockfile
-        return \$RETVAL
-}
-# See how we were called.
-case "\$1" in
+#
+#  See 'man radiusd' for details on command-line options.
+#
+ARGS=""
+
+test -f $RADIUSD || exit 0
+test -f $RADDBDIR/radiusd.conf || exit 0
+
+if [ ! -d $rundir ] ; then
+    mkdir $rundir
+    chown ${RADIUS_USER}:${RADIUS_USER} $rundir
+    chmod 775 $rundir
+fi
+
+if [ ! -d $logdir ] ; then
+    mkdir $logdir
+    chown ${RADIUS_USER}:${RADIUS_USER} $logdir
+    chmod 770 $logdir
+    chmod g+s $logdir
+fi
+
+if [ ! -f $logdir/radius.log ]; then
+        touch $logdir/radius.log
+fi
+
+chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
+chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
+mkdir /var/run/radiusd/
+chown -R ${RADIUS_USER}:${RADIUS_USER} /var/run/radiusd/
+chmod 660 $logdir/radius.log
+
+case "$1" in
   start)
-        start
-        ;;
+	echo -n "Starting $DESC:"
+	$RADIUSD $ARGS
+	echo "radiusd"
+	;;
   stop)
+	[ -z "$2" ] && echo -n "Stopping $DESC: "
+        [ -f $rundir/radiusd.pid ] && kill -TERM `cat $rundir/radiusd.pid`
+	[ -z "$2" ] && echo "radiusd."
+	;;
+  reload|force-reload)
+	echo "Reloading $DESC configuration files."
+	[ -f $rundir/radiusd.pid ] && kill -HUP `cat $rundir/radiusd.pid`
+	;;
+  restart)
+	sh $0 stop quiet
+	sleep 3
+	sh $0 start
+	;;
+  check)
+	$RADIUSD -CX $ARGS
+	exit $?
+	;;
+  *)
+        echo "Usage: /etc/init.d/$RADIUS {start|stop|reload|restart|check}"
+        exit 1
         stop
         ;;
   status)
@@ -202,14 +273,13 @@ case "\$1" in
         exit 2
 esac
 
+exit 0
 EOF
-) > /etc/init.d/freeradius
+
 
   chmod +x /etc/init.d/freeradius
   chkconfig freeradius add
   chkconfig freeradius on
-
-AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
 }
 
 #*******************************************
