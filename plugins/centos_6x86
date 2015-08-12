@@ -138,8 +138,8 @@ ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 groupadd ${RADIUS_SERVER_USER}
 useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
-mkdir /var/run/radiusd
-chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /var/run/radiusd
+#mkdir /var/run/radiusd
+#chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /var/run/radiusd
 
 cat << 'EOF' > /etc/init.d/radiusd
 #!/bin/sh
@@ -220,11 +220,11 @@ if [ ! -f $logdir/radius.log ]; then
         touch $logdir/radius.log
 fi
 
-#chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
-#chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
-#mkdir /var/run/radiusd/
-#chown -R ${RADIUS_USER}:${RADIUS_USER} /var/run/radiusd/
-#chmod 660 $logdir/radius.log
+chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
+chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
+mkdir /var/run/radiusd/
+chown -R ${RADIUS_USER}:${RADIUS_USER} /var/run/radiusd/
+chmod 660 $logdir/radius.log
 
 case "$1" in
   start)
