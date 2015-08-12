@@ -6,6 +6,7 @@
 #M perl_modules:Perl_modules:_install_perl_modules
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install_dhcp
+#M IPN:IPN:_install_ipn
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -220,6 +221,114 @@ EOF
 #*******************************************
 _install_dhcp() {
   yum -y install dhcp
+}
+
+
+
+#**********************************************************
+# IPN Ipcad + flow-tools
+#**********************************************************
+_install_ipn() {
+
+	yum install -y flow-tools
+	
+	mkdir -p /usr/abills/var/log/ipn/
+	
+	echo 'OPTIONS="-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996"' > /etc/sysconfig/flow-capture
+	
+	chkconfig --add flow-capture
+	chkconfig --level 345 flow-capture on
+    
+	yum install -y libpcap libpcap-devel;
+
+  
+  echo '********************************************************************';
+  echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
+  echo '********************************************************************';
+  
+  # will be installed in /usr/
+  cd /usr/
+  
+  #remove if already extracted
+  if [ -d /usr/ipcad-3.7.3 ]; then
+    rm -rf ipcad-3.7.3
+  fi;
+  
+  # do not download if present
+  if [ -f "ipcad-3.7.3.tar.gz" ]; then
+    echo "INFO: Already downloaded";
+  else
+    wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
+  fi;
+  
+  tar -xvzf ipcad-3.7.3.tar.gz
+  cd ipcad-3.7.3
+  
+  LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
+  LINE2_NUM=$(( LINE1_NUM + 2 ));
+  
+  sed -i "${LINE2_NUM}d" headers.h;
+  sed -i "${LINE1_NUM}d" headers.h;
+  
+  echo
+  
+  if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
+    echo "INFO:  Error "
+  else
+    echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
+  fi;
+  
+  
+  sed -i "1i #include \"signal.h\"" main.c;
+  
+  echo
+  
+  sed -i "1i #include \"headers.h\"" pps.c;
+  sed -i "1i #include \"signal.h\"" pps.c;
+  
+  echo "INFO: Added to pps.c"
+    
+  sed -i "1i #include \"signal.h\"" servers.h;
+  
+  echo "INFO: Added to servers.h"
+  
+  ./configure && make && make install
+  
+  if [ -d  /var/ipcad/ ]; then
+    echo "directory /var/ipcad/ exists";
+  else
+    mkdir /var/ipcad/;
+  fi;
+  
+
+(cat <<EOF
+# »нтерфейсы дл¤ сбора статистики
+interface eth0;
+# детализаци¤ по портам 
+#capture-ports enable;
+
+# јгрегировать порты, уменьшает размер базы детализации 
+#aggregate 1024-65535    into 65535;     /* Aggregate wildly */
+#aggregate 3128-3128     into 3128;      /* Protect these ports */
+#aggregate 150-1023      into 1023;      /* General low range */
+
+# ≈кспортирование статистики на адрес 127.0.0.1 порт 9996
+netflow export destination 127.0.0.1 9996;
+netflow export version 5;       # NetFlow export format version {1|5}
+netflow timeout active 30;      # Timeout when flow is active, in minutes
+netflow timeout inactive 15;    # Flow inactivity timeout, in seconds
+netflow engine-type 73;         # v5 engine_type; 73='I' for "IPCAD"
+netflow engine-id 1;            # Useful to differentiate multiple ipcads.
+
+dumpfile = ipcad.dump;
+chroot = /var/ipcad/;
+pidfile = ipcad.pid;  
+
+rsh enable at 127.0.0.1;
+memory_limit = 16m;
+EOF
+) > /usr/local/etc/ipcad.conf
+
 }
 
 #*******************************************
