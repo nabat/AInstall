@@ -6,6 +6,8 @@
 #M perl_modules:Perl_modules:_install_perl_modules
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install_dhcp
+#M IPN:Flow-tools:_install_flowtools
+#M Ipcad:Ipcad:_install_ipcad
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -109,12 +111,9 @@ else
 fi;
 
 FREERADIUS_VERSION="2.2.7"
+RADIUS_SERVER_USER="freerad"
  
-if [ -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
-  echo "Freeradius_Server already downloaded"
-else
-  wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
-fi
+wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
   echo "Can\'t download freeradius. PLease download and install manual";
@@ -124,9 +123,9 @@ fi;
 tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 cd freeradius-server-${FREERADIUS_VERSION}
-./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+#./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
 echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
-make && make install
+#make && make install
 
 ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
@@ -156,28 +155,28 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 . /etc/init.d/functions
 
 prog=/usr/local/freeradius/sbin/radiusd
-lockfile=/var/lock/subsys/$prog
+lockfile=/var/lock/subsys/\$prog
 
 start() {
         # Start daemons.
-        echo -n $"Starting $prog: "
-        daemon $prog $OPTIONS
-        RETVAL=$?
+        echo -n \$"Starting \$prog: "
+        daemon \$prog \$OPTIONS
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && touch $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && touch \$lockfile
+        return \$RETVAL
 }
 stop() {
-        [ "$EUID" != "0" ] && exit 4
-        echo -n $"Shutting down $prog: "
-        killproc $prog
-        RETVAL=$?
+        [ "\$EUID" != "0" ] && exit 4
+        echo -n \$"Shutting down \$prog: "
+        killproc \$prog
+        RETVAL=\$?
         echo
-        [ $RETVAL -eq 0 ] && rm -f $lockfile
-        return $RETVAL
+        [ \$RETVAL -eq 0 ] && rm -f \$lockfile
+        return \$RETVAL
 }
 # See how we were called.
-case "$1" in
+case "\$1" in
   start)
         start
         ;;
@@ -185,14 +184,14 @@ case "$1" in
         stop
         ;;
   status)
-        status $prog
+        status \$prog
         ;;
   restart|force-reload)
         stop
         start
         ;;
   try-restart|condrestart)
-        if status $prog > /dev/null; then
+        if status \$prog > /dev/null; then
             stop
             start
         fi
@@ -201,81 +200,9 @@ case "$1" in
         exit 3
         ;;
   *)
-        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
+        echo \$"Usage: \$0 {start|stop|status|restart|try-restart|force-reload}"
         exit 2
 esac
-
-EOF)
-  
-else
-(cat <<EOF
-#!/bin/sh
-# Start/stop the FreeRADIUS daemon. (ABillS)
-
-### BEGIN INIT INFO
-# Provides:          freeradius
-# Required-Start:    $remote_fs $network $syslog
-# Should-Start:      $time mysql slapd postgresql samba krb5-kdc
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Radius Daemon
-# Description:       Extensible, configurable radius daemon
-### END INIT INFO
-
-set -e
-
-if [ -f /lib/lsb/init-functions ]; then
-. /lib/lsb/init-functions
-elif [ -f /lib/lsb/init-functions ]; then
-. /etc/init.d/functions
-fi;
-
-PROG="freeradius"
-PROGRAM="/usr/sbin/radiusd"
-PIDFILE="/var/run/radiusd/radiusd.pid"
-DESCR="FreeRADIUS daemon"
-
-test -f \$PROGRAM || exit 0
-
-# /var/run may be a tmpfs
-if [ ! -d /var/run/radiusd ]; then
- mkdir -p /var/run/radiusd
- chown freerad:freerad /var/run/radiusd
-fi
-
-export PATH="\${PATH:+\$PATH:}/usr/sbin:/sbin"
-
-ret=0
-
-case "\$1" in
-        start)
-                log_daemon_msg "Starting \$DESCR" "\$PROG"
-                start-stop-daemon --start --quiet --pidfile \$PIDFILE --exec \$PROGRAM || ret=\$?
-                log_end_msg \$ret
-                exit \$ret;
-                ;;
-        stop)
-                log_daemon_msg "Stopping \$DESCR" "\$PROG"
-                if [ -f "\$PIDFILE" ] ; then
-                  start-stop-daemon --stop --retry=TERM/30/KILL/5 --quiet --pidfile \$PIDFILE || ret=\$?
-                  log_end_msg \$ret
-                else
-                  log_action_cont_msg "\$PIDFILE not found"
-                  log_end_msg 0
-                fi
-                ;;
-        restart|force-reload)
-                \$0 stop
-                \$0 start
-                ;;
-        *)
-                echo "Usage: \$0 start|stop|restart|force-reload"
-                exit 1
-                ;;
-esac
-
-exit 0
 
 EOF
 ) > /etc/init.d/freeradius
@@ -283,8 +210,7 @@ EOF
   chmod +x /etc/init.d/freeradius
   chkconfig freeradius add
   chkconfig freeradius on
-
-AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
+	echo " FREE RADIUS ##################################################################################################"
 }
 
 #*******************************************
@@ -301,5 +227,189 @@ _install_utils() {
   yum -y install vim tmux bash git
 }
 
+#*******************************************
+# Flow-tools
+#*******************************************
+_install_flowtools() {
+	echo "Installign Flow-Tools"
+	yum install -y flow-tools
+	
+	mkdir /usr/abills/var/log/ipn/
+	touch /etc/rc.d/init.d/flow-capture
+	echo "Create file and add some script in it"
+	cat << 'EOF' > /etc/rc.d/init.d/flow-capture
+#!/bin/sh
+#
+# flow-tools Tool set for working with NetFlow data
+#
+# chkconfig:    - 44 44
+# description:  flow-tools.
+#
+# processname: flow-capture
+# pidfile: /var/run/flow-capture.pid 
+
+# Source function library
+. /etc/rc.d/init.d/functions 
+
+# Get network config
+. /etc/sysconfig/network 
+
+RETVAL=0
+
+start() {
+       echo -n $"Starting Flow-capture daemon: "
+       daemon /usr/bin/flow-capture -S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996
+       RETVAL=$?
+       echo
+       [ $RETVAL -eq 0 ] && touch /var/lock/subsys/flow-capture
+       return $RETVAL
+}
+
+stop() {
+       echo -n $"Stopping Flow-Capture daemon: "
+       killproc flow-capture
+       RETVAL=$?
+       echo
+       [ $RETVAL -eq 0 ] && rm -f /var/run/flow-capture.pid /var/lock/subsys/flow-capture
+       return $RETVAL
+}
+
+restart() {
+       stop
+       start
+}
+
+reload() {
+       return $RETVAL
+}
+
+case "$1" in
+ start)
+       start
+       ;;
+ stop)
+       stop
+       ;;
+ status)
+       status flow-capture
+       ;;
+ restart)
+       restart
+       ;;
+ condrestart)
+       [ -f /var/lock/subsys/flow-capture ] && restart || :
+       ;;
+ reload)
+       reload
+       ;;
+ *)
+       echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
+       exit 1
+esac
+
+exit $?
+
+EOF
+	echo "Add flow-capture in autostart"
+	chkconfig --add flow-capture
+	chkconfig --level 345 flow-capture on
+	
+}
+
+#**********************************************************
+# Ipcad
+#**********************************************************
+_install_ipcad() {
 
 
+yum install libpcap libpcap-devel;
+
+  
+  echo '********************************************************************';
+  echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
+  echo '********************************************************************';
+  
+  # will be installed in /usr/
+  cd /usr/
+  
+  #remove if already extracted
+  if [ -d /usr/ipcad-3.7.3 ]; then
+    rm -rf ipcad-3.7.3
+  fi;
+  
+  # do not download if present
+  if [ -f "ipcad-3.7.3.tar.gz" ]; then
+    echo "INFO: Already downloaded";
+  else
+    wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
+  fi;
+  
+  tar -xvzf ipcad-3.7.3.tar.gz
+  cd ipcad-3.7.3
+  
+  LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
+  LINE2_NUM=$(( LINE1_NUM + 2 ));
+  
+  sed -i "${LINE2_NUM}d" headers.h;
+  sed -i "${LINE1_NUM}d" headers.h;
+  
+  echo
+  
+  if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
+    echo "INFO:  Error "
+  else
+    echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
+  fi;
+  
+  
+  sed -i "1i #include \"signal.h\"" main.c;
+  
+  echo
+  
+  sed -i "1i #include \"headers.h\"" pps.c;
+  sed -i "1i #include \"signal.h\"" pps.c;
+  
+  echo "INFO: Added to pps.c"
+    
+  sed -i "1i #include \"signal.h\"" servers.h;
+  
+  echo "INFO: Added to servers.h"
+  
+  ./configure && make && make install
+  
+  if [ -d  /var/ipcad/ ]; then
+    echo "directory /var/ipcad/ exists";
+  else
+    mkdir /var/ipcad/;
+  fi;
+  
+
+(cat <<EOF
+# Интерфейсы для сбора статистики
+interface eth0;
+# детализация по портам 
+#capture-ports enable;
+
+# Агрегировать порты, уменьшает размер базы детализации 
+#aggregate 1024-65535    into 65535;     /* Aggregate wildly */
+#aggregate 3128-3128     into 3128;      /* Protect these ports */
+#aggregate 150-1023      into 1023;      /* General low range */
+
+# Експортирование статистики на адрес 127.0.0.1 порт 9996
+netflow export destination 127.0.0.1 9996;
+netflow export version 5;       # NetFlow export format version {1|5}
+netflow timeout active 30;      # Timeout when flow is active, in minutes
+netflow timeout inactive 15;    # Flow inactivity timeout, in seconds
+netflow engine-type 73;         # v5 engine_type; 73='I' for "IPCAD"
+netflow engine-id 1;            # Useful to differentiate multiple ipcads.
+
+dumpfile = ipcad.dump;
+chroot = /var/ipcad/;
+pidfile = ipcad.pid;  
+
+rsh enable at 127.0.0.1;
+memory_limit = 16m;
+EOF
+) > /usr/local/etc/ipcad.conf
+
+}
