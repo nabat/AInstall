@@ -334,3 +334,5 @@ rsh enable at 127.0.0.1;
 memory_limit = 16m;
 EOF
 ) > /usr/local/etc/ipcad.conf
+
+}
