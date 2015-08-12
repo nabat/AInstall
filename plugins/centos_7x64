@@ -6,8 +6,8 @@
 #M perl_modules:Perl_modules:_install_perl_modules
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install_dhcp
-#M IPN:Flow-tools:_install_flowtools
-#M Ipcad:Ipcad:_install_ipcad
+#M IPN:Flow-tools,Ipcad:_install_ipn
+
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -123,9 +123,9 @@ fi;
 tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 cd freeradius-server-${FREERADIUS_VERSION}
-#./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
 echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
-#make && make install
+make && make install
 
 ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
@@ -134,15 +134,28 @@ groupadd ${RADIUS_SERVER_USER}
 useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
 
-(cat <<EOF
-#!/bin/bash
+	cat << 'EOF' > /etc/init.d/radiusd
+#!/bin/sh
 #
-# radiusd       This shell script takes care of starting and stopping
-#               freeradius.
+# radiusd	Start the radius daemon.
 #
-# chkconfig: - 58 74
-# description: radiusd is service access provider Daemon. \
-
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+#
+#    Copyright (C) 2001-2008 The FreeRADIUS Project http://www.freeradius.org
+#   chkconfig: - 58 74
+#   description: radiusd is service access provider Daemon.
 ### BEGIN INIT INFO
 # Provides: radiusd
 # Should-Start: radiusd
@@ -151,36 +164,86 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 # Description: radiusd is access provider service Daemon.
 ### END INIT INFO
 
-# Source function library.
-. /etc/init.d/functions
+prefix=/usr/local/freeradius
+exec_prefix=${prefix}
+sbindir=${exec_prefix}/sbin
+localstatedir=/var
+logdir=${localstatedir}/log/radius
+rundir=/usr/local/freeradius/var/run/radiusd/
+sysconfdir=${prefix}/etc
+#
+#  If you have issues with OpenSSL, uncomment these next lines.
+#
+#  Something similar may work for MySQL, and you may also
+#  have to LD_PRELOAD libz.so
+#
+#LD_LIBRARY_PATH=
+#LD_RUN_PATH=:
+#LD_PRELOAD=libcrypto.so
+export LD_LIBRARY_PATH LD_RUN_PATH LD_PRELOAD
 
-prog=/usr/local/freeradius/sbin/radiusd
-lockfile=/var/lock/subsys/\$prog
+RADIUSD=$sbindir/radiusd
+RADDBDIR=${sysconfdir}/raddb
+RADIUS_USER='freerad'
+DESC="FreeRADIUS"
 
-start() {
-        # Start daemons.
-        echo -n \$"Starting \$prog: "
-        daemon \$prog \$OPTIONS
-        RETVAL=\$?
-        echo
-        [ \$RETVAL -eq 0 ] && touch \$lockfile
-        return \$RETVAL
-}
-stop() {
-        [ "\$EUID" != "0" ] && exit 4
-        echo -n \$"Shutting down \$prog: "
-        killproc \$prog
-        RETVAL=\$?
-        echo
-        [ \$RETVAL -eq 0 ] && rm -f \$lockfile
-        return \$RETVAL
-}
-# See how we were called.
-case "\$1" in
+#
+#  See 'man radiusd' for details on command-line options.
+#
+ARGS=""
+
+test -f $RADIUSD || exit 0
+test -f $RADDBDIR/radiusd.conf || exit 0
+
+if [ ! -d $rundir ] ; then
+    mkdir $rundir
+    chown ${RADIUS_USER}:${RADIUS_USER} $rundir
+    chmod 775 $rundir
+fi
+
+if [ ! -d $logdir ] ; then
+    mkdir $logdir
+    chown ${RADIUS_USER}:${RADIUS_USER} $logdir
+    chmod 770 $logdir
+    chmod g+s $logdir
+fi
+
+if [ ! -f $logdir/radius.log ]; then
+        touch $logdir/radius.log
+fi
+
+chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
+chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
+chown -R ${RADIUS_USER}:${RADIUS_USER} /var/run/radiusd/
+chmod 660 $logdir/radius.log
+
+case "$1" in
   start)
-        start
-        ;;
+	echo -n "Starting $DESC:"
+	$RADIUSD $ARGS
+	echo "radiusd"
+	;;
   stop)
+	[ -z "$2" ] && echo -n "Stopping $DESC: "
+        [ -f $rundir/radiusd.pid ] && kill -TERM `cat $rundir/radiusd.pid`
+	[ -z "$2" ] && echo "radiusd."
+	;;
+  reload|force-reload)
+	echo "Reloading $DESC configuration files."
+	[ -f $rundir/radiusd.pid ] && kill -HUP `cat $rundir/radiusd.pid`
+	;;
+  restart)
+	sh $0 stop quiet
+	sleep 3
+	sh $0 start
+	;;
+  check)
+	$RADIUSD -CX $ARGS
+	exit $?
+	;;
+  *)
+        echo "Usage: /etc/init.d/$RADIUS {start|stop|reload|restart|check}"
+        exit 1
         stop
         ;;
   status)
@@ -205,12 +268,13 @@ case "\$1" in
 esac
 
 EOF
-) > /etc/init.d/freeradius
 
-  chmod +x /etc/init.d/freeradius
-  chkconfig freeradius add
-  chkconfig freeradius on
-	echo " FREE RADIUS ##################################################################################################"
+  chmod +x /etc/init.d/radiusd
+  chkconfig --add radiusd
+	chkconfig --level 345 radiusd on
+	echo "##################################################################################################"
+	echo " FREERADIUS ##################################################################################################"
+	echo "##################################################################################################"
 }
 
 #*******************************************
@@ -228,101 +292,24 @@ _install_utils() {
 }
 
 #*******************************************
-# Flow-tools
+# Flow-tools + Ipcad
 #*******************************************
-_install_flowtools() {
-	echo "Installign Flow-Tools"
+_install_ipn() {
 	yum install -y flow-tools
 	
-	mkdir /usr/abills/var/log/ipn/
-	touch /etc/rc.d/init.d/flow-capture
-	echo "Create file and add some script in it"
-	cat << 'EOF' > /etc/rc.d/init.d/flow-capture
-#!/bin/sh
-#
-# flow-tools Tool set for working with NetFlow data
-#
-# chkconfig:    - 44 44
-# description:  flow-tools.
-#
-# processname: flow-capture
-# pidfile: /var/run/flow-capture.pid 
-
-# Source function library
-. /etc/rc.d/init.d/functions 
-
-# Get network config
-. /etc/sysconfig/network 
-
-RETVAL=0
-
-start() {
-       echo -n $"Starting Flow-capture daemon: "
-       daemon /usr/bin/flow-capture -S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996
-       RETVAL=$?
-       echo
-       [ $RETVAL -eq 0 ] && touch /var/lock/subsys/flow-capture
-       return $RETVAL
-}
-
-stop() {
-       echo -n $"Stopping Flow-Capture daemon: "
-       killproc flow-capture
-       RETVAL=$?
-       echo
-       [ $RETVAL -eq 0 ] && rm -f /var/run/flow-capture.pid /var/lock/subsys/flow-capture
-       return $RETVAL
-}
-
-restart() {
-       stop
-       start
-}
-
-reload() {
-       return $RETVAL
-}
-
-case "$1" in
- start)
-       start
-       ;;
- stop)
-       stop
-       ;;
- status)
-       status flow-capture
-       ;;
- restart)
-       restart
-       ;;
- condrestart)
-       [ -f /var/lock/subsys/flow-capture ] && restart || :
-       ;;
- reload)
-       reload
-       ;;
- *)
-       echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
-       exit 1
-esac
-
-exit $?
-
-EOF
-	echo "Add flow-capture in autostart"
-	chkconfig --add flow-capture
-	chkconfig --level 345 flow-capture on
+	mkdir -p /usr/abills/var/log/ipn/
 	
-}
+	echo  'OPTIONS="-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996"' > /etc/sysconfig/flow-capture
 
-#**********************************************************
-# Ipcad
-#**********************************************************
-_install_ipcad() {
+	
+	chkconfig --add flow-capture
+	chkconfig flow-capture on
+	echo '##################################################################################################'
+	echo 'FLOWTOOLS INSTALLED ##################################################################################################'
+	echo '##################################################################################################'
 
 
-yum install libpcap libpcap-devel;
+	yum -y install libpcap libpcap-devel;
 
   
   echo '********************************************************************';
@@ -384,7 +371,7 @@ yum install libpcap libpcap-devel;
   fi;
   
 
-(cat <<EOF
+	cat << 'EOF' > /usr/local/etc/ipcad.conf
 # Интерфейсы для сбора статистики
 interface eth0;
 # детализация по портам 
@@ -409,7 +396,11 @@ pidfile = ipcad.pid;
 
 rsh enable at 127.0.0.1;
 memory_limit = 16m;
-EOF
-) > /usr/local/etc/ipcad.conf
 
+EOF
+
+	echo '##################################################################################################'
+	echo 'IPCAD INSTALLED ##################################################################################################'
+	echo '##################################################################################################'
 }
+
