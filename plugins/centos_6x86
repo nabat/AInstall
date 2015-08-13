@@ -219,6 +219,8 @@ EOF
   chkconfig radiusd on
   
   service radiusd start
+  
+  cd ${CURRENT_DIR}
 }
 
 #*******************************************
