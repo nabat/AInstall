@@ -3,12 +3,12 @@ Autoinstaller for ABillS based on plugin system
 ver. 0.1
 Feel free to make bugreports
 
-Plugins are structured as plugins/DistributiveVersionArch
+Plugins are structured as plugins/Distributive_VersionArch
 
 ================================================
 Plugin Format
 ================================================
-
+<code>
 #TAG_NAME action
 
 OS tag OS_NAME OS_VERSION
@@ -61,4 +61,4 @@ post_install execute function after full installation
 #               # 
 # Final result  #
 #---------------#
-
+</code>
