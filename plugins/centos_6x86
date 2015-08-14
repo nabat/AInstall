@@ -7,6 +7,8 @@
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install_dhcp
 #M IPN:IPN:_install_ipn
+#M MRTG:Mrtg,Rstat:_install_mrtg
+#M FSbackup:FSbackup:_install_fsbackup
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -403,6 +405,54 @@ cd ${CURRENT_DIR}
 service flow-capture start
 chkconfig --add flow-capture
 chkconfig flow-capture on
+
+}
+
+#************************************
+# rstat install
+#************************************
+_install_rstat() {
+	RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
+
+	wget ${RSTAT_URL}
+
+	tar zxvf rstat-0.21.tgz ;
+	cd rstat ;
+	make install ;
+	cd ${CURRENT_DIR}
+}
+#************************************
+# MRTG install
+#************************************
+_install_mrtg() {
+	yum -y install mrtg net-snmp net-snmp-utils net-tools
+	_install_rstat
+	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+}
+
+#**********************************************************
+# FSBackup install
+#**********************************************************
+_install_fsbackup() {
+	echo "FSBACKUP START INSTALL"
+	url="http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz"
+
+	wget ${url}
+
+	tar zxvf fsbackup-1.2pl2.tar.gz;
+	cd fsbackup-1.2pl2;
+	./install.pl;
+	mkdir /usr/local/fsbackup/archive;
+
+	echo "!/usr/local/fsbackup" >> /usr/local/fsbackup/cfg_example
+	cp /usr/local/fsbackup/create_backup.sh /usr/local/fsbackup/create_backup.sh_back
+	cat /usr/local/fsbackup/create_backup.sh_back | sed 's/config_files=\".*\"/config_files=\"cfg_example\"/' > /usr/local/fsbackup/create_backup.sh
+
+	check_fsbackup_cron=`grep create_backup /etc/crontab`
+	if [ x"${check_fsbackup_cron}" = x ]; then
+		echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
+	fi;
 
 }
 
