@@ -7,10 +7,10 @@
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install_dhcp
 #M IPN:Flow-tools,Ipcad:_install_ipn
-
+#M MRTG:Mrtg,Rstat:_install_mrtg
+#M FSbackup:FSbackup:_install_fsbackup
 #dM Mail:Mail_server:install_mail
 # MRTG=
-# IPN=
 # fsbackup=
 # perl_speedy 
 #M utils:Utils:_install_utils
@@ -29,7 +29,7 @@ PING=/bin/ping
 #  Pre install
 #*******************************************
 pre_install() {
-  yum -y install wget dialog tmux bash gcc;
+  yum -y install wget dialog tmux bash nano gcc;
   _install_epel;
   CURRENT_DIR=`pwd`
 }
@@ -39,34 +39,36 @@ pre_install() {
 #*********************************************************
 _install_mysql(){
   yum install -y mariadb mariadb-devel mariadb-libs mariadb-server
-  systemctl start mariadb
+
   systemctl enable mariadb
+  
+  
 }
 
 #*********************************************************
 #  Install apache
 #*********************************************************
 _install_httpd(){
-  yum -y install httpd httpd-devel httpd-tools mod_perl
-  chkconfig httpd on
-  service httpd start
+	yum -y install httpd httpd-devel httpd-tools mod_perl
+	chkconfig httpd on
+	service httpd start
   
-   echo "#########        Opening firewall ports         ############" 
-  iptables -I INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
-  iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
-  service iptables save
- echo "#########        Disabling selinux               ############"
-   sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
-   cat config2 > /etc/selinux/config
-   rm -f config2
-   cat /etc/selinux/config | grep 'SELINUX='
+	echo "#########        Opening firewall ports         ############" 
+	iptables -I INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+	iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
+	service iptables save
+	echo "#########        Disabling selinux               ############"
+	sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
+	cat config2 > /etc/selinux/config
+	rm -f config2
+	cat /etc/selinux/config | grep 'SELINUX='
 }
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
 #*********************************************************
 _install_epel() {
-  wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
- rpm -ivh epel-release-7-5.noarch.rpm
+	wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+	rpm -ivh epel-release-7-5.noarch.rpm
  
 }
 
@@ -74,7 +76,7 @@ _install_epel() {
 #  Install Perl modules
 #*********************************************************
 _install_perl_modules() {
- yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File
+	yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File
 }
 
 #*******************************************
@@ -82,58 +84,58 @@ _install_perl_modules() {
 #*******************************************
 _install_freeradius() {
   
-  if [ -d /usr/local/freeradius/ ]; then
-    echo "Radius exists: /usr/local/freeradius/";
-    return 0 ;
-  fi;
+	if [ -d /usr/local/freeradius/ ]; then
+		echo "Radius exists: /usr/local/freeradius/";
+		return 0 ;
+	fi;
   
   PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
   
-for dir in ${PERL_LIB_DIRS}; do
-  if [ "${DEBUG}" = 1 ]; then
-    echo "ls ${dir}/libperl* | head -1"  
-  fi;
+	for dir in ${PERL_LIB_DIRS}; do
+	if [ "${DEBUG}" = 1 ]; then
+		echo "ls ${dir}/libperl* | head -1"  
+	fi;
 
-  PERL_LIB=`ls ${dir}/libperl* | head -1`;
-  if [ x"${PERL_LIB}" != x ]; then
-    PERL_LIB_DIR=${dir}
-    if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
-      ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
-    fi;
-  fi;
-done;
+	PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	if [ x"${PERL_LIB}" != x ]; then
+		PERL_LIB_DIR=${dir}
+		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
+		ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
+		fi;
+	fi;
+	done;
 
 
-if [ x"${PERL_LIB_DIR}" = x ]; then
-  echo "Perl lib not found";
-  exit;
-else
-  echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
-fi;
+	if [ x"${PERL_LIB_DIR}" = x ]; then
+		echo "Perl lib not found";
+		exit;
+	else
+		echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
+	fi;
 
-FREERADIUS_VERSION="2.2.7"
-RADIUS_SERVER_USER="freerad"
+	FREERADIUS_VERSION="2.2.7"
+	RADIUS_SERVER_USER="freerad"
  
-wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+	wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
-if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
-  echo "Can\'t download freeradius. PLease download and install manual";
-  exit;
-fi;
+	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
+		echo "Can\'t download freeradius. PLease download and install manual";
+		exit;
+	fi;
 
-tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
-cd freeradius-server-${FREERADIUS_VERSION}
-./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
-echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
-make && make install
+	cd freeradius-server-${FREERADIUS_VERSION}
+	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+	echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
+	make && make install
 
-ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
-#Add user
-groupadd ${RADIUS_SERVER_USER}
-useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
-chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
+	#Add user
+	groupadd ${RADIUS_SERVER_USER}
+	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
+	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
 
 	cat << 'EOF' > /etc/init.d/radiusd
 #!/bin/sh
@@ -270,8 +272,8 @@ esac
 
 EOF
 
-  chmod +x /etc/init.d/radiusd
-  chkconfig --add radiusd
+	chmod +x /etc/init.d/radiusd
+	chkconfig --add radiusd
 	chkconfig --level 345 radiusd on
 	cd ${CURRENT_DIR}
 	echo "##################################################################################################"
@@ -283,14 +285,14 @@ EOF
 #  Dhcp server
 #*******************************************
 _install_dhcp() {
-  yum -y install dhcp
+	yum -y install dhcp
 }
 
 #*******************************************
 #  Utils 
 #*******************************************
 _install_utils() {
-  yum -y install vim tmux bash git
+	yum -y install vim tmux bash git
 }
 
 #*******************************************
@@ -314,63 +316,63 @@ _install_ipn() {
 	yum -y install libpcap libpcap-devel;
 
   
-  echo '********************************************************************';
-  echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
-  echo '********************************************************************';
+	echo '********************************************************************';
+	echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
+	echo '********************************************************************';
   
-  # will be installed in /usr/
-  cd /usr/
+	# will be installed in /usr/
+	cd /usr/
   
-  #remove if already extracted
-  if [ -d /usr/ipcad-3.7.3 ]; then
-    rm -rf ipcad-3.7.3
-  fi;
+	#remove if already extracted
+	if [ -d /usr/ipcad-3.7.3 ]; then
+		rm -rf ipcad-3.7.3
+	fi;
   
-  # do not download if present
-  if [ -f "ipcad-3.7.3.tar.gz" ]; then
-    echo "INFO: Already downloaded";
-  else
-    wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
-  fi;
+	# do not download if present
+	if [ -f "ipcad-3.7.3.tar.gz" ]; then
+		echo "INFO: Already downloaded";
+	else
+		wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
+	fi;
   
-  tar -xvzf ipcad-3.7.3.tar.gz
-  cd ipcad-3.7.3
+	tar -xvzf ipcad-3.7.3.tar.gz
+	cd ipcad-3.7.3
   
-  LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
-  LINE2_NUM=$(( LINE1_NUM + 2 ));
+	LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
+	LINE2_NUM=$(( LINE1_NUM + 2 ));
   
-  sed -i "${LINE2_NUM}d" headers.h;
-  sed -i "${LINE1_NUM}d" headers.h;
+	sed -i "${LINE2_NUM}d" headers.h;
+	sed -i "${LINE1_NUM}d" headers.h;
   
-  echo
+	echo
   
-  if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
-    echo "INFO:  Error "
-  else
-    echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
-  fi;
+	if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
+		echo "INFO:  Error "
+	else
+		echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
+	fi;
   
   
-  sed -i "1i #include \"signal.h\"" main.c;
+	sed -i "1i #include \"signal.h\"" main.c;
   
-  echo
+	echo
   
-  sed -i "1i #include \"headers.h\"" pps.c;
-  sed -i "1i #include \"signal.h\"" pps.c;
+	sed -i "1i #include \"headers.h\"" pps.c;
+	sed -i "1i #include \"signal.h\"" pps.c;
   
-  echo "INFO: Added to pps.c"
+	echo "INFO: Added to pps.c"
     
-  sed -i "1i #include \"signal.h\"" servers.h;
+	sed -i "1i #include \"signal.h\"" servers.h;
   
-  echo "INFO: Added to servers.h"
+	echo "INFO: Added to servers.h"
   
-  ./configure && make && make install
+	./configure && make && make install
   
-  if [ -d  /var/ipcad/ ]; then
-    echo "directory /var/ipcad/ exists";
-  else
-    mkdir /var/ipcad/;
-  fi;
+	if [ -d  /var/ipcad/ ]; then
+		echo "directory /var/ipcad/ exists";
+	else
+		mkdir /var/ipcad/;
+	fi;
   
 
 	cat << 'EOF' > /usr/local/etc/ipcad.conf
@@ -406,3 +408,58 @@ EOF
 	echo '##################################################################################################'
 }
 
+#************************************
+# rstat install
+#************************************
+_install_rstat() {
+	RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
+
+	wget ${RSTAT_URL}
+
+	tar zxvf rstat-0.21.tgz ;
+	cd rstat ;
+	make install ;
+	cd ${CURRENT_DIR}
+}
+#************************************
+# MRTG install
+#************************************
+_install_mrtg() {
+	yum -y install mrtg net-snmp net-snmp-utils net-tools
+	_install_rstat
+	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+}
+
+#**********************************************************
+# FSBackup install
+#**********************************************************
+_install_fsbackup() {
+	echo "FSBACKUP START INSTALL"
+	url="http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz"
+
+	wget ${url}
+
+	tar zxvf fsbackup-1.2pl2.tar.gz;
+	cd fsbackup-1.2pl2;
+	./install.pl;
+	mkdir /usr/local/fsbackup/archive;
+
+	echo "!/usr/local/fsbackup" >> /usr/local/fsbackup/cfg_example
+	cp /usr/local/fsbackup/create_backup.sh /usr/local/fsbackup/create_backup.sh_back
+	cat /usr/local/fsbackup/create_backup.sh_back | sed 's/config_files=\".*\"/config_files=\"cfg_example\"/' > /usr/local/fsbackup/create_backup.sh
+
+	check_fsbackup_cron=`grep create_backup /etc/crontab`
+	if [ x"${check_fsbackup_cron}" = x ]; then
+		echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
+	fi;
+
+}
+#************************************
+# Post install
+#************************************
+post_install() {
+	systemctl start mariadb
+	service radiusd start
+	service flow-capture start
+}
