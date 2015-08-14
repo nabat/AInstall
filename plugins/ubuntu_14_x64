@@ -1,10 +1,10 @@
 #OS Ubuntu 14_x64
 #COMMENTS Ubuntu comments
-#M update:upgrade:_install update
+#M update:upgrade:apt-get update
 #M mysql:MySQL:_install mysql-server-5.6 mysql-client libmysqlclient-dev
 #M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
-#M freeradius:Freeradius_Server:install_freeradius
+#M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
 #M Mail:Mail_server:install_mail
 # MRTG=
@@ -32,118 +32,212 @@ PING=/sbin/ping
 #PRE INSTALL
 #******************************************************************
 pre_install () {
-  echo "hi";
+	echo "hi";
+	apt-get -y install dialog 
+  
+	CURRENT_DIR=`pwd`
 }
 
+#*******************************************
+#  Radius 
+#*******************************************
+_install_freeradius() {
+	apt-get -y install gcc 
+	apt-get -y install make
+  
+	if [ -d /usr/local/freeradius/ ]; then
+		echo "Radius exists: /usr/local/freeradius/";
+		return 0 ;
+	fi;
+  
+  PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
+  
+	for dir in ${PERL_LIB_DIRS}; do
+	if [ "${DEBUG}" = 1 ]; then
+		echo "ls ${dir}/libperl* | head -1"  
+	fi;
+
+	PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	if [ x"${PERL_LIB}" != x ]; then
+		PERL_LIB_DIR=${dir}
+		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
+		ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
+		fi;
+	fi;
+	done;
 
 
-#******************************************************************
-#INSTALL FREERADIUS
-#******************************************************************
+	if [ x"${PERL_LIB_DIR}" = x ]; then
+		echo "Perl lib not found";
+		exit;
+	else
+		echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
+	fi;
 
-install_freeradius () {
-	LIBPERLSO_VER="5.18.2"
-	ln -s /usr/lib/libperl.so.${LIBPERLSO_VER} /usr/lib/libperl.so
-	
 	FREERADIUS_VERSION="2.2.7"
-	
-	wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
-	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
-	cd freeradius-server-${FREERADIUS_VERSION}
-	
-	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=/usr/lib/ --without-openssl --with-dhcp > 1
-	make && make install
-	
-	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
-	
-	#settings freeradius
-	cp /usr/abills/misc/freeradius/v2/radiusd.conf /usr/local/freeradius/etc/raddb/radiusd.conf
-	rm /usr/local/freeradius/etc/raddb/sites-enabled/*
-	cp /usr/abills/misc/freeradius/v2/users_perl /usr/local/freeradius/etc/raddb/users
-	cp /usr/abills/misc/freeradius/v2/default_rlm_perl /usr/local/freeradius/etc/raddb/sites-enabled/abills_default
-	cp /usr/abills/misc/freeradius/v2/perl /usr/local/freeradius/etc/raddb/modules/
-	
-	
-	
-	
-	#add user
-	groupadd freerad
-	useradd -g freerad -s /bash/bash freerad
-	
-	chown -R freerad:freerad /usr/local/freeradius/etc/raddb
-	mkdir /var/run/radiusd/
-	chown -R freerad:freerad /var/run/radiusd/
-	
-(cat <<EOF
-#!/bin/sh
-# Start/stop the FreeRADIUS daemon.
+	RADIUS_SERVER_USER="freerad"
+ 
+	wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
+	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
+		echo "Can\'t download freeradius. PLease download and install manual";
+		exit;
+	fi;
+
+	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+
+	cd freeradius-server-${FREERADIUS_VERSION}
+	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+	echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
+	make && make install
+
+	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+
+	#Add user
+	groupadd ${RADIUS_SERVER_USER}
+	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
+	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
+	echo "_________________________________________________________________"
+	echo " RADIUS SCRIPT AUTOSTART"
+	echo "_________________________________________________________________"
+	cat << 'EOF' > /etc/init.d/radiusd
+#!/bin/sh
+#
+# radiusd	Start the radius daemon.
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+#
+#    Copyright (C) 2001-2008 The FreeRADIUS Project http://www.freeradius.org
+#   chkconfig: - 58 74
+#   description: radiusd is service access provider Daemon.
 ### BEGIN INIT INFO
-# Provides:          freeradius
-# Required-Start:    $remote_fs $network $syslog
-# Should-Start:      $time mysql slapd postgresql samba krb5-kdc
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Radius Daemon
-# Description:       Extensible, configurable radius daemon
+# Provides: radiusd
+# Should-Start: radiusd
+# Should-Stop: radiusd
+# Short-Description: start and stop radiusd
+# Description: radiusd is access provider service Daemon.
 ### END INIT INFO
 
-set -e
+prefix=/usr/local/freeradius
+exec_prefix=${prefix}
+sbindir=${exec_prefix}/sbin
+localstatedir=/var
+logdir=${localstatedir}/log/radius
+rundir=/usr/local/freeradius/var/run/radiusd/
+sysconfdir=${prefix}/etc
+#
+#  If you have issues with OpenSSL, uncomment these next lines.
+#
+#  Something similar may work for MySQL, and you may also
+#  have to LD_PRELOAD libz.so
+#
+#LD_LIBRARY_PATH=
+#LD_RUN_PATH=:
+#LD_PRELOAD=libcrypto.so
+export LD_LIBRARY_PATH LD_RUN_PATH LD_PRELOAD
 
-. /lib/lsb/init-functions
+RADIUSD=$sbindir/radiusd
+RADDBDIR=${sysconfdir}/raddb
+RADIUS_USER='freerad'
+DESC="FreeRADIUS"
 
-PROG="freeradius"
-PROGRAM="/usr/sbin/radiusd"
-PIDFILE="/var/run/radiusd/radiusd.pid"
-DESCR="FreeRADIUS daemon"
+#
+#  See 'man radiusd' for details on command-line options.
+#
+ARGS=""
 
-test -f $PROGRAM || exit 0
+test -f $RADIUSD || exit 0
+test -f $RADDBDIR/radiusd.conf || exit 0
 
-# /var/run may be a tmpfs
-if [ ! -d /var/run/radiusd ]; then
- mkdir -p /var/run/radiusd
- chown freerad:freerad /var/run/radiusd
+if [ ! -d $rundir ] ; then
+    mkdir $rundir
+    chown ${RADIUS_USER}:${RADIUS_USER} $rundir
+    chmod 775 $rundir
 fi
 
-export PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
+if [ ! -d $logdir ] ; then
+    mkdir $logdir
+    chown ${RADIUS_USER}:${RADIUS_USER} $logdir
+    chmod 770 $logdir
+    chmod g+s $logdir
+fi
 
-ret=0
+if [ ! -f $logdir/radius.log ]; then
+        touch $logdir/radius.log
+fi
+
+chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
+chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
+chown -R ${RADIUS_USER}:${RADIUS_USER} ${rundir}
+chmod 660 $logdir/radius.log
 
 case "$1" in
-        start)
-                log_daemon_msg "Starting $DESCR" "$PROG"
-                start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $PROGRAM || ret=$?
-                log_end_msg $ret
-                exit $ret
-                ;;
-        stop)
-                log_daemon_msg "Stopping $DESCR" "$PROG"
-                if [ -f "$PIDFILE" ] ; then
-                  start-stop-daemon --stop --retry=TERM/30/KILL/5 --quiet --pidfile $PIDFILE || ret=$?
-                  log_end_msg $ret
-                else
-                  log_action_cont_msg "$PIDFILE not found"
-                  log_end_msg 0
-                fi
-                ;;
-        restart|force-reload)
-                $0 stop
-                $0 start
-                ;;
-        *)
-                echo "Usage: $0 start|stop|restart|force-reload"
-                exit 1
-                ;;
+  start)
+	echo -n "Starting $DESC:"
+	$RADIUSD $ARGS
+	echo "radiusd"
+	;;
+  stop)
+	[ -z "$2" ] && echo -n "Stopping $DESC: "
+        [ -f $rundir/radiusd.pid ] && kill -TERM `cat $rundir/radiusd.pid`
+	[ -z "$2" ] && echo "radiusd."
+	;;
+  reload|force-reload)
+	echo "Reloading $DESC configuration files."
+	[ -f $rundir/radiusd.pid ] && kill -HUP `cat $rundir/radiusd.pid`
+	;;
+  restart)
+	sh $0 stop quiet
+	sleep 3
+	sh $0 start
+	;;
+  check)
+	$RADIUSD -CX $ARGS
+	exit $?
+	;;
+  *)
+        echo "Usage: /etc/init.d/$RADIUS {start|stop|reload|restart|check}"
+        exit 1
+        stop
+        ;;
+  status)
+        status \$prog
+        ;;
+  restart|force-reload)
+        stop
+        start
+        ;;
+  try-restart|condrestart)
+        if status \$prog > /dev/null; then
+            stop
+            start
+        fi
+        ;;
+  reload)
+        exit 3
+        ;;
+  *)
+        echo \$"Usage: \$0 {start|stop|status|restart|try-restart|force-reload}"
+        exit 2
 esac
 
-exit 0
-
 EOF
-) > /etc/init.d/freeradius
-	
-	chmod +x /etc/init.d/freeradius
-	update-rc.d freeradius defaults
+
+	chmod +x /etc/init.d/radiusd
+	update-rc.d radiusd defaults
+	cd ${CURRENT_DIR}
 }
 
 
