@@ -5,9 +5,9 @@
 #M apache:apache:_install_httpd
 #M perl_modules:Perl_modules:_install_perl_modules
 #M freeradius:Freeradius_Server:_install_freeradius
-#M DHCP:Dhcp_server:_install_dhcp
-#M IPN:Flow-tools,Ipcad:_install_ipn
-#M MRTG:Mrtg,Rstat:_install_mrtg
+#M dhcp:Dhcp_server:_install_dhcp
+#M flow-tools:Flow-tools,Ipcad:_install_ipn
+#M mrtg:Mrtg,Rstat:_install_mrtg
 #M FSbackup:FSbackup:_install_fsbackup
 #dM Mail:Mail_server:install_mail
 # MRTG=
@@ -427,8 +427,8 @@ _install_rstat() {
 _install_mrtg() {
 	yum -y install mrtg net-snmp net-snmp-utils net-tools
 	_install_rstat
-	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
-	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+	#indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+	#echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
 }
 
 #**********************************************************
