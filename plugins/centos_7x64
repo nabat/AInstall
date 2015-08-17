@@ -8,6 +8,7 @@
 #M dhcp:Dhcp_server:_install_dhcp
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
 #M mrtg:Mrtg,Rstat:_install_mrtg
+#M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
 #M FSbackup:FSbackup:_install_fsbackup
 #dM Mail:Mail_server:install_mail
 # MRTG=
@@ -19,7 +20,7 @@
 
 WEB_SERVER_USER=apache
 APACHE_CONF_DIR=/etc/httpd/conf.d
-RESTART_MYSQL=/etc/init.d/mysqld
+RESTART_MYSQL=/usr/libexec/mysqld
 RESTART_RADIUS=/etc/init.d/radiusd
 RESTART_APACHE=/etc/init.d/httpd
 RESTART_DHCP=/etc/init.d/dhcpd
@@ -29,7 +30,7 @@ PING=/bin/ping
 #  Pre install
 #*******************************************
 pre_install() {
-  yum -y install wget dialog tmux bash nano gcc;
+  yum -y install wget	 tmux bash nano gcc;
   _install_epel;
   CURRENT_DIR=`pwd`
 }
@@ -427,8 +428,8 @@ _install_rstat() {
 _install_mrtg() {
 	yum -y install mrtg net-snmp net-snmp-utils net-tools
 	_install_rstat
-	#indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
-	#echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
 }
 
 #**********************************************************
@@ -453,8 +454,224 @@ _install_fsbackup() {
 	if [ x"${check_fsbackup_cron}" = x ]; then
 		echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
 	fi;
+	
+	cd ${CURRENT_DIR}
+}
+
+#**********************************************************
+# ACCEL-PPPoE install
+#**********************************************************
+_install_accel_pppoe() {
+
+  yum -y install kernel-headers kernel-devel bzip2 cmake
+
+  echo
+  echo "#############################################"
+  echo "##  Installing  ACCEL-PPP ${ACCEL_PPPP_VERSION} "
+  echo "#############################################"
+  echo
+  
+  
+  wget http://sourceforge.net/projects/accel-ppp/files/accel-ppp-1.7.4.tar.bz2
+  tar -xjf accel-ppp-1.7.4.tar.bz2
+  cd accel-ppp-1.7.4
+  mkdir build
+  cd build
+  cmake -DBUILD_DRIVER=FALSE -DRADIUS=TRUE -DKDIR=/usr/src/kernels/`uname -r` -DCMAKE_INSTALL_PREFIX=/usr/local ..
+  make
+  make install
+  
+cat << 'EOF1' > /etc/accel-ppp.conf
+[modules]
+#path=/usr/local/lib/accel-ppp
+log_file
+#log_tcp
+#log_pgsql
+pptp
+pppoe
+#l2tp
+auth_mschap_v2
+#auth_mschap_v1
+#auth_chap_md5
+#auth_pap
+radius
+#ippool
+sigchld
+pppd_compat
+shaper_tbf
+#chap-secrets
+
+[core]
+log-error=/var/log/accel-ppp/core.log
+thread-count=4
+
+[ppp]
+verbose=1
+min-mtu=1000
+mtu=1400
+mru=1400
+#ccp=0
+#sid-case=upper
+#check-ip=0
+#single-session=replace
+#mppe=require
+
+[lcp]
+echo-interval=30
+echo-failure=3
+
+[pptp]
+echo-interval=30
+verbose=1
+
+[pppoe]
+# Интерфейсы на которых запущен pppoe сервер ( должны быть соответственно подняты интерфейсы)
+interface=eth1
+interface=vlan2
+interface=vlan3
+interface=vlan4
+#ac-name=xxx
+#service-name=yyy
+#pado-delay=0
+#pado-delay=0,100:100,200:200,-1:500
+#ifname-in-sid=called-sid
+#tr101=1
+verbose=1
+
+#[l2tp]
+#dictionary=/usr/local/share/accel-ppp/l2tp/dictionary
+#hello-interval=60
+#timeout=60
+#rtimeout=5
+#retransmit=5
+#host-name=accel-ppp
+#verbose=1
+
+[dns]
+dns1=10.0.0.10
+#dns2=172.16.1.1
+
+[radius]
+dictionary=/usr/local/share/accel-ppp/radius/dictionary
+nas-identifier=accel-ppp
+nas-ip-address=127.0.0.1
+gw-ip-address=10.0.0.10
+auth-server=127.0.0.1:1812,secretpass
+acct-server=127.0.0.1:1813,secretpass
+dae-server=127.0.0.1:3799,secretpass
+verbose=1
+#timeout=3
+#max-try=3
+#acct-timeout=120
+#acct-delay-time=0
+
+[client-ip-range]
+disable
+#10.0.0.0/8 # Указать диапазоны раздаваемые клиентам в (по DHCP или вручную). 
+         # ВАЖНО: они не должны пересекатся с пулами PPPOE или PPTP сервера доступа.
+
+#[ip-pool]
+#gw-ip-address=192.168.0.1
+#192.168.0.2-255
+#192.168.1.1-255
+#192.168.2.1-255
+#192.168.3.1-255
+#192.168.4.0/24
+
+[log]
+log-file=/var/log/accel-ppp/accel-ppp.log
+log-emerg=/var/log/accel-ppp/emerg.log
+log-fail-file=/var/log/accel-ppp/auth-fail.log
+#log-debug=/dev/stdout
+#log-tcp=127.0.0.1:3000
+copy=1
+#color=1
+#per-user-dir=per_user
+#per-session-dir=per_session
+#per-session=1
+level=3
+#log-tcp=127.0.0.1:3000
+
+#[log-pgsql]
+#conninfo=user=log
+#log-table=log
+
+[pppd-compat]
+#ip-pre-up=/etc/ppp/ip-pre-up
+#ip-up=/etc/ppp/ip-up
+#ip-down=/etc/ppp/ip-down
+#ip-change=/etc/ppp/ip-change
+radattr-prefix=/var/run/radattr
+verbose=1
+
+#[chap-secrets]
+#gw-ip-address=192.168.100.1
+#chap-secrets=/etc/ppp/chap-secrets
+
+[tbf]
+#attr=Filter-Id
+#down-burst-factor=0.1
+#up-burst-factor=1.0
+#latency=50
+attr-down=PPPD-Downstream-Speed-Limit
+attr-up=PPPD-Upstream-Speed-Limit
+
+
+[cli]
+telnet=127.0.0.1:2000
+#tcp=127.0.0.1:2001  
+EOF1
+
+cat << 'EOF2' >> /usr/local/share/accel-ppp/radius/dictionary
+# Limit session traffic
+ATTRIBUTE Session-Octets-Limit 227 integer
+# What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
+ATTRIBUTE Octets-Direction 228 integer
+# Connection Speed Limit
+ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
+ATTRIBUTE Acct-Interim-Interval 85 integer 
+ATTRIBUTE Acct-Input-Gigawords    52      integer
+ATTRIBUTE Acct-Output-Gigawords   53      integer 
+EOF2
+  
+modprobe -r ip_gre
+
+echo 'blacklist ip_gre' >> /etc/modprobe.d/blacklist.conf
+
+echo 'pptp' >> /etc/modules
+echo 'pppoe' >> /etc/modules
+
+cat << 'EOF3' >> /usr/local/freeradius/etc/raddb/dictionary
+# Limit session traffic
+ATTRIBUTE Session-Octets-Limit 227 integer
+# What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
+ATTRIBUTE Octets-Direction 228 integer
+# Connection Speed Limit
+ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
+ATTRIBUTE Acct-Interim-Interval 85 integer 
+ATTRIBUTE Acct-Input-Gigawords    52      integer
+EOF3
+
+accel-pppd  -p 'var/run/accel.pid' -c '/etc/accel-ppp.conf'
+
+cd ${CURRENT_DIR}
 
 }
+
 #************************************
 # Post install
 #************************************
