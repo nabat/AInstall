@@ -250,11 +250,11 @@ _install_ipn() {
 	
 	mkdir -p /usr/abills/var/log/ipn/
 	
-	echo  'OPTIONS="-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996"' > /etc/sysconfig/flow-capture
+	echo "-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996" > /etc/flow-tools/flow-capture.conf
 
 	
-	chkconfig --add flow-capture
-	chkconfig flow-capture on
+	pdate-rc.d flow-capture defaults
+	update-rc.d flow-capture enable
 	echo '##################################################################################################'
 	echo 'FLOWTOOLS INSTALLED ##################################################################################################'
 	echo '##################################################################################################'
@@ -613,9 +613,76 @@ ATTRIBUTE Acct-Interim-Interval 85 integer
 ATTRIBUTE Acct-Input-Gigawords    52      integer
 EOF3
 
+
+	touch /etc/init.d/accel-ppp
+	chmod +x /etc/init.d/accel-ppp
+	
+	cat << 'EOF4' >> /etc/init.d/accel-ppp
+	#!/bin/sh
+# /etc/init.d/accel-pppd: set up the accel-ppp server
+### BEGIN INIT INFO
+# Provides:          accel-ppp
+# Required-Start:    $networking
+# Required-Stop:     $networking
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO
+
+set -e
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/sbin;
+ACCEL_PPTPD=`which accel-pppd`
+. /lib/lsb/init-functions
+
+if test -f /etc/default/accel-ppp; then
+    . /etc/default/accel-ppp
+fi
+
+if [ -z $ACCEL_PPPTD_OPTS ]; then
+  ACCEL_PPTPD_OPTS="-c /etc/accel-ppp.conf"
+fi
+
+case "$1" in
+  start)
+        log_daemon_msg "Starting accel-ppp server" "accel-pppd"
+        if start-stop-daemon --start --quiet --oknodo --exec $ACCEL_PPTPD -- -d -p /var/run/accel-pppd.pid $ACCEL_PPTPD_OPTS; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+  ;;
+  restart)
+        log_daemon_msg "Restarting accel-ppp server" "accel-pppd"
+        start-stop-daemon --stop --quiet --oknodo --retry 180 --pidfile /var/run/accel-pppd.pid
+        if start-stop-daemon --start --quiet --oknodo --exec $ACCEL_PPTPD -- -d -p /var/run/accel-pppd.pid $ACCEL_PPTPD_OPTS; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+  ;;
+
+  stop)
+        log_daemon_msg "Stopping accel-ppp server" "accel-pppd"
+        start-stop-daemon --stop --quiet --oknodo --retry 180 --pidfile /var/run/accel-pppd.pid
+        log_end_msg 0
+  ;;
+
+  status)
+    do_status
+  ;;
+  *)
+    log_success_msg "Usage: /etc/init.d/accel-ppp {start|stop|status|restart}"
+    exit 1
+    ;;
+esac
+
+exit 0 
+EOF4
+	update-rc.d accel-ppp defaults
+	update-rc.d accel-ppp enable
 #accel-pppd  -p 'var/run/accel.pid' -c '/etc/accel-ppp.conf'
 
-cd ${CURRENT_DIR}
+	cd ${CURRENT_DIR}
 
 }
 
