@@ -2440,6 +2440,27 @@ fetch_free_distro () {
   tar zxvf abills-0.58_rc3.tgz -C /usr/
 }
 
+start_session() {
+
+  if [ -e `which tmux` ];then
+      echo "INFO: Found tmux";
+  else
+      echo "ERROR: tmux is not installed";
+      exit 1;
+  fi;
+
+  SESSION_NAME='INSTALL';
+
+  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} './install.sh tmuxed'
+
+  echo "Script ended"
+  sleep 2;
+}
+
+if [ ! ""$1 == "tmuxed" ];then
+  start_session;
+  exit 0;
+fi;
 
 # Installation proccess
 # Proccess command-line options
