@@ -13,6 +13,14 @@ Plugin Format
 <table>
   <tr>
     <td>
+      <b>Section</b>
+    </td>
+    <td>
+      <b>Example</b>
+    </td>
+  </tr>
+  <tr>
+    <td>
       #OS OS_NAME OS_VERSION
     </td>
     <td>
