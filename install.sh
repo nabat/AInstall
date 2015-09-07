@@ -2506,7 +2506,7 @@ while [ "${OS_NAME}" = "" ]; do
   echo "============Select plugin:============ "
   for plugin in ${PLUGINS_DIR}/*; do
     echo 
-    echo " "`cat ${plugin} | grep -e '#OS'`":         ${plugin}"
+    echo " "`cat ${plugin} | grep -e '#OS'`":         ${plugin} " | sed -e 's/plugins[/]/''/';
   done;
  
   #echo "Use plugin [enter for default plugin]: ";

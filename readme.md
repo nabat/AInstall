@@ -1,64 +1,87 @@
-###############################################
+
 Autoinstaller for ABillS based on plugin system
+===============================================
+
 ver. 0.1
 Feel free to make bugreports
 
-Plugins are structured as plugins/DistributiveVersionArch
+Plugins are structured as plugins/Distributive_VersionArch
 
-================================================
 Plugin Format
-================================================
-<code>
-#TAG_NAME action
+-------------
 
-OS tag OS_NAME OS_VERSION
-  #OS freebsd 10
+<table>
+  <tr>
+    <td>
+      #OS OS_NAME OS_VERSION
+    </td>
+    <td>
+      #OS freebsd 10
+    </td>
+  </tr>
+  <tr>
+    <td>
+      #COMMENTS comments for plugin
+    </td>
+    <td>
+      #COMMENTS CentOS comment
+    </td>
+  </tr>
+  <tr>
+    <td>
+      #M [module_name]:[module describe]:[command]
+    </td>
+    <td>
+      #M mysql:MySQL:_install_mysql
+    </td>
+  </tr>
 
-COMMENTS tag coments for plugin
+</table>
 
-  #COMMENTS [Freebsd comments]
+As command you can use shell command like 
+  <b>pkg install www</b> 
+or shell function:
+  <b>shell_function</b>
 
-#M module configure tag
-  #module_tag [item_name]:[item describe]:[command]
+Inside plugin you can use these functions to execute custom commands.
+<table>
+  <tr>
+    <td>
+      pre_install()
+    </td>
+    <td>
+      executes before installing modules
+    </td>
+  </tr>
+  <tr>
+    <td>
+      post_install()
+    </td>
+    <td>
+       executes after full installation (before autoconf)
+    </td>
+  </tr>  
+</table> 
 
-as command you can use shell command like 
-  pkg install www 
-or shell function
-  shell_function
 
-pre_install  execute function before install modules
+Plugin execution
+----------------
+<table>
+  <tr>
+    Pre install 
+  </tr>
+  <tr>
+    install programs
+  </tr>
+  <tr>
+    Post install
+  </tr>
+  <tr>
+    misc/autoconf 
+  </tr>
+  <tr>
+    Final result
+  </tr>
+</table>
 
-post_install execute function after full installation
-
-
-#---------------#
-#               #
-# Pre install   #
-#               #
-#---------------#
-        |
-#---------------#
-#               #
-#   install     #
-#   programs    #
-#---------------#
-        |
-#---------------#
-#               #
-# Post install  #
-#               #
-#---------------#
-        |
-#---------------#
-# Configuration #
-#      and      #
-#    startup    #
-#    Section    #
-# misc/autoconf #
-#---------------#
-       |
-#---------------#
-#               # 
-# Final result  #
-#---------------#
-</code>
+Installer uses autoconf for module configuration and defining system startup.
