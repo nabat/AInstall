@@ -4,11 +4,11 @@ ver. 0.1
 Feel free to make bugreports
 
 Plugins are structured as plugins/DistributiveVersionArch
-<code>
+
 ================================================
 Plugin Format
 ================================================
-
+<code>
 #TAG_NAME action
 
 OS tag OS_NAME OS_VERSION
@@ -61,5 +61,4 @@ post_install execute function after full installation
 #               # 
 # Final result  #
 #---------------#
-
 </code>
