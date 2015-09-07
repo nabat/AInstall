@@ -79,16 +79,16 @@ Plugin execution
     Pre install 
   </td></tr>
   <tr><td>
-    install programs
+    Install programs
   </td></tr>
   <tr><td>
     Post install
   </td></tr>
   <tr><td>
-    misc/autoconf 
+    Run misc/autoconf 
   </td></tr>
   <tr><td>
-    Final result
+    Show result
   </td></tr>
 </table>
 
