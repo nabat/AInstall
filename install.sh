@@ -2442,7 +2442,7 @@ fetch_free_distro () {
 
 start_session() {
 
-  command -v tmux >/dev/null 2>&1 || { echo >&2 "Error: tmux is not installed.  Trying to install."; _install tmux ;
+  command -v tmux >/dev/null 2>&1 || { echo >&2 "Error: tmux is not installed.  Trying to install."; _install tmux };
 
   SESSION_NAME='INSTALL';
 
