@@ -2442,7 +2442,7 @@ fetch_free_distro () {
 
 start_session() {
 
-  command -v tmux >/dev/null 2>&1 || ( echo >&2 "tmux it's not installed."; return 1 )
+  command -v tmux >/dev/null 2>&1 || ( echo >&2 "tmux is not installed."; return 1 )
 
   SESSION_NAME='INSTALL';
 
@@ -2451,13 +2451,6 @@ start_session() {
   echo "Script ended"
   sleep 2;
 }
-
-if [ ! ""$1 == "tmuxed" ];then
-  start_session;
-  exit 0;
-fi;
-
-
 
 # Installation proccess
 # Proccess command-line options
