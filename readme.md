@@ -75,21 +75,21 @@ Inside plugin you can use these functions to execute custom commands.
 Plugin execution
 ----------------
 <table>
-  <tr>
+  <tr><td>
     Pre install 
-  </tr>
-  <tr>
+  </td></tr>
+  <tr><td>
     install programs
-  </tr>
-  <tr>
+  </td></tr>
+  <tr><td>
     Post install
-  </tr>
-  <tr>
+  </td></tr>
+  <tr><td>
     misc/autoconf 
-  </tr>
-  <tr>
+  </td></tr>
+  <tr><td>
     Final result
-  </tr>
+  </td></tr>
 </table>
 
 Installer uses autoconf for module configuration and defining system startup.
