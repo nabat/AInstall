@@ -2440,6 +2440,24 @@ fetch_free_distro () {
   tar zxvf abills-0.58_rc3.tgz -C /usr/
 }
 
+start_session() {
+
+  command -v tmux >/dev/null 2>&1 || ( echo >&2 "tmux it's not installed."; return 1 )
+
+  SESSION_NAME='INSTALL';
+
+  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} './install.sh tmuxed'
+
+  echo "Script ended"
+  sleep 2;
+}
+
+if [ ! ""$1 == "tmuxed" ];then
+  start_session;
+  exit 0;
+fi;
+
+
 
 # Installation proccess
 # Proccess command-line options
@@ -2483,6 +2501,10 @@ for _switch ; do
                 exit;
                 shift; shift
                 ;;
+        -t)     start_session
+                exit;
+                shift; shift
+                ;;
         esac
 done
 
@@ -2501,12 +2523,14 @@ while [ "${OS_NAME}" = "" ]; do
   get_os
   mk_resolve
 
+  start_tmux_session
+
   #Show plugins
   echo "OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM}"
   echo "============Select plugin:============ "
   for plugin in ${PLUGINS_DIR}/*; do
-    echo 
     echo " "`cat ${plugin} | grep -e '#OS'`":         ${plugin} " | sed -e 's/plugins[/]/''/';
+    echo
   done;
  
   #echo "Use plugin [enter for default plugin]: ";
