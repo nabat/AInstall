@@ -173,7 +173,7 @@ exec_prefix=${prefix}
 sbindir=${exec_prefix}/sbin
 localstatedir=/var
 logdir=${localstatedir}/log/radius
-rundir=/usr/local/freeradius/var/run/radiusd/
+rundir=/var/run/radiusd/
 sysconfdir=${prefix}/etc
 #
 #  If you have issues with OpenSSL, uncomment these next lines.
@@ -377,17 +377,17 @@ _install_ipn() {
   
 
 	cat << 'EOF' > /usr/local/etc/ipcad.conf
-# Интерфейсы для сбора статистики
+# Г€Г­ГІГҐГ°ГґГҐГ©Г±Г» Г¤Г«Гї Г±ГЎГ®Г°Г  Г±ГІГ ГІГЁГ±ГІГЁГЄГЁ
 interface eth0;
-# детализация по портам 
+# Г¤ГҐГІГ Г«ГЁГ§Г Г¶ГЁГї ГЇГ® ГЇГ®Г°ГІГ Г¬ 
 #capture-ports enable;
 
-# Агрегировать порты, уменьшает размер базы детализации 
+# ГЂГЈГ°ГҐГЈГЁГ°Г®ГўГ ГІГј ГЇГ®Г°ГІГ», ГіГ¬ГҐГ­ГјГёГ ГҐГІ Г°Г Г§Г¬ГҐГ° ГЎГ Г§Г» Г¤ГҐГІГ Г«ГЁГ§Г Г¶ГЁГЁ 
 #aggregate 1024-65535    into 65535;     /* Aggregate wildly */
 #aggregate 3128-3128     into 3128;      /* Protect these ports */
 #aggregate 150-1023      into 1023;      /* General low range */
 
-# Експортирование статистики на адрес 127.0.0.1 порт 9996
+# Г…ГЄГ±ГЇГ®Г°ГІГЁГ°Г®ГўГ Г­ГЁГҐ Г±ГІГ ГІГЁГ±ГІГЁГЄГЁ Г­Г  Г Г¤Г°ГҐГ± 127.0.0.1 ГЇГ®Г°ГІ 9996
 netflow export destination 127.0.0.1 9996;
 netflow export version 5;       # NetFlow export format version {1|5}
 netflow timeout active 30;      # Timeout when flow is active, in minutes
@@ -525,7 +525,7 @@ echo-interval=30
 verbose=1
 
 [pppoe]
-# €нтерфейсы на которых запущен pppoe сервер ( должны быть соответственно поднЯты интерфейсы)
+# В€Г­ГІГҐГ°ГґГҐГ©Г±Г» Г­Г  ГЄГ®ГІГ®Г°Г»Гµ Г§Г ГЇГіГ№ГҐГ­ pppoe Г±ГҐГ°ГўГҐГ° ( Г¤Г®Г«Г¦Г­Г» ГЎГ»ГІГј Г±Г®Г®ГІГўГҐГІГ±ГІГўГҐГ­Г­Г® ГЇГ®Г¤Г­ГџГІГ» ГЁГ­ГІГҐГ°ГґГҐГ©Г±Г»)
 interface=eth1
 interface=vlan2
 interface=vlan3
@@ -567,8 +567,8 @@ verbose=1
 
 [client-ip-range]
 disable
-#10.0.0.0/8 # “казать диапазоны раздаваемые клиентам в (по DHCP или вручную). 
-         # ‚Ђ†ЌЋ: они не должны пересекатсЯ с пулами PPPOE или PPTP сервера доступа.
+#10.0.0.0/8 # В“ГЄГ Г§Г ГІГј Г¤ГЁГ ГЇГ Г§Г®Г­Г» Г°Г Г§Г¤Г ГўГ ГҐГ¬Г»ГҐ ГЄГ«ГЁГҐГ­ГІГ Г¬ Гў (ГЇГ® DHCP ГЁГ«ГЁ ГўГ°ГіГ·Г­ГіГѕ). 
+         # В‚ВЂВ†ВЌВЋ: Г®Г­ГЁ Г­ГҐ Г¤Г®Г«Г¦Г­Г» ГЇГҐГ°ГҐГ±ГҐГЄГ ГІГ±Гџ Г± ГЇГіГ«Г Г¬ГЁ PPPOE ГЁГ«ГЁ PPTP Г±ГҐГ°ГўГҐГ°Г  Г¤Г®Г±ГІГіГЇГ .
 
 #[ip-pool]
 #gw-ip-address=192.168.0.1
