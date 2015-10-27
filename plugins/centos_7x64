@@ -114,7 +114,7 @@ _install_freeradius() {
 		echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
 	fi;
 
-	FREERADIUS_VERSION="2.2.7"
+	FREERADIUS_VERSION="2.2.9"
 	RADIUS_SERVER_USER="freerad"
  
 	wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
