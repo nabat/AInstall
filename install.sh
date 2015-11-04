@@ -241,9 +241,8 @@ mk_time () {
 # uninstall
 #**********************************************************
 _uninstall () {
-  echo -n  "Uninstall system? (y/n): "
+  read -p  "Uninstall system? (y/n): " UNINSTALL;
 
-  read UNINSTALL=
   if [ x"${UNINSTALL}" != xy ]; then
     echo "reset";
     exit;
@@ -772,8 +771,7 @@ fi;
 #**********************************************************
 install_sudo() {
 
-echo -n "Remote IPN server [y/n]: "
-read LOCAL_IPN=
+read -p "Remote IPN server [y/n]: " LOCAL_IPN ;
 
 if [ x${LOCAL_IPN} = xy ]; then
   LOCAL_IPN=1;
@@ -921,8 +919,7 @@ echo " ${KERNEL_FILE}                                      "
 echo "====================================================="
 
 
-echo -n "Update source (y/n)?: "
-read UPDATE_SRC=
+read -p "Update source (y/n)?: " UPDATE_SRC;
 
 if [ x"${UPDATE_SRC}" = xy ]; then
   #System source update
@@ -941,8 +938,7 @@ if [ ! -d /usr/src/sys ]; then
   return 0;
 fi;
 
-echo -n "Build kernel (y/n)?: "
-read KERNEL=
+read -p "Build kernel (y/n)?: " KERNEL;
 
 if [ x"${KERNEL}" = xy ]; then
 
@@ -972,8 +968,7 @@ options         HZ=1000
 
     make buildkernel KERNCONF=${KERNEL_FILE}
 
-    echo -n "Install kernel ${KERNEL_FILE}? (y/n): "
-    read INSTALL_KERNEL=
+    read -p "Install kernel ${KERNEL_FILE}? (y/n): " INSTALL_KERNEL;
     if [ x${INSTALL_KERNEL} = xy ]; then
       make installkernel KERNCONF=${KERNEL_FILE}
     fi;
@@ -1238,7 +1233,7 @@ if [ "${RESULT}" = "" ]; then
   echo 'WITHOUT_GUI=yes' >> /etc/make.conf
 fi;
 
-if [ x"${BENCHMARTK}" != x ]; then
+if [ x"${BENCHMARK}" != x ]; then
   mk_sysbench;
   exit;
 fi;
@@ -1470,8 +1465,7 @@ for name in ${RESULT}; do
     APACHE_CONFIG='/usr/local/etc/apache22/httpd.conf'
     check_php_conf=`grep 'x-httpd-php' ${APACHE_CONFIG}`
     if [ w${check_php_conf} = w ]; then
-      echo -n "Can\'t find php in apache config add it? (y/n): "
-      read PHP_CONF=
+      read -p "Can\'t find php in apache config add it? (y/n): " PHP_CONF;
       if [ w${PHP_CONF} = wy ]; then
         echo "AddType application/x-httpd-php .php" >> ${APACHE_CONFIG}
       fi;
@@ -1572,7 +1566,7 @@ if [ "${RESUL}" = "" ]; then
   echo 'WITHOUT_GUI=yes' >> /etc/make.conf
 fi;
 
-if [ x"${BENCHMARTK}" != x ]; then
+if [ x"${BENCHMARK}" != x ]; then
   mk_sysbench;
   exit;
 fi;
@@ -1725,8 +1719,7 @@ for name in ${RESULT}; do
     APACHE_CONFIG='/usr/local/etc/apache22/httpd.conf'
     check_php_conf=`grep 'x-httpd-php' ${APACHE_CONFIG}`
     if [ w${check_php_conf} = w ]; then
-      echo -n "Can\'t find php in apache config add it? (y/n): "
-      read PHP_CONF=
+      read -p "Can\'t find php in apache config add it? (y/n): " PHP_CONF;
       if [ w${PHP_CONF} = wy ]; then
         echo "AddType application/x-httpd-php .php" >> ${APACHE_CONFIG}
       fi;
@@ -1920,11 +1913,11 @@ case "${OS_NAME}" in
     RESTART_APACHE=/etc/init.d/apache2
 
     if [ -f /etc/apt/apt.conf ]; then 
-      if [ x`grep 'APT::Cache-Limit' /etc/apt/apt.conf` = x]; then
+      if [ x`grep 'APT::Cache-Limit' /etc/apt/apt.conf` = x ]; then
         echo 'APT::Cache-Limit "50000000";' >> /etc/apt/apt.conf
       fi;
   elif [ -f /etc/apt/apt.conf.d ]; then
-      if [ x`grep 'APT::Cache-Limit' /etc/apt/apt.conf.d` = x]; then
+      if [ x`grep 'APT::Cache-Limit' /etc/apt/apt.conf.d` = x ]; then
         echo 'APT::Cache-Limit "50000000";' >> /etc/apt/apt.conf.d
       fi;    
     fi;
@@ -2392,8 +2385,7 @@ for name in $RESULT; do
   # Echo 
   if [ "${DEBUG}" != "" ]; then
      echo "Finished: ${name}";
-     echo "Contibue install. [y/n]";
-     read CONTINUE=
+     read -p "Contibue install. [y/n]" CONTINUE;
   fi;
   
 done
@@ -2440,7 +2432,7 @@ fetch_free_distro () {
   tar zxvf abills-0.58_rc3.tgz -C /usr/
 }
 
-start_session() {
+start_tmux_session() {
 
   command -v tmux >/dev/null 2>&1 || ( echo >&2 "tmux is not installed."; return 1 )
 
@@ -2467,7 +2459,7 @@ for _switch ; do
         -f)     FETCH_FREE_DISTR=1;
                 shift;
                 ;;
-        -b)     BENCHMARTK=1;
+        -b)     BENCHMARK=1;
                 shift;
                 ;;
         -r)     REBUILD=1
