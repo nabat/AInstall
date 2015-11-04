@@ -5,7 +5,7 @@
 #
 #**************************************************************
 
-VERSION=4.94
+VERSION=5.0
 
 
 # LIB FUNCTION 
@@ -2421,7 +2421,7 @@ fi;
 fetch_free_distro () {
   echo "fetching distro";
 
-  URL="http://downloads.sourceforge.net/project/abills/abills/0.58/abills-0.58_rc3.tgz"
+  URL="http://downloads.sourceforge.net/project/abills/abills/0.58/abills-0.58.tgz"
 
   if [ "${OS}" = "Linux" ]; then
     wget -q "${URL}";
@@ -2429,7 +2429,7 @@ fetch_free_distro () {
     fetch -q "${URL}";
   fi;
   
-  tar zxvf abills-0.58_rc3.tgz -C /usr/
+  tar zxvf abills-0.58.tgz -C /usr/
 }
 
 start_tmux_session() {
@@ -2542,6 +2542,7 @@ while [ "${OS_NAME}" = "" ]; do
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
+    fetch_free_distro;
     plugin_check ${USE_PLUGIN}
   elif [ "${OS}" = "Linux" ]; then
     linux_build
