@@ -1,4 +1,4 @@
-#!usr/bin/env bash
+#!/usr/bin/env bash
 # ABillS Auto Programs Building
 #
 # Created By ~AsmodeuS~ 2010-2015
@@ -2438,7 +2438,7 @@ start_tmux_session() {
 
   SESSION_NAME='INSTALL';
 
-  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} './install.sh tmuxed'
+  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} './install.sh --in_tmux'
 
   echo "Script ended"
   sleep 2;
@@ -2486,10 +2486,13 @@ for _switch ; do
                 exit;
                 shift; shift
                 ;;
-        -t)     start_session
+        -t)     start_tmux_session
                 exit;
                 shift; shift
                 ;;
+        --in_tmux)  IN_TMUX="true";
+                    shift; shift
+                    ;;
         esac
 done
 
@@ -2508,21 +2511,34 @@ while [ "${OS_NAME}" = "" ]; do
   get_os
   mk_resolve
 
-  start_tmux_session();
+  if [ ! ${IN_TMUX} ]; then
+    start_tmux_session;
+    exit 0;
+  fi;
 
   #Show plugins
-  echo "OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM}"
-  echo "============Select plugin:============ "
+  #prepare dialog
+  tempfile=temp.txt;
+  dialog_title="OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM}";
   for plugin in ${PLUGINS_DIR}/*; do
-    echo " "`cat ${plugin} | grep -e '#OS'`":         ${plugin} " | sed -e 's/plugins[/]/''/';
-    echo
+    plugin_name="`cat ${plugin} | grep -e '#OS' | sed -e 's/[#]OS/''/' | sed -e 's/ //g'`";
+    echo "PLUGIN NAME: ${plugin_name}";
+    plugin_val="`echo ${plugin} | sed -e 's/plugins[/]/''/'`";
+     echo ${plugin_val};
+    plugins_list="${plugins_list}${plugin_val} ${plugin_name} ";
   done;
- 
+
+  echo ${plugins_list};
+
+  dialog --title "${dialog_title}" --menu "Choose plugin" 40 40 10 ${plugins_list} 2>$tempfile;
+
+ USE_PLUGIN=`cat $tempfile`;
+ rm -f $tempfile;
   #echo "Use plugin [enter for default plugin]: ";
   #Changed by AnyKey
-  if [ "${USE_PLUGIN}" = "" ]; then
-    read -p "Use plugin [enter for default plugin]: " USE_PLUGIN  
-  fi;
+#  if [ "${USE_PLUGIN}" = "" ]; then
+#    read -p "Use plugin [Empty string for default plugin]: " USE_PLUGIN
+#  fi;
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";

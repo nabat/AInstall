@@ -1,7 +1,6 @@
+
 #ABillS Shell library
 #
-#
-
 #**********************************************************
 # Get OS 
 # OS_NAME, OS_VERSION, OS_NUM
