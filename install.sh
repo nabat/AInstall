@@ -2420,17 +2420,23 @@ fi;
 # Fetch free distro
 #**********************************************************
 fetch_free_distro () {
-  echo "Fetching ABillS ${ABILLS_VERSION}";
 
-  URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
+  if [ ! -d /usr/abills ]; then
 
-  if [ "${OS}" = "Linux" ]; then
-    wget -q "${URL}";
-  else 
-    fetch -q "${URL}";
+    echo "Fetching ABillS ${ABILLS_VERSION}";
+
+    URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
+
+    if [ "${OS}" = "Linux" ]; then
+      wget -q "${URL}";
+    else
+      fetch -q "${URL}";
+    fi;
+
+    tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
+  else
+     echo "ABillS exists at /usr/abills/"
   fi;
-  
-  tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
 }
 
 start_tmux_session() {
