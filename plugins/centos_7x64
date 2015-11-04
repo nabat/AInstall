@@ -57,7 +57,7 @@ _install_httpd(){
 	echo "#########        Opening firewall ports         ############" 
 	iptables -I INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
 	iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
-	service iptables save
+	service iptables save || iptables-save > /etc/sysconfig/iptables || apt-get -y install iptables-persistent
 	echo "#########        Disabling selinux               ############"
 	sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
 	cat config2 > /etc/selinux/config
