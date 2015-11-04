@@ -1,4 +1,4 @@
-#!/bin/sh
+#!usr/bin/env bash
 # ABillS Auto Programs Building
 #
 # Created By ~AsmodeuS~ 2010-2015
@@ -2508,7 +2508,7 @@ while [ "${OS_NAME}" = "" ]; do
   get_os
   mk_resolve
 
-  start_tmux_session
+  start_tmux_session();
 
   #Show plugins
   echo "OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM}"
