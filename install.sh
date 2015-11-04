@@ -6,7 +6,7 @@
 #**************************************************************
 
 VERSION=5.0
-
+ABILLS_VERSION="0.58"
 
 # LIB FUNCTION 
 . ./alib.sh
@@ -21,6 +21,7 @@ DEFAULT_HOSTNAME="aserver"
 DIALOG=dialog
 FETCH_FREE_DISTR=1;
 PLUGINS_DIR="plugins"
+
 
 #Get running user
 ID=`id | sed 's/uid\=\([0-9]*\).*/\1/';`;
@@ -2419,9 +2420,9 @@ fi;
 # Fetch free distro
 #**********************************************************
 fetch_free_distro () {
-  echo "fetching distro";
+  echo "Fetching ABillS ${ABILLS_VERSION}";
 
-  URL="http://downloads.sourceforge.net/project/abills/abills/0.58/abills-0.58.tgz"
+  URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
 
   if [ "${OS}" = "Linux" ]; then
     wget -q "${URL}";
@@ -2429,7 +2430,7 @@ fetch_free_distro () {
     fetch -q "${URL}";
   fi;
   
-  tar zxvf abills-0.58.tgz -C /usr/
+  tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
 }
 
 start_tmux_session() {
@@ -2443,6 +2444,22 @@ start_tmux_session() {
   echo "Script ended"
   sleep 2;
 }
+
+fetch_distro(){
+  if [ "${FETCH_FREE_DISTR}"  != "" ] ; then
+    fetch_free_distro;
+  elif [ ! -d "${BILLING_DIR}" ]; then
+    UPDATE_URL=http://abills.net.ua/misc/update.sh
+    # make cvs
+    cd ${BASE_PWD}
+    if [ ! -f update.sh ]; then
+      _fetch update.sh "${UPDATE_URL}";
+      chmod +x update.sh
+    fi;
+    ./update.sh -git
+  fi;
+}
+
 
 # Installation proccess
 # Proccess command-line options
@@ -2542,7 +2559,7 @@ while [ "${OS_NAME}" = "" ]; do
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
-    fetch_free_distro;
+    fetch_distro;
     plugin_check ${USE_PLUGIN}
   elif [ "${OS}" = "Linux" ]; then
     linux_build
@@ -2551,18 +2568,6 @@ while [ "${OS_NAME}" = "" ]; do
   fi;
 done;
 
-if [ "${FETCH_FREE_DISTR}"  != "" ] ; then
-  fetch_free_distro;  
-elif [ ! -d "${BILLING_DIR}" ]; then
-  UPDATE_URL=http://abills.net.ua/misc/update.sh
-  # make cvs 
-  cd ${BASE_PWD} 
-  if [ ! -f update.sh ]; then
-    _fetch update.sh "${UPDATE_URL}";
-    chmod +x update.sh
-  fi;
-  ./update.sh -git
-fi;
 
 mk_file_definition
 
