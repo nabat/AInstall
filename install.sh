@@ -245,7 +245,7 @@ _uninstall () {
   read -p  "Uninstall system? (y/n): " UNINSTALL;
 
   if [ x"${UNINSTALL}" != xy ]; then
-    echo "reset";
+    echo "Canceled";
     exit;
   fi;
 

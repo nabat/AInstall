@@ -1,8 +1,8 @@
 #OS Debian_8_x64
 #COMMENTS Ubuntu comments
 #M update:upgrade:apt-get update && apt-get upgrade
-#M mysql:MySQL:_install mysql-server-5.6 mysql-client libmysqlclient-dev
-#M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork
+#M mysql:MySQL:_install mariadb-server
+#M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork libapache2-mod-perl2
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
@@ -19,7 +19,7 @@
 YES="-y"
 BUILD_OPTIONS=" sudo apt-get ${YES} install "
 WEB_SERVER_USER=www-data
-APACHE_CONF_DIR=/etc/apache2/apache2.conf
+APACHE_CONF_DIR=/etc/apache2/
 RESTART_MYSQL=/etc/init.d/mysql
 RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
 RESTART_APACHE=/etc/init.d/apache2
@@ -689,5 +689,9 @@ EOF4
 #POST INSTALL
 #******************************************************************
 post_install () {
-	echo "goodbye";
+  a2enmode rewrite;
+  a2enmode ssl;
+  a2enmode perl;
+  a2enmode cgi;
+	echo "Plugin finished";
 }
