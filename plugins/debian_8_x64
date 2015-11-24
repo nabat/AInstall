@@ -1,5 +1,5 @@
 #OS Debian_8_x64
-#COMMENTS Ubuntu comments
+#COMMENTS Debian comments
 #M update:upgrade:apt-get update && apt-get upgrade
 #M mysql:MySQL:_install mariadb-server mariadb mariadb-client libmysqlclient-dev
 #M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork libapache2-mod-perl2
@@ -21,7 +21,7 @@ BUILD_OPTIONS=" sudo apt-get ${YES} install "
 WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql
-RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
+RESTART_RADIUS=/usr/local/etc/rc.d/freeradius
 RESTART_APACHE=/etc/init.d/apache2
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
@@ -29,11 +29,11 @@ PING=/sbin/ping
 
 
 #******************************************************************
-#PRE INSTALL
+# PRE INSTALL SECTION. Installing required packages
 #******************************************************************
 pre_install () {
-	echo "hi";
-	apt-get -y install dialog nano gcc
+
+	apt-get -y install dialog nano gcc sudo
   
 	CURRENT_DIR=`pwd`
 }
@@ -186,13 +186,13 @@ _install_ipn() {
 	pdate-rc.d flow-capture defaults
 	update-rc.d flow-capture enable
 	echo '##################################################################################################'
-	echo 'FLOWTOOLS INSTALLED ##################################################################################################'
+	echo '###########                         FLOWTOOLS INSTALLED                              #############'
 	echo '##################################################################################################'
+	sleep 1;
 
 
 	apt-get -y install libpcap-dev;
 
-  
 	echo '********************************************************************';
 	echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
 	echo '********************************************************************';
@@ -253,17 +253,17 @@ _install_ipn() {
   
 
 	cat << 'EOF' > /usr/local/etc/ipcad.conf
-# Èíòåðôåéñû äëÿ ñáîðà ñòàòèñòèêè
+# Интерфейсы для сбора статистики
 interface eth0;
-# äåòàëèçàöèÿ ïî ïîðòàì 
+# детализация по портам
 #capture-ports enable;
 
-# Àãðåãèðîâàòü ïîðòû, óìåíüøàåò ðàçìåð áàçû äåòàëèçàöèè 
+# Агрегировать порты, уменьшает размер базы детализации
 #aggregate 1024-65535    into 65535;     /* Aggregate wildly */
 #aggregate 3128-3128     into 3128;      /* Protect these ports */
 #aggregate 150-1023      into 1023;      /* General low range */
 
-# Åêñïîðòèðîâàíèå ñòàòèñòèêè íà àäðåñ 127.0.0.1 ïîðò 9996
+# Експортирование статистики на адрес 127.0.0.1 порт 9996
 netflow export destination 127.0.0.1 9996;
 netflow export version 5;       # NetFlow export format version {1|5}
 netflow timeout active 30;      # Timeout when flow is active, in minutes
@@ -281,7 +281,7 @@ memory_limit = 16m;
 EOF
 	cd ${CURRENT_DIR}
 	echo '##################################################################################################'
-	echo 'IPCAD INSTALLED ##################################################################################################'
+	echo '#############                       IPCAD INSTALLED                                ###############'
 	echo '##################################################################################################'
 }
 
@@ -343,9 +343,9 @@ _install_accel_pppoe() {
   apt-get -y install bzip2 cmake libssl-dev libpcre3-dev
 
   echo
-  echo "#############################################"
-  echo "##  Installing  ACCEL-PPP ${ACCEL_PPPP_VERSION} "
-  echo "#############################################"
+  echo "##############################################################"
+  echo "##        Installing  ACCEL-PPP ${ACCEL_PPPP_VERSION}       ##"
+  echo "##############################################################"
   echo
   cd /usr/
   
@@ -620,9 +620,12 @@ EOF4
 #POST INSTALL
 #******************************************************************
 post_install () {
+
   a2enmod rewrite;
   a2enmod ssl;
   a2enmod perl;
   a2enmod cgi;
+
 	echo "Plugin finished";
+	echo -p "press Enter to continue...";
 }
