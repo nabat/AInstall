@@ -2428,7 +2428,7 @@ fetch_free_distro () {
     URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
 
     if [ "${OS}" = "Linux" ]; then
-      wget -q --show-progress "${URL}";
+      wget -q "${URL}";
     else
       fetch -q "${URL}";
     fi;
