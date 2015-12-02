@@ -18,7 +18,7 @@
 
 YES="-y"
 BUILD_OPTIONS=" sudo apt-get ${YES} install "
-WEB_SERVER_USER=apache
+WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql
 RESTART_RADIUS=/usr/local/etc/rc.d/freeradius
@@ -253,17 +253,17 @@ _install_ipn() {
 
 
 	cat << 'EOF' > /usr/local/etc/ipcad.conf
-# Интерфейсы для сбора статистики
+# Г€Г­ГІГҐГ°ГґГҐГ©Г±Г» Г¤Г«Гї Г±ГЎГ®Г°Г  Г±ГІГ ГІГЁГ±ГІГЁГЄГЁ
 interface eth0;
-# детализация по портам
+# Г¤ГҐГІГ Г«ГЁГ§Г Г¶ГЁГї ГЇГ® ГЇГ®Г°ГІГ Г¬
 #capture-ports enable;
 
-# Агрегировать порты, уменьшает размер базы детализации
+# ГЂГЈГ°ГҐГЈГЁГ°Г®ГўГ ГІГј ГЇГ®Г°ГІГ», ГіГ¬ГҐГ­ГјГёГ ГҐГІ Г°Г Г§Г¬ГҐГ° ГЎГ Г§Г» Г¤ГҐГІГ Г«ГЁГ§Г Г¶ГЁГЁ
 #aggregate 1024-65535    into 65535;     /* Aggregate wildly */
 #aggregate 3128-3128     into 3128;      /* Protect these ports */
 #aggregate 150-1023      into 1023;      /* General low range */
 
-# Експортирование статистики на адрес 127.0.0.1 порт 9996
+# Г…ГЄГ±ГЇГ®Г°ГІГЁГ°Г®ГўГ Г­ГЁГҐ Г±ГІГ ГІГЁГ±ГІГЁГЄГЁ Г­Г  Г Г¤Г°ГҐГ± 127.0.0.1 ГЇГ®Г°ГІ 9996
 netflow export destination 127.0.0.1 9996;
 netflow export version 5;       # NetFlow export format version {1|5}
 netflow timeout active 30;      # Timeout when flow is active, in minutes
