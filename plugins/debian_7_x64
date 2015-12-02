@@ -18,9 +18,9 @@
 
 YES="-y"
 BUILD_OPTIONS=" sudo apt-get ${YES} install "
-WEB_SERVER_USER=www-data
+WEB_SERVER_USER=apache
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
-RESTART_MYSQL=/etc/init.d/mysqld
+RESTART_MYSQL=/etc/init.d/mysql
 RESTART_RADIUS=/usr/local/etc/rc.d/freeradius
 RESTART_APACHE=/etc/init.d/apache2
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
