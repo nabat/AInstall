@@ -627,5 +627,5 @@ post_install () {
   a2enmod cgi;
 
 	echo "Plugin finished";
-	echo -p "press Enter to continue...";
+	read -p "press Enter to continue...";
 }

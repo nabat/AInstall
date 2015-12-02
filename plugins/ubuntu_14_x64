@@ -690,5 +690,6 @@ EOF4
 #POST INSTALL
 #******************************************************************
 post_install () {
-	echo "goodbye";
+		echo "Plugin finished";
+	  read -p "press Enter to continue...";
 }
