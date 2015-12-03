@@ -42,7 +42,6 @@ pre_install () {
 #  Radius
 #*******************************************
 _install_freeradius() {
-	apt-get -y install gcc
 	apt-get -y install make
 
 	if [ -d /usr/local/freeradius/ ]; then
@@ -628,4 +627,7 @@ post_install () {
 
 	echo "Plugin finished";
 	read -p "press Enter to continue...";
+
+	ln -s /bin/gzip /usr/bin/gzip
+  ln -s /usr/bin/mysqldump /usr/local/bin/mysqldump
 }
