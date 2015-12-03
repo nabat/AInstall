@@ -5,7 +5,7 @@
 #
 #**************************************************************
 
-VERSION=5.01
+VERSION=5.02
 ABILLS_VERSION="0.58"
 
 # LIB FUNCTION
@@ -231,10 +231,12 @@ fi;
 mk_time () {
 
   CHECK_NTPDATE=`which ntpdate`;
-  if [ x"${CHECK_NTPDATE}" != x ]; then
-    ntpdate europe.pool.ntp.org
+  if [ "${CHECK_NTPDATE}" = "" ]; then
+    _install ntpdate
   fi;
-  
+
+
+  ntpdate europe.pool.ntp.org  
   echo "Time sync: " . `date`
 }
 
