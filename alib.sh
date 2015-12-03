@@ -76,7 +76,7 @@ _install () {
   for pkg in $@; do
     if [ "${OS_NAME}" = "CentOS" ]; then
       test_program="rpm -q"
-      BUILD_OPTIONS='yum -y'
+      BUILD_OPTIONS='yum -y install'
     elif [ "${OS}" = "FreeBSD" ]; then
       if [ "${BUILD_OPTIONS}" = ""  ]; then
         BUILD_OPTIONS="pkg install -y"
