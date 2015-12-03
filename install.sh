@@ -2425,17 +2425,9 @@ fi;
 fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
-
     echo "Fetching ABillS ${ABILLS_VERSION}";
-
     URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
-
-    if [ "${OS}" = "Linux" ]; then
-      wget -q "${URL}";
-    else
-      fetch -q "${URL}";
-    fi;
-
+    _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
     tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
   else
      echo "ABillS exists at /usr/abills/"
@@ -2545,7 +2537,7 @@ while [ "${OS_NAME}" = "" ]; do
   get_os
   mk_resolve
 
-  if [ ! ${IN_TMUX} ]; then
+  if [ ! "${IN_TMUX}" ]; then
     start_tmux_session;
     exit 0;
   fi;
@@ -2563,6 +2555,8 @@ while [ "${OS_NAME}" = "" ]; do
   done;
 
   echo ${plugins_list};
+
+  _install dialog
 
   dialog --title "${dialog_title}" --menu "Choose plugin" 40 40 10 ${plugins_list} 2>$tempfile;
 
