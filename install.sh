@@ -5,11 +5,12 @@
 #
 #**************************************************************
 
-VERSION=5.0
+VERSION=5.01
 ABILLS_VERSION="0.58"
 
-# LIB FUNCTION 
-. ./alib.sh
+# LIB FUNCTION
+BASEDIR=$(dirname $0)
+${BASEDIR} ./alib.sh
 
 TMPOPTIONSFILE="/tmp/abills.tmp"
 CMD_LOG="/tmp/ports_builder_cmd.log"
@@ -284,38 +285,38 @@ done;
 #**********************************************************
 #
 #**********************************************************
-_install () {
-
-  for pkg in $@; do
-    if [ "${OS_NAME}" = "CentOS" ]; then
-      test_program="rpm -q"
-    elif [ "${OS}" = "FreeBSD" ]; then
-      test_program="pkg info"
-    else
-      test_program="dpkg -s"
-    fi;
-
-    ${test_program} ${pkg} > /dev/null 2>&1
-
-    res=$?
-
-    if [ ${res} = 1 ]; then
-      ${BUILD_OPTIONS} ${pkg}
-      echo "Pkg: ${BUILD_OPTIONS} ${pkg} ${res}";
-    elif [ ${res} = 127 -o ${res} = 70 ]; then
-      ${BUILD_OPTIONS} ${pkg}
-      echo "Pkg: ${BUILD_OPTIONS} ${pkg} ${res}";
-    else
-      echo -n "  ${pkg}"
-      if [ "${res}" = 0 ]; then
-        echo " Installed";
-      else 
-        echo " ${res}"
-      fi;
-    fi; 
-    
-  done;
-}
+#_install () {
+#
+#  for pkg in $@; do
+#    if [ "${OS_NAME}" = "CentOS" ]; then
+#      test_program="rpm -q"
+#    elif [ "${OS}" = "FreeBSD" ]; then
+#      test_program="pkg info"
+#    else
+#      test_program="dpkg -s"
+#    fi;
+#
+#    ${test_program} ${pkg} > /dev/null 2>&1
+#
+#    res=$?
+#
+#    if [ ${res} = 1 ]; then
+#      ${BUILD_OPTIONS} ${pkg}
+#      echo "Pkg: ${BUILD_OPTIONS} ${pkg} ${res}";
+#    elif [ ${res} = 127 -o ${res} = 70 ]; then
+#      ${BUILD_OPTIONS} ${pkg}
+#      echo "Pkg: ${BUILD_OPTIONS} ${pkg} ${res}";
+#    else
+#      echo -n "  ${pkg}"
+#      if [ "${res}" = 0 ]; then
+#        echo " Installed";
+#      else 
+#        echo " ${res}"
+#      fi;
+#    fi; 
+#    
+#  done;
+#}
 
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
@@ -2439,7 +2440,12 @@ fetch_free_distro () {
   fi;
 }
 
+#**********************************************************
+# Start tmux session
+#**********************************************************
 start_tmux_session() {
+
+  _install tmux
 
   command -v tmux >/dev/null 2>&1 || ( echo >&2 "tmux is not installed."; return 1 )
 
@@ -2451,6 +2457,9 @@ start_tmux_session() {
   sleep 2;
 }
 
+#**********************************************************
+#
+#**********************************************************
 fetch_distro(){
   if [ "${FETCH_FREE_DISTR}"  != "" ] ; then
     fetch_free_distro;

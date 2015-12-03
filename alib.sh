@@ -89,10 +89,13 @@ _install () {
     ${test_program} "${pkg}" > /dev/null 2>&1
 
     res=$?
-
-    if [ "${BUILD_OPTIONS}" = ""  ]; then
-      echo "Not defined BUILD_OPTIONS params"
-      exit;
+    if [ "${BUILD_OPTIONS}" = "" ]; then
+      if [ "${OS_NAME}" = "CentOS" ]; then
+        BUILD_OPTIONS=" yum -y install ";
+      else
+        echo "Not defined BUILD_OPTIONS params"
+        exit;
+      fi;
     fi;
 
     if [ "${res}" = 1 ]; then
@@ -120,9 +123,18 @@ _install () {
 _fetch () {
 
 if [ "${OS}" = Linux ]; then
+  #check wget 
+  CHECK_WGET=`which wget`;
+
+  if [ "${CHECK_WGET}" = "" ]; then
+    _install wget
+  fi;
+
   FETCH="wget -q -O"
+  MD5="md5sum"
 else 
   FETCH="fetch -q -o"
+  MD5="md5"
 fi;
 
 ${FETCH} $1 $2
