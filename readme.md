@@ -1,9 +1,18 @@
 
-Autoinstaller for ABillS based on plugin system
+Installer for ABillS based on plugin system
 ===============================================
 
 ver. 0.1
 Feel free to make bugreports
+
+Installing:
+  * ABillS
+  * MySQL
+  * FreeRadius
+  * Apache
+  * Accel-PPPoE
+  * Flow-tools
+  * ...
 
 Plugins are structured as plugins/Distributive_VersionArch
 
@@ -72,7 +81,7 @@ Inside plugin you can use these functions to execute custom commands.
 </table> 
 
 
-Plugin execution
+Plugin execution flow
 ----------------
 <table>
   <tr><td>
@@ -92,4 +101,4 @@ Plugin execution
   </td></tr>
 </table>
 
-Installer uses autoconf for module configuration and defining system startup.
+Installer uses <b>autoconf</b> for module configuration and defining system startup.
