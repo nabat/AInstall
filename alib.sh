@@ -112,10 +112,12 @@ _install () {
         BUILD_OPTIONS=" yum -y install ";
       else
         guess_pac_man;
-        if [ "${BUILD_OPTIONS}" = "" ]; then
+        if [ x"${BUILD_OPTIONS}" = x"" ]; then
           echo "Not defined BUILD_OPTIONS params (Your system is currently not supported, or we can't found your package manager)";
           echo "You can open new issue at https://github.com/nabat/AInstall/issues/new";
           exit;
+        else
+          res=1;
         fi
       fi;
     fi;
