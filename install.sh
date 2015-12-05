@@ -2426,7 +2426,7 @@ fi;
 fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
-    echo "Fetching ABillS ${ABILLS_VERSION}";
+    echo "Fetching ABillS ${ABILLS_VERSION}. May take some time that depends off yout internet connection speed";
     URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
     _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
     tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
