@@ -2427,6 +2427,7 @@ fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
     echo "Fetching ABillS ${ABILLS_VERSION}. May take some time that depends off yout internet connection speed";
+
     URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
     _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
     tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
@@ -2446,7 +2447,7 @@ start_tmux_session() {
 
   SESSION_NAME='INSTALL';
 
-  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} './install.sh --in_tmux'
+  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $*"
 
   echo "Script ended"
   sleep 2;
