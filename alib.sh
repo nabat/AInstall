@@ -69,6 +69,24 @@ fi
 }
 
 #**********************************************************
+# Anykey: Guess system package managers
+#**********************************************************
+guess_pac_man(){
+  #Predefined list of well-known package managers;
+  LIST="yum apt-get pkg pacman";
+
+  for MANAGER in ${LIST}; do
+    which ${MANAGER} &&  break;
+  done
+
+	if [ x'' != x${MANAGER} ]; then
+	  BUILD_OPTIONS=" ${MANAGER} -y install";
+	fi;
+  echo "Package manager: ${MANAGER}";
+}
+
+
+#**********************************************************
 # Install programs
 #**********************************************************
 _install () {
@@ -93,8 +111,12 @@ _install () {
       if [ "${OS_NAME}" = "CentOS" ]; then
         BUILD_OPTIONS=" yum -y install ";
       else
-        echo "Not defined BUILD_OPTIONS params"
-        exit;
+        guess_pac_man;
+        if [ "${BUILD_OPTIONS}" = "" ]; then
+          echo "Not defined BUILD_OPTIONS params (Your system is currently not supported, or we can't found your package manager)";
+          echo "You can open new issue at https://github.com/nabat/AInstall/issues/new";
+          exit;
+        fi
       fi;
     fi;
 

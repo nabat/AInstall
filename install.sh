@@ -2560,11 +2560,11 @@ while [ "${OS_NAME}" = "" ]; do
 
  USE_PLUGIN=`cat $tempfile`;
  rm -f $tempfile;
-  #echo "Use plugin [enter for default plugin]: ";
+  #  echo "Use plugin [enter for default plugin]: ";
   #Changed by AnyKey
-#  if [ "${USE_PLUGIN}" = "" ]; then
-#    read -p "Use plugin [Empty string for default plugin]: " USE_PLUGIN
-#  fi;
+  #  if [ "${USE_PLUGIN}" = "" ]; then
+  #    read -p "Use plugin [Empty string for default plugin]: " USE_PLUGIN
+  #  fi;
 
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
