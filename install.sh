@@ -131,7 +131,8 @@ fi;
 
 . "${PLUGINS_DIR}/${plugin_name}"
 
-
+#Make correct time
+mk_time;
 pre_install;
 
 for name in ${RESULT}; do
@@ -2529,9 +2530,6 @@ if [ x"${UNINSTALL}" != x ]; then
 fi;
 
 #Run program
-#Make correct time
-mk_time
-
 #Get os
 while [ "${OS_NAME}" = "" ]; do
   get_os
