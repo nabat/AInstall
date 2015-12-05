@@ -19,6 +19,8 @@
 
 YES="-y"
 BUILD_OPTIONS=" sudo apt-get ${YES} install "
+MYSQLDUMP=/bin/gzip
+GZIP=/usr/bin/mysqldump
 WEB_SERVER_USER=apache
 APACHE_CONF_DIR=/etc/apache2/apache2.conf
 RESTART_MYSQL=/etc/init.d/mysql
@@ -30,7 +32,7 @@ PING=/sbin/ping
 
 
 #******************************************************************
-#PRE INSTALL
+#  PRE INSTALL
 #******************************************************************
 pre_install () {
 	echo "hi";
