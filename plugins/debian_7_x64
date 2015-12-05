@@ -625,6 +625,10 @@ post_install () {
   a2enmod perl;
   a2enmod cgi;
 
+  service apache2 restart;
+
+  rm -f /var/lib/mysql/ib_logfile*
+
 	echo "Plugin finished";
 	read -p "press Enter to continue...";
 
