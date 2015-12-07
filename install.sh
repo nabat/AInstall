@@ -223,7 +223,7 @@ if [ "${OS}" = "FreeBSD" ]; then
   fi;
 
   BILLING_WEB_IP=${IP}
-elif [ "${OS}" = "Linux" ] ;
+elif [ "${OS}" = "Linux" ] ; then
   IP=`ip route get 8.8.8.8 | grep dev | awk '{ print  $7 }'`;
   BILLING_WEB_IP=${IP}
 fi;
