@@ -2469,20 +2469,25 @@ start_tmux_session() {
 #
 #**********************************************************
 fetch_distro(){
-
   if [ "${FETCH_FREE_DISTR}"  != "" -a "${COM_DISTRO}" = "" ] ; then
+    echo "===============================================================";
     fetch_free_distro;
   elif [ ! -d "${BILLING_DIR}" ]; then
     UPDATE_URL=http://abills.net.ua/misc/update.sh
-    # make cvs
+    # make cvs/git update
     cd ${BASE_PWD}
     if [ ! -f update.sh ]; then
       _fetch update.sh "${UPDATE_URL}";
       chmod +x update.sh
     fi;
-    ./update.sh -git
+    if [ "${BASE_INSTALL_DIR}" != "" ]; then 
+      KEY_DIR="-key ${BASE_INSTALL_DIR}"
+    fi;
+
+    ./update.sh -git ${KEY_DIR}
   fi;
 
+  echo "${COM_DISTRO} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 }
 
 
