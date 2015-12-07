@@ -415,7 +415,7 @@ install_rstat() {
  cd rstat ;
  make install;
 
- cd ${BASEDIR}
+ cd ${CURRENT_DIR}
 }
 
 #**********************************************************
@@ -443,7 +443,7 @@ if [ x"${check_fsbackup_cron}" = x ]; then
   echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
 fi;
 
-  cd ${BASEDIR}
+  cd ${CURRENT_DIR}
 }
 
 #**********************************************************
@@ -2371,10 +2371,10 @@ for name in $RESULT; do
   fi;
  
   #Accel-PPTP Build
-  if [ ${name} = "ACCEL-IPoE" ]; then
+  if [ "${name}" = "ACCEL-IPoE" ]; then
     install_accel_ipoe
   #Accel-PPTP Build
-  elif [ ${name} = "ACCEL-PPP" ]; then
+  elif [ "${name}" = "ACCEL-PPP" ]; then
     install_accel_ppp
   fi;
 
@@ -2422,7 +2422,7 @@ if [ "$1" != "" ]; then
  
   run_plugin "${plugin_name}";
 
-  port_install;
+  #port_install;
 
   if [ "${BILLING_WEB_IP}" = "" ]; then
     BILLING_WEB_IP="your.host"

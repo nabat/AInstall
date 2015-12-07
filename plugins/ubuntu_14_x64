@@ -367,8 +367,6 @@ _install_mrtg() {
 	install_rstat
 
   echo "PATH"
-  pwd
-
 	if [ ! -d /usr/abills/webreports/ ]; then
 	  mkdir /usr/abills/webreports/
 	fi;
@@ -682,6 +680,16 @@ EOF4
 #accel-pppd  -p 'var/run/accel.pid' -c '/etc/accel-ppp.conf'
 
 	cd ${CURRENT_DIR}
+
+}
+
+
+#******************************************************************
+# Install main server
+#******************************************************************
+install_mail () {
+
+  echo "Not supported yet"
 
 }
 
