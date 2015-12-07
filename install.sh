@@ -415,6 +415,7 @@ install_rstat() {
  cd rstat ;
  make install;
 
+ cd ${BASEDIR}
 }
 
 #**********************************************************
@@ -442,6 +443,7 @@ if [ x"${check_fsbackup_cron}" = x ]; then
   echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
 fi;
 
+  cd ${BASEDIR}
 }
 
 #**********************************************************
