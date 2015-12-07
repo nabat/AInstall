@@ -5,7 +5,7 @@
 #
 #**************************************************************
 
-VERSION=5.02
+VERSION=5.03
 ABILLS_VERSION="0.58"
 
 # LIB FUNCTION
@@ -2459,7 +2459,8 @@ start_tmux_session() {
 #
 #**********************************************************
 fetch_distro(){
-  if [ "${FETCH_FREE_DISTR}"  != "" ] ; then
+
+  if [ "${FETCH_FREE_DISTR}"  != "" -a "${COM_DISTRO}" = "" ] ; then
     fetch_free_distro;
   elif [ ! -d "${BILLING_DIR}" ]; then
     UPDATE_URL=http://abills.net.ua/misc/update.sh
@@ -2471,6 +2472,7 @@ fetch_distro(){
     fi;
     ./update.sh -git
   fi;
+
 }
 
 
