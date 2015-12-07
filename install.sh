@@ -213,18 +213,23 @@ if [ "${OS}" = "FreeBSD" ]; then
     HOSTNAME=${DEFAULT_HOSTNAME}
     hostname ${DEFAULT_HOSTNAME}
   fi;
-  
+
   CHECK_HOSTS=`grep "${HOSTNAME}" /etc/hosts`
 
   IP=`ifconfig \`route -n get default | grep interface | tail -1 | awk '{ print $2 }'\` | grep "inet " | awk '{ print $2 }' | head -1`
-  
+
   if [ x"${CHECK_HOSTS}" = x ]; then
     echo "${IP}  ${HOSTNAME}" >> /etc/hosts
   fi;
-  
+
+  BILLING_WEB_IP=${IP}
+elif [ "${OS}" = "Linux" ] ;
+  IP=`ip route get 8.8.8.8 | grep dev | awk '{ print  $7 }'`;
   BILLING_WEB_IP=${IP}
 fi;
+
 }
+
 
 #**********************************************************
 # Set correct date time
@@ -400,22 +405,25 @@ echo "
 #**********************************************************
 install_rstat() {
 
+ cd ${BASEDIR}/src/
+
  RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
 
  _fetch rstat-0.21.tgz \"${RSTAT_URL}\"
 
  tar zxvf rstat-0.21.tgz ;
  cd rstat ;
- make install ;
+ make install;
 
 }
 
 #**********************************************************
-#
+# FSBackup install
 #**********************************************************
 install_fsbackup() {
   
-cd ~ ;
+cd ${BASEDIR}/src/
+
 url="http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz"
 
 _fetch fsbackup-1.2pl2.tar.gz http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz
@@ -2414,7 +2422,7 @@ if [ "$1" != "" ]; then
 
   port_install;
 
-  if [ x"${BILLING_WEB_IP}" = x ]; then
+  if [ "${BILLING_WEB_IP}" = "" ]; then
     BILLING_WEB_IP="your.host"
   fi;
 
@@ -2539,6 +2547,12 @@ fi;
 while [ "${OS_NAME}" = "" ]; do
   get_os
   mk_resolve
+
+  #Mkae spurce dir
+  
+  if [ ! -d "${BASEDIR}/src/" ]; then
+    mkdir "${BASEDIR}/src/"
+  fi;
 
   if [ ! "${IN_TMUX}" ]; then
     start_tmux_session;

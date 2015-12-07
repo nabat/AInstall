@@ -9,7 +9,7 @@
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
 #M mrtg:Mrtg,Rstat:_install_mrtg
 #M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
-#M FSbackup:FSbackup:_install_fsbackup
+#M FSbackup:FSbackup:install_fsbackup
 #M Mail:Mail_server:install_mail
 #M build_kernel:Build_Kernel:echo test
 # perl_speedy 
@@ -36,7 +36,8 @@ PING=/sbin/ping
 #******************************************************************
 pre_install () {
 	echo "hi";
-	apt-get -y install dialog nano gcc
+
+	_install dialog nano gcc
   
 	CURRENT_DIR=`pwd`
 }
@@ -45,8 +46,7 @@ pre_install () {
 #  Radius 
 #*******************************************
 _install_freeradius() {
-	apt-get -y install gcc 
-	apt-get -y install make
+	_install gcc make
   
 	if [ -d /usr/local/freeradius/ ]; then
 		echo "Radius exists: /usr/local/freeradius/";
@@ -80,7 +80,7 @@ _install_freeradius() {
 	FREERADIUS_VERSION="2.2.9"
 	RADIUS_SERVER_USER="freerad"
  
-	wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+	_fetch freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
 		echo "Can\'t download freeradius. PLease download and install manual";
@@ -248,7 +248,8 @@ EOF
 # Flow-tools + Ipcad
 #*******************************************
 _install_ipn() {
-	apt-get -y  install flow-tools
+
+	_install flow-tools
 	
 	mkdir -p /usr/abills/var/log/ipn/
 	
@@ -262,7 +263,7 @@ _install_ipn() {
 	echo '##################################################################################################'
 
 
-	apt-get -y install libpcap-dev;
+	_install libpcap-dev;
 
   
 	echo '********************************************************************';
@@ -358,26 +359,19 @@ EOF
 }
 
 #************************************
-# rstat install
-#************************************
-_install_rstat() {
-	RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
-	cd /usr/
-	wget ${RSTAT_URL}
-
-	tar zxvf rstat-0.21.tgz ;
-	cd rstat ;
-	make install ;
-	cd ${CURRENT_DIR}
-}
-
-#************************************
 # MRTG install
 #************************************
 _install_mrtg() {
-	apt-get -y install mrtg snmp 
-	_install_rstat
+	_install mrtg snmp 
+
+	install_rstat
+
+	if [ ! -d /usr/abills/webreports/ ]; then
+	  mkdir /usr/abills/webreports/
+	fi;
+
 	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+
 	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
 }
 
@@ -412,7 +406,7 @@ _install_fsbackup() {
 #**********************************************************
 _install_accel_pppoe() {
 
-  apt-get -y install bzip2 cmake libssl-dev libpcre3-dev
+  _install bzip2 cmake libssl-dev libpcre3-dev
 
   echo
   echo "#############################################"
