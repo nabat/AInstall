@@ -409,7 +409,7 @@ install_rstat() {
 
  RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
 
- _fetch rstat-0.21.tgz \"${RSTAT_URL}\"
+ _fetch rstat-0.21.tgz "${RSTAT_URL}"
 
  tar zxvf rstat-0.21.tgz ;
  cd rstat ;
