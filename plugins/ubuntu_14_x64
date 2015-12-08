@@ -67,7 +67,7 @@ _install_apache() {
 #  Radius 
 #*******************************************
 _install_freeradius() {
-	_install gcc make
+	_install gcc make libmysqlclient-dev
   
 	if [ -d /usr/local/freeradius/ ]; then
 		echo "Radius exists: /usr/local/freeradius/";
