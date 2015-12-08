@@ -48,11 +48,18 @@ pre_install () {
 # Apache2
 #******************************************************************
 _install_apache() {
-	_install apache2 apache2-doc apache2-utils apache2-mpm-prefork
+	_install apache2 
+	_install apache2-doc 
+	_install apache2-utils 
+	_install apache2-mpm-prefork
 	a2enmod ssl
 	a2enmod rewrite
 	a2enmod suexec
 	a2enmod include
+	
+	chown -Rf www-data:www-data /usr/abills/cgi-bin
+	chown -Rf www-data:www-data /usr/abills/Abills/templates
+	chown -Rf www-data:www-data /usr/abills/backup
 	${RESTART_APACHE} restart
 }
 #*******************************************
