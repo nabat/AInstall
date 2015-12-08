@@ -1,7 +1,7 @@
 #OS Ubuntu 14_x64
 #COMMENTS Ubuntu comments
 #M update:upgrade:apt-get update
-#M mysql:MySQL:_install mysql-server-5.6 mysql-client libmysqlclient-dev
+#M mysql:MySQL:_install_apache
 #M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
 #M freeradius:Freeradius_Server:_install_freeradius
@@ -21,8 +21,8 @@ YES="-y"
 BUILD_OPTIONS=" sudo apt-get ${YES} install "
 MYSQLDUMP=/bin/gzip
 GZIP=/usr/bin/mysqldump
-WEB_SERVER_USER=apache
-APACHE_CONF_DIR=/etc/apache2/apache2.conf
+WEB_SERVER_USER=www-data
+APACHE_CONF_DIR=/etc/apache2/
 RESTART_MYSQL=/etc/init.d/mysql
 RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
 RESTART_APACHE=/etc/init.d/apache2
@@ -42,6 +42,19 @@ pre_install () {
 	CURRENT_DIR=`pwd`
 }
 
+
+
+#******************************************************************
+# Apache2
+#******************************************************************
+_install_apache() {
+	_install apache2 apache2-doc apache2-utils apache2-mpm-prefork
+	a2enmod ssl
+	a2enmod rewrite
+	a2enmod suexec
+	a2enmod include
+	${RESTART_APACHE} restart
+}
 #*******************************************
 #  Radius 
 #*******************************************
