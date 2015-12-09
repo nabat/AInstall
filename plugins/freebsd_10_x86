@@ -1,0 +1,86 @@
+#OS freebsd 10
+#COMMENTS Freebsd comments
+#M update:upgrade:pkg upgrade -y
+#M mysql:MySQL:_install mysql56-server
+#M apache:apache:_install apache24
+#M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
+#M freeradius:Freeradius_Server:_install freeradius
+#M DHCP:Dhcp_server:_install isc-dhcp43-server
+#M Mail:Mail_server:install_mail
+# MRTG=
+# IPN=
+# fsbackup=
+#M build_kernel:Build_Kernel:echo test
+# perl_speedy 
+#M utils:Utils:_install vim tmux bash git
+
+# Variable
+
+WEB_SERVER_USER=www
+APACHE_CONF_DIR=/usr/local/etc/mysqld
+RESTART_MYSQL=/usr/local/etc/rc.d/apache24
+RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
+RESTART_APACHE=/usr/local/etc/rc.d/apache24
+RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
+PING=/sbin/ping
+
+
+#*******************************************
+# Install mailserver
+#*******************************************
+install_mail () {
+ echo "Install mail server"
+
+ BUILD_OPTIONS="&& make && make install"
+ PORTS_LOCATION="/usr/ports/"
+
+ cmd="cd ${PORTS_LOCATION}/security/cyrus-sasl2 ${BUILD_OPTIONS};";
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/postfix ${BUILD_OPTIONS};"; 
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/maildrop && make WITH_AUTHLIB=yes MAILDROP_TRUSTED_USERS=vmail MAILDROP_SUID=1005 MAILDROP_SGID=1005 && make install;";
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib-base ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/courier-imap ${BUILD_OPTIONS} ;"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/spamassassin/ ${BUILD_OPTIONS} ;"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/clamav ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/amavisd-new ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/squirrelmail ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/www/mod_php56 ${BUILD_OPTIONS};"
+
+ if [ "${DEBUG}" != "" ]; then
+   echo "CMD: ${cmd}";
+ fi;
+
+ eval "${cmd}"
+
+ exit;
+
+ #Check apache php support
+ check_apache=`pkg info | grep apache22`
+ if [ "${check_apache}" = "" ]; then
+   APACHE_CONFIG='/usr/local/etc/apache24/httpd.conf'
+ else
+   APACHE_CONFIG='/usr/local/etc/apache22/httpd.conf'
+ fi;
+
+ check_php_conf=`grep 'x-httpd-php' ${APACHE_CONFIG}`
+ if [ w${check_php_conf} = w ]; then
+   echo -n "Can\'t find php in apache config add it? (y/n): "
+   read PHP_CONF=
+   if [ w${PHP_CONF} = wy ]; then
+     echo "AddType application/x-httpd-php .php" >> ${APACHE_CONFIG}
+   fi;
+ fi;
+ 
+ PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
+ if [ x"${PHP_INDEX}" = x ]; then
+   cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
+   cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}      
+ fi;
+
+ AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
+ AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} AMAVIS=1 CLAMAV=1"
+}
+
+#*******************************************
+#
+#*******************************************
