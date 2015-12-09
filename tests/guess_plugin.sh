@@ -30,7 +30,13 @@ guess_plugin(){
 #  echo ${PLUGIN_OS_VERSION};
 
   #OS Architecture
-	PLUGIN_OS_ARCH=`echo ${MACH} | grep -o -e '[0-9][0-9]'`;
+	PLUGIN_OS_ARCH=`64`;
+
+	if [ ! ${MACH} == 'amd64'  ]; then
+	  if [ ! ${MACH} == 'x86_64' ]; then
+	    PLUGIN_OS_ARCH = '86';
+	  fi
+	fi
 #  echo ${PLUGIN_OS_ARCH};
 
 	PLUGIN_NAME="${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}";
