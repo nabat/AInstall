@@ -190,7 +190,7 @@ for ps_name in ${PROCESS_LIST}; do
   RESULT="${RESULT}\n${ps_name} ${status}";
 done;
 
-echo ${RESULT};
+#echo ${RESULT};
 }
 
 #**********************************************************
@@ -622,7 +622,7 @@ install_accel_ipoe() {
  
  ipoe_mod_check=`lsmod | grep ipoe`
  if [ "${ipoe_mod_check}" = "" ]; then
-   echo "Accel IPoE not install";
+   echo "Accel IPoE NOT installed";
    exit;
  else
    echo "Accel IPoE installed";
@@ -2413,7 +2413,7 @@ done
 #**********************************************************
 #Make plugins
 #**********************************************************
-plugin_check () {
+plugin_start () {
 
 if [ "$1" != "" ]; then
   plugin_name=$1;
@@ -2566,7 +2566,7 @@ while [ "${OS_NAME}" = "" ]; do
     mkdir "${BASEDIR}/src/"
   fi;
 
-  if [ ! "${IN_TMUX}" ]; then
+  if [ "${IN_TMUX}" ]; then
     start_tmux_session;
     exit 0;
   fi;
@@ -2577,20 +2577,44 @@ while [ "${OS_NAME}" = "" ]; do
   dialog_title="OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM}";
   for plugin in ${PLUGINS_DIR}/*; do
     plugin_name="`cat ${plugin} | grep -e '#OS' | sed -e 's/[#]OS/''/' | sed -e 's/ //g'`";
-    echo "PLUGIN NAME: ${plugin_name}";
+#    echo "PLUGIN NAME: ${plugin_name}";
     plugin_val="`echo ${plugin} | sed -e 's/plugins[/]/''/'`";
-     echo ${plugin_val};
+#     echo ${plugin_val};
     plugins_list="${plugins_list}${plugin_val} ${plugin_name} ";
   done;
 
-  echo ${plugins_list};
+#  echo ${plugins_list};
 
-  _install dialog
+  DIALOG_INSTALLED=`which dialog`;
 
-  dialog --title "${dialog_title}" --menu "Choose plugin" 40 40 10 ${plugins_list} 2>$tempfile;
+  if [ x"" == x"${DIALOG_INSTALLED}" ]; then
+    _install dialog;
+  fi;
 
- USE_PLUGIN=`cat $tempfile`;
- rm -f $tempfile;
+  #try to guess plugin
+	guess_plugin;
+
+	if [ "${use_plugin}" ]; then
+
+	  USE_PLUGIN=${use_plugin};
+
+  else
+
+	  if [ "${PLUGIN_NAME}" ]; then
+
+	     USE_PLUGIN=${PLUGIN_NAME}
+
+	  else
+
+	    dialog --title "${dialog_title}" --menu "Choose plugin" 40 40 10 ${plugins_list} 2>$tempfile;
+
+      USE_PLUGIN=`cat $tempfile`;
+      rm -f $tempfile;
+
+	  fi
+
+  fi;
+
   #  echo "Use plugin [enter for default plugin]: ";
   #Changed by AnyKey
   #  if [ "${USE_PLUGIN}" = "" ]; then
@@ -2600,7 +2624,7 @@ while [ "${OS_NAME}" = "" ]; do
   if [ "${USE_PLUGIN}" != "" ]; then
     echo "Plugin: ${USE_PLUGIN}";
     fetch_distro;
-    plugin_check ${USE_PLUGIN}
+    plugin_start ${USE_PLUGIN}
   elif [ "${OS}" = "Linux" ]; then
     linux_build
   else 
