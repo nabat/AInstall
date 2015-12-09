@@ -5,7 +5,7 @@
 #
 #**************************************************************
 
-VERSION=5.03
+VERSION=5.04
 ABILLS_VERSION="0.58"
 
 # LIB FUNCTION
@@ -172,11 +172,11 @@ run_plugin () {
 
 #**********************************************************
 # Check active services
+#
+# Anykey: PROCESS_LIST defined in global scope to redefine it in plugin
 #**********************************************************
+PROCESS_LIST="mysqld radiusd httpd flow-capture mpd named"
 check_ps () {
-
-PROCESS_LIST="mysqld radiusd httpd flow-capture mpd named"  
-
 ps ax |grep "radius" | grep -v "grep"
 RESULT="-------------------------------------------"
 for ps_name in ${PROCESS_LIST}; do
@@ -189,6 +189,8 @@ for ps_name in ${PROCESS_LIST}; do
   
   RESULT="${RESULT}\n${ps_name} ${status}";
 done;
+
+echo ${RESULT};
 }
 
 #**********************************************************
@@ -2438,7 +2440,7 @@ fi;
 fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
-    echo "Fetching ABillS ${ABILLS_VERSION}. May take some time that depends off yout internet connection speed";
+    echo "Fetching ABillS ${ABILLS_VERSION}.\n May take some time that depends off your internet connection speed";
 
     URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
     _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
@@ -2540,6 +2542,9 @@ for _switch ; do
         --in_tmux)  IN_TMUX="true";
                     shift; shift
                     ;;
+        --check_services) check_ps;
+                          exit;
+                          ;;
         esac
 done
 
@@ -2555,7 +2560,7 @@ while [ "${OS_NAME}" = "" ]; do
   get_os
   mk_resolve
 
-  #Mkae spurce dir
+  #Make source dir
   
   if [ ! -d "${BASEDIR}/src/" ]; then
     mkdir "${BASEDIR}/src/"
