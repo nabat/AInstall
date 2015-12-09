@@ -5,6 +5,9 @@
 # Get OS 
 # OS_NAME, OS_VERSION, OS_NUM
 #**********************************************************
+
+ALIB_LOADED="Loaded";
+
 get_os () {
 
 OS=`uname -s`
@@ -85,6 +88,26 @@ guess_pac_man(){
   echo "Package manager: ${MANAGER}";
 }
 
+#**********************************************************
+# Anykey: Guess plugin to use
+#**********************************************************
+guess_plugin(){
+  get_os;
+  #OS_Name
+  PLUGIN_OS_NAME=`echo ${OS} | tr '[:upper:]' '[:lower:]'`;
+#  echo ${PLUGIN_OS_NAME};
+
+  #OS Major Version
+	PLUGIN_OS_VERSION=`echo ${OS_VERSION} | grep -o -e '^[0-9]*'`;
+#  echo ${PLUGIN_OS_VERSION};
+
+  #OS Architecture
+	PLUGIN_OS_ARCH=`echo ${MACH} | grep -o -e '[0-9][0-9]'`;
+#  echo ${PLUGIN_OS_ARCH};
+
+	PLUGIN_NAME="${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}";
+#	echo ${PLUGIN_NAME};
+}
 
 #**********************************************************
 # Install programs
