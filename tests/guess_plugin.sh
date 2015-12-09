@@ -22,7 +22,7 @@ echo;
 guess_plugin(){
   get_os;
   #OS_Name
-  PLUGIN_OS_NAME=`echo ${OS} | tr '[:upper:]' '[:lower:]'`;
+  PLUGIN_OS_NAME=`echo ${OS_NAME} | tr '[:upper:]' '[:lower:]'`;
 #  echo ${PLUGIN_OS_NAME};
 
   #OS Major Version
