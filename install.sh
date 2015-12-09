@@ -2566,7 +2566,7 @@ while [ "${OS_NAME}" = "" ]; do
     mkdir "${BASEDIR}/src/"
   fi;
 
-  if [ "${IN_TMUX}" ]; then
+  if [ ! "${IN_TMUX}" ]; then
     start_tmux_session;
     exit 0;
   fi;
