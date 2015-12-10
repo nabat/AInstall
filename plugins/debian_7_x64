@@ -1,6 +1,6 @@
 #OS Debian_7_x64
 #COMMENTS Debian comments
-#M update:upgrade:apt-get update && apt-get upgrade
+#M update:upgrade:apt-get update && apt-get upgrade;
 #M mysql:MySQL:_install mysql-server mysql-client libmysqlclient-dev
 #M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork libapache2-mod-perl2
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
