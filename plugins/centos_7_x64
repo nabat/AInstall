@@ -26,6 +26,9 @@ RESTART_APACHE=/etc/init.d/httpd
 RESTART_DHCP=/etc/init.d/dhcpd
 PING=/bin/ping
 
+#Services to check after installation
+PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
+
 #*******************************************
 #  Pre install
 #*******************************************
