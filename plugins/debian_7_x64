@@ -185,9 +185,9 @@ _install_flow_tools() {
 
 	echo "-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996" > /etc/flow-tools/flow-capture.conf
 
-
-	pdate-rc.d flow-capture defaults
+	update-rc.d flow-capture defaults
 	update-rc.d flow-capture enable
+
 	echo '##################################################################################################'
 	echo '###########                         FLOWTOOLS INSTALLED                              #############'
 	echo '##################################################################################################'
