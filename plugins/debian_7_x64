@@ -6,7 +6,8 @@
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
-#M flow-tools:Flow-tools,Ipcad:_install_ipn
+#M flow-tools:Flow-tools:_install_flow_tools
+#M ipcad:Ipcad:_install_ipcad
 #M mrtg:Mrtg,Rstat:_install_mrtg
 #M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
 #M FSbackup:FSbackup:_install_fsbackup
@@ -175,9 +176,9 @@ EOF
 
 
 #*******************************************
-# Flow-tools + Ipcad
+# Flow-tools
 #*******************************************
-_install_ipn() {
+_install_flow_tools() {
 	apt-get -y  install flow-tools
 
 	mkdir -p /usr/abills/var/log/ipn/
@@ -191,13 +192,18 @@ _install_ipn() {
 	echo '###########                         FLOWTOOLS INSTALLED                              #############'
 	echo '##################################################################################################'
 	sleep 1;
+}
 
+#*******************************************
+# Ipcad
+#*******************************************
+_install_ipcad() {
 
 	apt-get -y install libpcap-dev;
 
-	echo '********************************************************************';
-	echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
-	echo '********************************************************************';
+	echo '##################################################################';
+	echo '###        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD       ###';
+	echo '##################################################################';
 
 	# will be installed in /usr/
 	cd /usr/
@@ -281,10 +287,12 @@ rsh enable at 127.0.0.1;
 memory_limit = 16m;
 
 EOF
+
 	cd ${CURRENT_DIR}
-	echo '##################################################################################################'
-	echo '#############                       IPCAD INSTALLED                                ###############'
-	echo '##################################################################################################'
+	echo '####################################';
+	echo '###       IPCAD INSTALLED        ###';
+	echo '####################################';
+
 }
 
 #************************************
