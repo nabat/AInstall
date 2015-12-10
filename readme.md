@@ -2,7 +2,7 @@
 Installer for ABillS based on plugin system
 ===============================================
 
-ver. 0.1
+ver. 5.05beta
 Feel free to make bugreports
 
 Installing:
@@ -12,10 +12,24 @@ Installing:
   * Apache
   * Accel-PPPoE
   * Flow-tools
-  * ...
+  * Fsbackup
+  * MRTG
 
-Plugins are structured as plugins/Distributive_VersionArch
+Plugins are structured as plugins/Distributive_Version_Arch
 
+As of version 5.05 it can guess your system.
+If guessed wrong, use ''-p'' key
+  
+ <code>
+  # ./install.sh -p centos_7_x64
+ </code>   
+   
+If you want avoid tmux session use ''--in_tmux'' key
+    
+<code>
+  # ./install.sh --in_tmux
+</code>
+  
 Plugin Format
 -------------
 
