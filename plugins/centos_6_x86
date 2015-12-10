@@ -27,6 +27,9 @@ RESTART_APACHE=/etc/init.d/httpd
 RESTART_DHCP=/etc/init.d/dhcpd
 PING=/bin/ping
 
+#Services to check after installation
+PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
+
 #*******************************************
 #  Pre install
 #*******************************************
@@ -381,7 +384,7 @@ interface eth0;
 # детализаци¤ по портам 
 #capture-ports enable;
 
-# јгрегировать порты, уменьшает размер базы детализации 
+# �?грегировать порты, уменьшает размер базы детализации 
 #aggregate 1024-65535    into 65535;     /* Aggregate wildly */
 #aggregate 3128-3128     into 3128;      /* Protect these ports */
 #aggregate 150-1023      into 1023;      /* General low range */
@@ -528,7 +531,7 @@ echo-interval=30
 verbose=1
 
 [pppoe]
-# Интерфейсы на которых запущен pppoe сервер ( должны быть соответственно подняты интерфейсы)
+# �?нтерфейсы на которых запущен pppoe сервер ( должны быть соответственно подняты интерфейсы)
 interface=eth1
 interface=vlan2
 interface=vlan3

@@ -29,8 +29,8 @@ RESTART_APACHE=/etc/init.d/apache2
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
 
-#Names for test
-PROCESS_LIST="mysqld radiusd httpd flow-capture mpd named"
+#Services to check after installation
+PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
 
 
 #******************************************************************
