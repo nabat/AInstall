@@ -108,7 +108,11 @@ guess_plugin(){
 	    PLUGIN_OS_ARCH = '64';
 	fi
 
-	PLUGIN_NAME="${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}";
+	#if file exists
+	if [ -f "${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}" ]; then
+	  PLUGIN_NAME="${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}";
+	fi
+
 #	echo ${PLUGIN_NAME};
 }
 
