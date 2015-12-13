@@ -114,10 +114,11 @@ guess_plugin(){
 	  PLUGIN_NAME="${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}";
 
 	  echo "Plugin guessed: ${PLUGIN_NAME}";
-	  sleep 1;
+
+	else
+	  	echo "Plugin guess failed";
 	fi
 
-	echo "Plugin guess failed";
 }
 
 #**********************************************************
