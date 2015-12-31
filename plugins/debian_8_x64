@@ -5,7 +5,7 @@
 #M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork libapache2-mod-perl2
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
 #M freeradius:Freeradius_Server:_install_freeradius
-#M DHCP:Dhcp_server:_install isc-dhcp43-server
+#M DHCP:Dhcp_server:_install isc-dhcp-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
 #M mrtg:Mrtg,Rstat:_install_mrtg
 #M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
