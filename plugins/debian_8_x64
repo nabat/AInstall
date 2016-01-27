@@ -188,6 +188,10 @@ _install_ipn() {
 	
 	update-rc.d flow-capture defaults
 	update-rc.d flow-capture enable
+	
+	ln -s `which flow-cat` /usr/local/bin/flow-cat
+        ln -s `which flow-print` /usr/local/bin/flow-print
+	
 	echo '##################################################################################################'
 	echo '###########                         FLOWTOOLS INSTALLED                              #############'
 	echo '##################################################################################################'
