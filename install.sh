@@ -1,11 +1,11 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # ABillS Auto Programs Building
 #
-# Created By ~AsmodeuS~ 2010-2015
+# Created By ABillS Team 2010-2016
 #
 #**************************************************************
 
-VERSION=5.05
+VERSION=5.06
 ABILLS_VERSION="0.58"
 
 # LIB FUNCTION
@@ -43,7 +43,7 @@ GetVersionFromFile() {
 # run before install
 #************************************************
 pre_install () {
- echo "default pre_install"  
+ echo "default pre_install"
 }
 
 
@@ -51,7 +51,7 @@ pre_install () {
 # run after install
 #************************************************
 post_install () {
- echo "deafult post_install"  
+ echo "deafult post_install"
 }
 
 
@@ -66,14 +66,12 @@ show_dialog () {
  COMMENTS=`cat ${PLUGINS_DIR}/${plugin_name} | grep '#COMMENTS'`;
  DIALOG_TITLE="Options for ABillS ${PLUGIN_OS} ${COMMENTS}"
 
-
  OLD_IFS=${IFS};
  IFS=$'\n'
 
- #DEBUG=2;
  #for line in `cat "${PLUGINS_DIR}/${plugin_name}" | grep '^#M'`; do
  while read line; do 
-   
+ 
    if [ "${DEBUG}" != "" ]; then
      echo " >> ${line}"
    fi;
@@ -90,7 +88,6 @@ show_dialog () {
  done < "${PLUGINS_DIR}/${plugin_name}";
 
  IFS=${OLD_IFS};
- #echo ${vars};
 
  ${DIALOG} --checklist "${DIALOG_TITLE}" 50 75 15 \
     ${vars}  \
@@ -110,11 +107,10 @@ get_program_info () {
   NAME=`echo ${NAME} | awk '{print $2 }'`
   DESCRIBE=`echo ${PROGRAM_LINE} | awk -F: '{print $2 }'`
   COMMAND=`echo ${PROGRAM_LINE} | awk -F: '{print $3 }'`
-  
+
   if [ "${DEBUG}" != "" ]; then
     echo ">> ${PROGRAM_LINE}"
   fi;
-
 }
 
 
@@ -165,7 +161,6 @@ done;
 #
 #************************************************
 run_plugin () {
-
   show_dialog "$1" ;
   run_cmd ;
 }
@@ -182,11 +177,11 @@ RESULT="-------------------------------------------"
 for ps_name in ${PROCESS_LIST}; do
   status="Not running";
   ps_status=`ps ax | grep ${ps_name} | grep -v "grep"`;
-  
+
   if [ x"${ps_status}" != x ]; then
     status="Running";
   fi;
-  
+
   RESULT="${RESULT}\n${ps_name} ${status}";
 done;
 
@@ -243,8 +238,7 @@ mk_time () {
     _install ntpdate
   fi;
 
-
-  ntpdate europe.pool.ntp.org  
+  ntpdate europe.pool.ntp.org
   echo "Time sync: " . `date`
 }
 
@@ -268,6 +262,7 @@ _uninstall () {
   mv /usr/abills /usr/abills_;
 }
 
+
 #**********************************************************
 #
 #**********************************************************
@@ -282,9 +277,9 @@ for program_name in $@; do
 
   if [ $? = 0 ]; then
     program_name=`echo "${program_name}" | sed s/\-/_/`;
-    
+  
     echo ${program_name};
-    
+  
     installed="${program_name}_install"
     eval "${installed}"="\(${RET}\)"
   fi;
@@ -292,49 +287,13 @@ done;
 
 }
 
-#**********************************************************
-#
-#**********************************************************
-#_install () {
-#
-#  for pkg in $@; do
-#    if [ "${OS_NAME}" = "CentOS" ]; then
-#      test_program="rpm -q"
-#    elif [ "${OS}" = "FreeBSD" ]; then
-#      test_program="pkg info"
-#    else
-#      test_program="dpkg -s"
-#    fi;
-#
-#    ${test_program} ${pkg} > /dev/null 2>&1
-#
-#    res=$?
-#
-#    if [ ${res} = 1 ]; then
-#      ${BUILD_OPTIONS} ${pkg}
-#      echo "Pkg: ${BUILD_OPTIONS} ${pkg} ${res}";
-#    elif [ ${res} = 127 -o ${res} = 70 ]; then
-#      ${BUILD_OPTIONS} ${pkg}
-#      echo "Pkg: ${BUILD_OPTIONS} ${pkg} ${res}";
-#    else
-#      echo -n "  ${pkg}"
-#      if [ "${res}" = 0 ]; then
-#        echo " Installed";
-#      else 
-#        echo " ${res}"
-#      fi;
-#    fi; 
-#    
-#  done;
-#}
-
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
 #*********************************************************
 install_epel () {
    _fetch epel-release-7-5.noarch.rpm http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
    rpm -ivh epel-release-7-5.noarch.rpm
-   
+ 
   ## RHEL/CentOS 6 32-Bit ##
   # wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
   # rpm -ivh epel-release-6-8.noarch.rpm
@@ -424,7 +383,7 @@ install_rstat() {
 # FSBackup install
 #**********************************************************
 install_fsbackup() {
-  
+
 cd ${BASEDIR}/src/
 
 url="http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz"
@@ -489,7 +448,7 @@ else
   else
     _add_cmd="/usr/sbin/pw useradd ${USER_NAME} -u ${USER_ID} -g ${ABILLS_SYSTEM_GROUP} -d /home/${USER_NAME} -s ${USER_SHELL} -w random -c \"ABillS Remote user\""
     PASSWORD=`eval ${_add_cmd}`
-   
+ 
     if [ $? -eq 0 ]; then
       mkdir /home/${USER_NAME}
       chown -Rf ${USER_NAME} /home/${USER_NAME}
@@ -619,7 +578,7 @@ install_accel_ipoe() {
  eval ${cmd}
 
  insmod /usr/src/accel-ppp-build/drivers/ipoe/driver/ipoe.ko
- 
+
  ipoe_mod_check=`lsmod | grep ipoe`
  if [ "${ipoe_mod_check}" = "" ]; then
    echo "Accel IPoE NOT installed";
@@ -645,7 +604,7 @@ elif [ ${OS_NAME} = Fedora -o ${OS_NAME} = fedora -o ${OS_NAME} = CentOS ]; then
 else
   cmd=${cmd}"${BUILD_OPTIONS} radiusclient1;";
 fi;
-    
+  
 if [ ${OS_NAME} = Mandriva -o ${OS_NAME} = Fedora ]; then
   echo "to install pptpd you need to download sources";
 else 
@@ -797,7 +756,7 @@ if [ x${LOCAL_IPN} = xy ]; then
   IPN_CONTROL_USER=abills_admin
   add_user ${IPN_CONTROL_USER}
 else
-  IPN_CONTROL_USER=${WEB_SERVER_USER}  
+  IPN_CONTROL_USER=${WEB_SERVER_USER}
 fi;
 
 
@@ -830,7 +789,7 @@ ${IPN_CONTROL_USER}   ALL = NOPASSWD: /usr/abills/libexec/linkupdown
 ${IPN_CONTROL_USER}   ALL = NOPASSWD: /sbin/ipfw
 ${IPN_CONTROL_USER}   ALL = NOPASSWD: /sbin/ifconfig
 
-" >> /usr/local/etc/sudoers  
+" >> /usr/local/etc/sudoers
 fi;
 }
 
@@ -846,7 +805,7 @@ install_ipn() {
   ./configure
   make 
   make install
-  
+
   if [ -d ${BILLING_DIR} ]; then
     ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
   fi;
@@ -859,66 +818,65 @@ install_ipcad() {
 
 _install libpcap-dev;
 #  if [ "${OS}" = "Ubuntu" -o "${OS}" = "Debian" -o "${OS}" = "CentOS"]; then
-  
+
   echo '********************************************************************';
   echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
   echo '********************************************************************';
-  
+
   # will be installed in /usr/
   cd /usr/
-  
+
   #remove if already extracted
   if [ -d /usr/ipcad-3.7.3 ]; then
     rm -rf ipcad-3.7.3
   fi;
-  
+
   # do not download if present
   if [ -f "ipcad-3.7.3.tar.gz" ]; then
     echo "INFO: Already downloaded";
   else
     _fetch ipcad-3.7.3.tar.gz http://lionet.info/soft/ipcad-3.7.3.tar.gz
   fi;
-  
+
   tar -xvzf ipcad-3.7.3.tar.gz
   cd ipcad-3.7.3
-  
+
   LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
   LINE2_NUM=$(( LINE1_NUM + 2 ));
-  
+
   sed -i "${LINE2_NUM}d" headers.h;
   sed -i "${LINE1_NUM}d" headers.h;
-  
+
   echo
-  
+
   if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
     echo "INFO:  Error "
   else
     echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
   fi;
-  
-  
+
   sed -i "1i #include \"signal.h\"" main.c;
-  
+
   echo
-  
+
   sed -i "1i #include \"headers.h\"" pps.c;
   sed -i "1i #include \"signal.h\"" pps.c;
-  
+
   echo "INFO: Added to pps.c"
-    
+  
   sed -i "1i #include \"signal.h\"" servers.h;
-  
+
   echo "INFO: Added to servers.h"
-  
+
   ./configure && make && make install
-  
+
   if [ -d  /var/ipcad/ ]; then
     echo "directory /var/ipcad/ exists";
   else
     mkdir /var/ipcad/;
   fi;
 
-  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} ipcad"    
+  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} ipcad"  
 
   echo "/usr/local/bin/ipcad -d" >> /etc/rc.local
 }
@@ -952,7 +910,7 @@ fi;
 if [ ! -d /usr/src/sys ]; then
   echo "Kernel Source not found";
   echo "Please download it to /usr/src/sys/"
-  
+
   sleep 5;
   return 0;
 fi;
@@ -975,7 +933,6 @@ options         IPFIREWALL_NAT          #ipfw kernel nat support
 options         LIBALIAS
 options         HZ=1000
 "
-
 
   if [ -f ${KERNEL_FILE} ]; then
     cp ${KERNEL_FILE} ${KERNEL_FILE}_ABILLS
@@ -1010,20 +967,18 @@ install_freeradius() {
     echo "Radius exists: /usr/local/freeradius/";
     return 0 ;
   fi;
-#Anton: DEBIAN 8.1 Jessie needs libmysqlclient18 
+
  _install make gcc libmysqlclient-dev libmysqlclient16 libmysqlclient18 libgdbm3 libgdbm-dev libperl-dev
 
  if [ "${OS_NAME}" = "CentOS" -o "${OS_NAME}" = "Fedora" ]; then
    _install perl-devel perl-ExtUtils-Embed
  fi;
 
- #Anton: Added /usr/lib/i386-linux-gnu/ for x86 systems
- #Anton: Added /usr/lib/x86_64-linux-gnu/ for DEBIAN
-PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
+ PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
 
 for dir in ${PERL_LIB_DIRS}; do
   if [ "${DEBUG}" = 1 ]; then
-    echo "ls ${dir}/libperl* | head -1"  
+    echo "ls ${dir}/libperl* | head -1"
   fi;
 
   PERL_LIB=`ls ${dir}/libperl* | head -1`;
@@ -1034,7 +989,6 @@ for dir in ${PERL_LIB_DIRS}; do
     fi;
   fi;
 done;
-
 
 if [ x"${PERL_LIB_DIR}" = x ]; then
   echo "Perl lib not found";
@@ -1065,7 +1019,6 @@ ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 groupadd ${RADIUS_SERVER_USER}
 useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
-
 
 #autostart
 # For CentOS
@@ -1142,7 +1095,7 @@ case "$1" in
 esac
 
 EOF)
-  
+
 else
 (cat <<EOF
 #!/bin/sh
@@ -1263,7 +1216,7 @@ PKG_ADD=pkg
 if [ -f /usr/sbin/pkg_add ]; then
   #new version PKG tools
   if [ ! -f /usr/sbin/pkg -a ! -f /usr/local/sbin/pkg ]; then
-    
+  
     if [ -d /usr/ports/ports-mgmt/pkg ]; then
       cd /usr/ports/ports-mgmt/pkg && make && make install
     else 
@@ -1271,7 +1224,7 @@ if [ -f /usr/sbin/pkg_add ]; then
     fi;
 
     PKG_INFO=`pkg info | head`;
-  
+
     if [ x"${PKG_INFO}" = x ]; then
       /usr/local/sbin/pkg2ng
 
@@ -1284,7 +1237,6 @@ if [ -f /usr/sbin/pkg_add ]; then
     fi;
   fi;
 fi
-
 
 ${DIALOG} --checklist "${DIALOG_TITLE}" 50 75 15 billing "Billing Server"  off \
      nas    "Nas server"  off  \
@@ -1323,11 +1275,9 @@ if [ x != x${freeradius_install} ]; then
   freeradius_install="(installed ${freeradius_install})"
 fi;
 
-
-
 for name in ${RESULT}; do
   name=`echo "${name}" | sed s/\"//g;`;
-  
+
   if [ "${name}" = "billing" ]; then
 
     DIALOG_TITLE="Options for ABillS FreeBSD ports"
@@ -1368,13 +1318,12 @@ for name in ${RESULT}; do
      Utils          "bash,vim,tmux,monit" on\
     2>${TMPOPTIONSFILE}
     RESULT=${RESULT}" "`cat ${TMPOPTIONSFILE}`;
-    
+
     # Add gatewayenable
     check_gate=`cat /etc/rc.conf | grep gateway_enable`;
     if [ x"${check_gate}" = x ]; then
       echo "gateway_enable=\"YES\"" >> /etc/rc.conf
     fi;
-    
   fi;
 done;
 
@@ -1395,22 +1344,20 @@ if [ x"${LIBTOOL__EXIST}" != x ]; then
   fi;
 fi;
 
-
-
 for name in ${RESULT}; do
   name=`echo "${name}" | sed s/\"//g;`;
   echo "Program: ${name}";
   cmd="";
-  
+
   #System and ports update
   if [ "${name}" = "update" ] ; then
     #System update
     # freebsd-update
-    #ports update    
+    #ports update  
     cmd="${cmd}portsnap fetch;"
     cmd="${cmd}portsnap extract;"
     cmd="${cmd}portsnap update;"
-    
+  
     #Build perl 5.18 on new systems
     PERL_EXIST=`${PKG_TOOL} | grep perl-|awk '{print $1}'`;
     if [ x"${PERL_EXIST}" = x ]; then
@@ -1451,7 +1398,7 @@ for name in ${RESULT}; do
     else
       cmd="cd ${PORTS_LOCATION}/net/isc-dhcp33-server ${BUILD_OPTIONS};";
     fi;
-    
+  
     install_sudo
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} dhcp"
   fi;
@@ -1493,18 +1440,17 @@ for name in ${RESULT}; do
     PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
     if [ x"${PHP_INDEX}" = x ]; then
       cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
-      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}      
+      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}    
     fi;
 
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
     AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} AMAVIS=1 CLAMAV=1"
   fi;
 
-
   if [ "${name}" = "MRTG" ]; then
     cmd="cd ${PORTS_LOCATION}/net-mgmt/mrtg ${BUILD_OPTIONS};";
     install_rstat;
-    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"    
+    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"  
   fi;
 
   if [ "${name}" = "fsbackup" ]; then
@@ -1520,7 +1466,7 @@ for name in ${RESULT}; do
 
     install_sudo
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} flow-tools"
-    
+  
     if [ -d ${BILLING_DIR} ]; then
       ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
     fi;
@@ -1552,15 +1498,13 @@ for name in ${RESULT}; do
   else
     eval ${cmd}
     if [ w${DEBUG} != w ]; then
-      echo ${cmd} >> ${CMD_LOG} 
+      echo ${cmd} >> ${CMD_LOG}
     fi;
-  fi;  
+  fi;
 
   AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freebsd"
 
 done
-
-
 }
 
 
@@ -1609,7 +1553,7 @@ _get_version apache mysql-server freeradius
 
 for name in ${RESULT}; do
   name=`echo "${name}" | sed s/\"//g;`;
-  
+
   if [ "${name}" = "billing" ]; then
 
     DIALOG_TITLE="Options for ABillS FreeBSD ports"
@@ -1647,13 +1591,13 @@ for name in ${RESULT}; do
      Utils          "bash,vim,tmux,monit" on\
     2>${TMPOPTIONSFILE}
     RESULT=${RESULT}" "`cat ${TMPOPTIONSFILE}`;
-    
+  
     # Add gatewayenable
     check_gate=`cat /etc/rc.conf | grep gateway_enable`;
     if [ x"${check_gate}" = x ]; then
       echo "gateway_enable=\"YES\"" >> /etc/rc.conf
     fi;
-    
+  
   fi;
 done;
 
@@ -1678,13 +1622,13 @@ for name in ${RESULT}; do
   name=`echo "${name}" | sed s/\"//g;`;
   echo "Program: ${name}";
   cmd="";
-  
+
   #System and ports update
   if [ "${name}" = "update" ] ; then
     #System update
     # freebsd-update
-    #ports update    
-    
+    #ports update  
+  
     ${PKG_ADD} upgrade
   fi;
 
@@ -1747,18 +1691,17 @@ for name in ${RESULT}; do
     PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
     if [ x"${PHP_INDEX}" = x ]; then
       cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
-      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}      
+      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}    
     fi;
 
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
     AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} AMAVIS=1 CLAMAV=1"
   fi;
 
-
   if [ "${name}" = "MRTG" ]; then
     _install mrtg;
     install_rstat;
-    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"    
+    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"  
   fi;
 
   if [ "${name}" = "fsbackup" ]; then
@@ -1775,7 +1718,7 @@ for name in ${RESULT}; do
     install_sudo
 
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} flow-tools"
-    
+  
     if [ -d ${BILLING_DIR} ]; then
       ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
     fi;
@@ -1803,18 +1746,16 @@ for name in ${RESULT}; do
   fi;
 done
 
-
 #Add perl symlink
 if [ ! -f /usr/bin/perl  ]; then
 
   ln -s  /usr/local/bin/perl  /usr/bin/perl
-  
+
   echo "Sym link"
 
 exit;
 
 fi;
-
 }
 
 
@@ -1822,7 +1763,7 @@ fi;
 #
 #**********************************************************
 install_dhcp () {
- USER_="www-data"
+
  # Dhcplog
  echo "local7.*                        /var/log/dhcpd.log" >> /etc/rsyslog.conf
  touch /var/log/dhcpd.log
@@ -1832,13 +1773,12 @@ install_dhcp () {
   sleep 2;
   fi;
  /etc/init.d/rsyslog restart
- #Anton:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- # ln -s /usr/abills/Abills/Dhcphosts/dhcp_log2db.pl /usr/abills/libexec/dhcp_log2db.p
- # echo "tail -F /var/log/dhcpd.log | /usr/abills/libexec/dhcp_log2db.pl" >> /etc/rc.local
- 
- chown ${USER} /etc/dhcp/dhcpd.conf
 
- echo "${USER} ALL = NOPASSWD: /etc/init.d/isc-dhcp-server" >> /etc/sudoers
+ # ln -s /usr/abills/Abills/Dhcphosts/dhcp_log2db.pl /usr/abills/libexec/dhcp_log2db.pl
+ # echo "tail -F /var/log/dhcpd.log | /usr/abills/libexec/dhcp_log2db.pl" >> /etc/rc.local
+
+ chown ${WEB_SERVER_USER} /etc/dhcp/dhcpd.conf
+ echo "${WEB_SERVER_USER} ALL = NOPASSWD: /etc/init.d/isc-dhcp-server" >> /etc/sudoers
 }
 
 #**********************************************************
@@ -1866,7 +1806,6 @@ cd /usr/abills/db/
 mysql --default-character-set=utf8 -D abills < abills.sql
 
 echo "loaded";
- 
 }
 
 #**********************************************************
@@ -1902,7 +1841,6 @@ OPTIONS="update Update  on
 #    PPTP                    PPTP            off
 #    PPTPD             pptpd      off
 
-
 #System defines
   WEB_SERVER_USER="www-data"
   RADIUS_SERVER_USER="freerad"
@@ -1923,7 +1861,7 @@ case "${OS_NAME}" in
 
     UPDATE_CMD="_install update"
     _install dialog git make gcc vim bc wget
-    
+  
     PERL_MODULES="libdigest-sha-perl libdigest-md4-perl libdigest-md5-perl"
     ;;
   *ebian)
@@ -1938,7 +1876,7 @@ case "${OS_NAME}" in
   elif [ -f /etc/apt/apt.conf.d ]; then
       if [ x`grep 'APT::Cache-Limit' /etc/apt/apt.conf.d` = x ]; then
         echo 'APT::Cache-Limit "50000000";' >> /etc/apt/apt.conf.d
-      fi;    
+      fi;  
     fi;
 
     UPDATE_CMD="aptitude update"
@@ -1958,7 +1896,7 @@ case "${OS_NAME}" in
     else
       BUILD_OPTIONS=" apt-get -y install ";
     fi;
-    
+  
     _install dialog cvs gcc vim make wget aptitude perl-devel libperl-dev
   ;;
   *edora)
@@ -1983,7 +1921,7 @@ case "${OS_NAME}" in
     RESTART_MYSQL=/etc/init.d/mysql
     RESTART_RADIUS=/etc/rc.d/init.d/freeradius
     RESTART_APACHE="service httpd"
-    
+  
   ;;
   *penSUSE)
     WEB_SERVER_USER=wwwrun
@@ -2029,7 +1967,7 @@ case "${OS_NAME}" in
     iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
   service iptables save
   /etc/init.d/iptables restart
-  
+
     WEB_SERVER_USER=apache
     RESTART_MYSQL=/etc/init.d/mysqld
     RESTART_RADIUS=/etc/init.d/freeradius
@@ -2062,7 +2000,7 @@ case "${OS_NAME}" in
       pacman -S --noconfirm dialog
     fi;
     pacman -Q cvs > /dev/null 2>&1
-  
+
     b=`echo $?`;
     if [ $b = 1 ]; then
       pacman -S --noconfirm cvs
@@ -2080,7 +2018,7 @@ case "${OS_NAME}" in
     else
       BUILD_OPTIONS=" emerge -pv  ";
     fi;
-    
+  
     _install dialog cvs bc
   ;;
   RedHat)
@@ -2129,7 +2067,6 @@ if [ x"${BENCHMARTK}" != x ]; then
   exit;
 fi;
 
-
 DIALOG_TITLE="Options for ABillS LINUX";
 DIALOG_TITLE=${DIALOG_TITLE}`echo ; uname -a`;
 if [ w${DEBUG} != w ] ; then
@@ -2149,7 +2086,7 @@ for name in $RESULT; do
   echo "Program: ${name}";
   cmd="";
 
-  if [ "${name}" = "update" -a "${UPDATE_CMD}" != "" ] ; then  
+  if [ "${name}" = "update" -a "${UPDATE_CMD}" != "" ] ; then
     ${UPDATE_CMD}
   fi;
 
@@ -2161,30 +2098,28 @@ for name in $RESULT; do
     elif [ "${OS_NAME}" = Fedora -o ${OS_NAME} = fedora ];then 
       cmd=${cmd}"${BUILD_OPTIONS} httpd php; ";
     elif [ "${OS_NAME}" = "CentOS" ]; then 
-    #load DATABASE. Should be where it have to be;
-    load_db;
+      #load DATABASE. Should be where it have to be;
+      load_db;
       cmd=${cmd}"${BUILD_OPTIONS} httpd mod_ssl php; ";
       #Anton: CentOS_VER 6
-    cmd=${cmd}"chkconfig httpd on;"
-    #Anton: CentOS VER 7
-    #open firewall
-    firewall-cmd --zone=public --add-port=9443/tcp --permanent
+      cmd=${cmd}"chkconfig httpd on;"
+      #Anton: CentOS VER 7
+      #open firewall
+      firewall-cmd --zone=public --add-port=9443/tcp --permanent
       firewall-cmd --reload
       cmd=${cmd}"systemctl enable httpd; systemctl start httpd;";
-  elif [ "${OS_NAME}" = Debian ]; then 
-  load_db;
-  cmd="${BUILD_OPTIONS} apache2; a2enmod ssl; a2enmod rewrite; a2enmod cgi;";
-  update-rc.d apache2 defaults
-    update-rc.d apache2 start 20 3 4 5
-  cp /usr/abills/misc/apache/abills_httpd.conf /etc/apache2/sites-enabled/
-   
-   elif [ "${OS_NAME}" = Ubuntu ]; then 
-  load_db;
-  cmd="${BUILD_OPTIONS} apache2; a2enmod ssl; a2enmod rewrite; a2enmod cgi;";
-  update-rc.d apache2 defaults
-    update-rc.d apache2 start 20 3 4 5
-  cp /usr/abills/misc/apache/abills_httpd.conf /etc/apache2/sites-enabled/
-   
+    elif [ "${OS_NAME}" = Debian ]; then 
+      load_db;
+      cmd="${BUILD_OPTIONS} apache2; a2enmod ssl; a2enmod rewrite; a2enmod cgi;";
+      update-rc.d apache2 defaults
+      update-rc.d apache2 start 20 3 4 5
+      cp /usr/abills/misc/apache/abills_httpd.conf /etc/apache2/sites-enabled/
+    elif [ "${OS_NAME}" = Ubuntu ]; then 
+      load_db;
+      cmd="${BUILD_OPTIONS} apache2; a2enmod ssl; a2enmod rewrite; a2enmod cgi;";
+      update-rc.d apache2 defaults
+      update-rc.d apache2 start 20 3 4 5
+      cp /usr/abills/misc/apache/abills_httpd.conf /etc/apache2/sites-enabled/
     else
       cmd="${BUILD_OPTIONS} apache2; a2enmod ssl; a2enmod rewrite; a2enmod cgi;";
       update-rc.d apache2 defaults
@@ -2201,7 +2136,7 @@ for name in $RESULT; do
 
   #pptp
   if [ ${name} = "PPTP" ]; then
-    if [ "${OS_NAME}" = ARCH -o "${OS_NAME}" = Fedora ]; then   
+    if [ "${OS_NAME}" = ARCH -o "${OS_NAME}" = Fedora ]; then 
       cmd="${BUILD_OPTIONS} ppp; ";
     elif [ "${OS_NAME}" = centos ];  then 
       cmd="${BUILD_OPTIONS} ppp; ";
@@ -2215,7 +2150,7 @@ for name in $RESULT; do
 
         mkdir ~/src/ && cd ~/src && wget ftp://ftp.samba.org/pub/ppp/ppp-2.4.4.tar.gz && wget http://bugs.gentoo.org/attachment.cgi?id=102981 -O radius-gigawords.patch;
         tar zxvf ppp-2.4.4.tar.gz && cd ppp-2.4.4 && patch -p1 -l < ../radius-gigawords.patch && ./configure --prefix=/usr && make && make install;
-      fi;  
+      fi;
     fi;
     #pptp=`yum info ppp |grep Version | awk '{print $3}' |uniq`;
   fi;
@@ -2234,15 +2169,13 @@ for name in $RESULT; do
         cmd=${cmd}"${BUILD_OPTIONS} mariadb mariadb-devel mariadb-libs mariadb-server"
         cmd=${cmd}";systemctl enable mariadb; systemctl start mariadb;"
       fi;
-
     elif [ "${OS_NAME}" = "Ubuntu" ]; then
       cmd=${cmd}"${BUILD_OPTIONS} mysql-server; ";
       cmd=${cmd}"update-rc.d mysql defaults; "
       cmd=${cmd}"update-rc.d mysql start 20 3 4 5; "
-  elif [ "${OS_NAME}" = "Debian" ]; then
+    elif [ "${OS_NAME}" = "Debian" ]; then
       cmd=${cmd}"${BUILD_OPTIONS} mysql-server; ";
       cmd=${cmd}"systemctl enable mysql; "
-
     else
       cmd=${cmd}"${BUILD_OPTIONS} mysql-server;";
       cmd=${cmd}"chkconfig --levels 235 mysqld on";
@@ -2260,18 +2193,17 @@ for name in $RESULT; do
   if [ ${name} = "DHCP" ]; then
     if [ "${OS_NAME}" = Debian ];  then 
       # ANTON: 7 version 
-    cmd=${cmd}"${BUILD_OPTIONS} dhcp3-server;";
+      cmd=${cmd}"${BUILD_OPTIONS} dhcp3-server;";
       # ANTON: 8 version 
-    cmd=${cmd}"${BUILD_OPTIONS} isc-dhcp-server;";
-  elif [ "${OS_NAME}" = CentOS ];  then 
+      cmd=${cmd}"${BUILD_OPTIONS} isc-dhcp-server;";
+     elif [ "${OS_NAME}" = CentOS ];  then 
       cmd=${cmd}"${BUILD_OPTIONS} dhcp dhcp-libs;";
-    install_dhcp;
+      install_dhcp;
 #    elif [ x${OS_NAME} = xSlackware ]; then
 #      install_dhcp
     else 
       cmd=${cmd}"${BUILD_OPTIONS} dhcp3-server;";
     fi;
-    
     install_dhcp;
   fi;
 
@@ -2330,7 +2262,7 @@ for name in $RESULT; do
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
       echo "!!!    Installing flow-tools                   !!!";
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-      
+    
       yum -y install flow-tools-devel flow-tools
       mkdir /usr/abills/var/log/ipn/;
   # yum -y install gcc bzip2
@@ -2368,7 +2300,7 @@ for name in $RESULT; do
     else 
       cmd=${cmd}"${BUILD_OPTIONS} ipcad;";
     fi;
-    
+  
     install_sudo ;
   fi;
  
@@ -2391,7 +2323,7 @@ for name in $RESULT; do
     make
     make install
   fi;
-  
+
   if [ w"${VERBOSE}" != w ]; then
     echo ${cmd}
   else
@@ -2400,13 +2332,13 @@ for name in $RESULT; do
       echo ${cmd} >> ${CMD_LOG}
     fi;
   fi
-  
+
   # Echo 
   if [ "${DEBUG}" != "" ]; then
      echo "Finished: ${name}";
      read -p "Contibue install. [y/n]" CONTINUE;
   fi;
-  
+
 done
 }
 
@@ -2441,7 +2373,6 @@ fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
     echo "Fetching ABillS ${ABILLS_VERSION}.\n May take some time that depends off your internet connection speed";
-
     URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
     _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
     tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
@@ -2508,6 +2439,9 @@ for _switch ; do
         -f)     FETCH_FREE_DISTR=1;
                 shift;
                 ;;
+        -com)   COM_DISTRO=1;
+                shift;
+                ;;
         -b)     BENCHMARK=1;
                 shift;
                 ;;
@@ -2561,7 +2495,7 @@ while [ "${OS_NAME}" = "" ]; do
   mk_resolve
 
   #Make source dir
-  
+
   if [ ! -d "${BASEDIR}/src/" ]; then
     mkdir "${BASEDIR}/src/"
   fi;
@@ -2595,24 +2529,15 @@ while [ "${OS_NAME}" = "" ]; do
 	guess_plugin;
 
 	if [ "${use_plugin}" ]; then
-
 	  USE_PLUGIN=${use_plugin};
-
   else
-
 	  if [ "${PLUGIN_NAME}" ]; then
-
-	     USE_PLUGIN=${PLUGIN_NAME}
-
+	    USE_PLUGIN=${PLUGIN_NAME}
 	  else
-
 	    dialog --title "${dialog_title}" --menu "Choose plugin" 40 40 10 ${plugins_list} 2>$tempfile;
-
       USE_PLUGIN=`cat $tempfile`;
       rm -f $tempfile;
-
 	  fi
-
   fi;
 
   #  echo "Use plugin [enter for default plugin]: ";
@@ -2632,7 +2557,6 @@ while [ "${OS_NAME}" = "" ]; do
   fi;
 done;
 
-
 mk_file_definition
 
 cd ${BILLING_DIR}/misc/
@@ -2650,7 +2574,7 @@ echo "Autoconf programs: ${AUTOCONF_PROGRAMS}";
 ./autoconf PROGRAMS=${AUTOCONF_PROGRAMS} ${AUTOCONF_PROGRAMS_FLAGS} 
 
 #if [ -x /usr/bin/chcon ]; then
-#  chcon -R -t httpd_sys_content_t ${BILLING_DIR}/cgi-bin/index.cgi  
+#  chcon -R -t httpd_sys_content_t ${BILLING_DIR}/cgi-bin/index.cgi
 #  chcon -R -t httpd_sys_content_t ${BILLING_DIR}/cgi-bin/admin/index.cgi 
 #  chcon -R -t httpd_sys_content_t ${BILLING_DIR}/cgi-bin/graphics.cgi
 #fi;
