@@ -105,7 +105,7 @@ guess_plugin(){
 	PLUGIN_OS_ARCH='86';
 	ARCH64=`echo ${MACH} | grep -o -e '64'`;
  	if [ ${ARCH64} ]; then
-	    PLUGIN_OS_ARCH = '64';
+	    PLUGIN_OS_ARCH='64';
 	fi
 
 	#if file exists

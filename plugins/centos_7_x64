@@ -669,7 +669,7 @@ ATTRIBUTE Acct-Interim-Interval 85 integer
 ATTRIBUTE Acct-Input-Gigawords    52      integer
 EOF3
 
-accel-pppd  -p 'var/run/accel.pid' -c '/etc/accel-ppp.conf'
+#accel-pppd  -p 'var/run/accel.pid' -c '/etc/accel-ppp.conf'
 
 cd ${CURRENT_DIR}
 
