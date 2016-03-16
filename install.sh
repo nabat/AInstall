@@ -71,7 +71,7 @@ show_dialog () {
 
  #for line in `cat "${PLUGINS_DIR}/${plugin_name}" | grep '^#M'`; do
  while read line; do 
- 
+
    if [ "${DEBUG}" != "" ]; then
      echo " >> ${line}"
    fi;
@@ -277,9 +277,9 @@ for program_name in $@; do
 
   if [ $? = 0 ]; then
     program_name=`echo "${program_name}" | sed s/\-/_/`;
-  
+
     echo ${program_name};
-  
+
     installed="${program_name}_install"
     eval "${installed}"="\(${RET}\)"
   fi;
@@ -293,7 +293,7 @@ done;
 install_epel () {
    _fetch epel-release-7-5.noarch.rpm http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
    rpm -ivh epel-release-7-5.noarch.rpm
- 
+
   ## RHEL/CentOS 6 32-Bit ##
   # wget http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
   # rpm -ivh epel-release-6-8.noarch.rpm
@@ -448,7 +448,7 @@ else
   else
     _add_cmd="/usr/sbin/pw useradd ${USER_NAME} -u ${USER_ID} -g ${ABILLS_SYSTEM_GROUP} -d /home/${USER_NAME} -s ${USER_SHELL} -w random -c \"ABillS Remote user\""
     PASSWORD=`eval ${_add_cmd}`
- 
+
     if [ $? -eq 0 ]; then
       mkdir /home/${USER_NAME}
       chown -Rf ${USER_NAME} /home/${USER_NAME}
@@ -604,7 +604,7 @@ elif [ ${OS_NAME} = Fedora -o ${OS_NAME} = fedora -o ${OS_NAME} = CentOS ]; then
 else
   cmd=${cmd}"${BUILD_OPTIONS} radiusclient1;";
 fi;
-  
+
 if [ ${OS_NAME} = Mandriva -o ${OS_NAME} = Fedora ]; then
   echo "to install pptpd you need to download sources";
 else 
@@ -863,7 +863,7 @@ _install libpcap-dev;
   sed -i "1i #include \"signal.h\"" pps.c;
 
   echo "INFO: Added to pps.c"
-  
+
   sed -i "1i #include \"signal.h\"" servers.h;
 
   echo "INFO: Added to servers.h"
@@ -876,7 +876,7 @@ _install libpcap-dev;
     mkdir /var/ipcad/;
   fi;
 
-  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} ipcad"  
+  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} ipcad"
 
   echo "/usr/local/bin/ipcad -d" >> /etc/rc.local
 }
@@ -1216,7 +1216,7 @@ PKG_ADD=pkg
 if [ -f /usr/sbin/pkg_add ]; then
   #new version PKG tools
   if [ ! -f /usr/sbin/pkg -a ! -f /usr/local/sbin/pkg ]; then
-  
+
     if [ -d /usr/ports/ports-mgmt/pkg ]; then
       cd /usr/ports/ports-mgmt/pkg && make && make install
     else 
@@ -1353,11 +1353,11 @@ for name in ${RESULT}; do
   if [ "${name}" = "update" ] ; then
     #System update
     # freebsd-update
-    #ports update  
+    #ports update
     cmd="${cmd}portsnap fetch;"
     cmd="${cmd}portsnap extract;"
     cmd="${cmd}portsnap update;"
-  
+
     #Build perl 5.18 on new systems
     PERL_EXIST=`${PKG_TOOL} | grep perl-|awk '{print $1}'`;
     if [ x"${PERL_EXIST}" = x ]; then
@@ -1398,7 +1398,7 @@ for name in ${RESULT}; do
     else
       cmd="cd ${PORTS_LOCATION}/net/isc-dhcp33-server ${BUILD_OPTIONS};";
     fi;
-  
+
     install_sudo
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} dhcp"
   fi;
@@ -1440,7 +1440,7 @@ for name in ${RESULT}; do
     PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
     if [ x"${PHP_INDEX}" = x ]; then
       cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
-      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}    
+      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}
     fi;
 
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
@@ -1450,7 +1450,7 @@ for name in ${RESULT}; do
   if [ "${name}" = "MRTG" ]; then
     cmd="cd ${PORTS_LOCATION}/net-mgmt/mrtg ${BUILD_OPTIONS};";
     install_rstat;
-    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"  
+    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"
   fi;
 
   if [ "${name}" = "fsbackup" ]; then
@@ -1466,7 +1466,7 @@ for name in ${RESULT}; do
 
     install_sudo
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} flow-tools"
-  
+
     if [ -d ${BILLING_DIR} ]; then
       ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
     fi;
@@ -1591,13 +1591,13 @@ for name in ${RESULT}; do
      Utils          "bash,vim,tmux,monit" on\
     2>${TMPOPTIONSFILE}
     RESULT=${RESULT}" "`cat ${TMPOPTIONSFILE}`;
-  
+
     # Add gatewayenable
     check_gate=`cat /etc/rc.conf | grep gateway_enable`;
     if [ x"${check_gate}" = x ]; then
       echo "gateway_enable=\"YES\"" >> /etc/rc.conf
     fi;
-  
+
   fi;
 done;
 
@@ -1627,8 +1627,8 @@ for name in ${RESULT}; do
   if [ "${name}" = "update" ] ; then
     #System update
     # freebsd-update
-    #ports update  
-  
+    #ports update
+
     ${PKG_ADD} upgrade
   fi;
 
@@ -1691,7 +1691,7 @@ for name in ${RESULT}; do
     PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
     if [ x"${PHP_INDEX}" = x ]; then
       cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
-      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}    
+      cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}
     fi;
 
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
@@ -1701,7 +1701,7 @@ for name in ${RESULT}; do
   if [ "${name}" = "MRTG" ]; then
     _install mrtg;
     install_rstat;
-    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"  
+    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg"
   fi;
 
   if [ "${name}" = "fsbackup" ]; then
@@ -1718,7 +1718,7 @@ for name in ${RESULT}; do
     install_sudo
 
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} flow-tools"
-  
+
     if [ -d ${BILLING_DIR} ]; then
       ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
     fi;
@@ -1861,7 +1861,7 @@ case "${OS_NAME}" in
 
     UPDATE_CMD="_install update"
     _install dialog git make gcc vim bc wget
-  
+
     PERL_MODULES="libdigest-sha-perl libdigest-md4-perl libdigest-md5-perl"
     ;;
   *ebian)
@@ -1876,7 +1876,7 @@ case "${OS_NAME}" in
   elif [ -f /etc/apt/apt.conf.d ]; then
       if [ x`grep 'APT::Cache-Limit' /etc/apt/apt.conf.d` = x ]; then
         echo 'APT::Cache-Limit "50000000";' >> /etc/apt/apt.conf.d
-      fi;  
+      fi;
     fi;
 
     UPDATE_CMD="aptitude update"
@@ -1896,7 +1896,7 @@ case "${OS_NAME}" in
     else
       BUILD_OPTIONS=" apt-get -y install ";
     fi;
-  
+
     _install dialog cvs gcc vim make wget aptitude perl-devel libperl-dev
   ;;
   *edora)
@@ -1921,7 +1921,7 @@ case "${OS_NAME}" in
     RESTART_MYSQL=/etc/init.d/mysql
     RESTART_RADIUS=/etc/rc.d/init.d/freeradius
     RESTART_APACHE="service httpd"
-  
+
   ;;
   *penSUSE)
     WEB_SERVER_USER=wwwrun
@@ -2018,7 +2018,7 @@ case "${OS_NAME}" in
     else
       BUILD_OPTIONS=" emerge -pv  ";
     fi;
-  
+
     _install dialog cvs bc
   ;;
   RedHat)
@@ -2108,13 +2108,13 @@ for name in $RESULT; do
       firewall-cmd --zone=public --add-port=9443/tcp --permanent
       firewall-cmd --reload
       cmd=${cmd}"systemctl enable httpd; systemctl start httpd;";
-    elif [ "${OS_NAME}" = Debian ]; then 
+    elif [ "${OS_NAME}" = Debian ]; then
       load_db;
       cmd="${BUILD_OPTIONS} apache2; a2enmod ssl; a2enmod rewrite; a2enmod cgi;";
       update-rc.d apache2 defaults
       update-rc.d apache2 start 20 3 4 5
       cp /usr/abills/misc/apache/abills_httpd.conf /etc/apache2/sites-enabled/
-    elif [ "${OS_NAME}" = Ubuntu ]; then 
+    elif [ "${OS_NAME}" = Ubuntu ]; then
       load_db;
       cmd="${BUILD_OPTIONS} apache2; a2enmod ssl; a2enmod rewrite; a2enmod cgi;";
       update-rc.d apache2 defaults
@@ -2136,7 +2136,7 @@ for name in $RESULT; do
 
   #pptp
   if [ ${name} = "PPTP" ]; then
-    if [ "${OS_NAME}" = ARCH -o "${OS_NAME}" = Fedora ]; then 
+    if [ "${OS_NAME}" = ARCH -o "${OS_NAME}" = Fedora ]; then
       cmd="${BUILD_OPTIONS} ppp; ";
     elif [ "${OS_NAME}" = centos ];  then 
       cmd="${BUILD_OPTIONS} ppp; ";
@@ -2196,7 +2196,7 @@ for name in $RESULT; do
       cmd=${cmd}"${BUILD_OPTIONS} dhcp3-server;";
       # ANTON: 8 version 
       cmd=${cmd}"${BUILD_OPTIONS} isc-dhcp-server;";
-     elif [ "${OS_NAME}" = CentOS ];  then 
+     elif [ "${OS_NAME}" = CentOS ];  then
       cmd=${cmd}"${BUILD_OPTIONS} dhcp dhcp-libs;";
       install_dhcp;
 #    elif [ x${OS_NAME} = xSlackware ]; then
@@ -2262,7 +2262,7 @@ for name in $RESULT; do
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
       echo "!!!    Installing flow-tools                   !!!";
       echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-    
+
       yum -y install flow-tools-devel flow-tools
       mkdir /usr/abills/var/log/ipn/;
   # yum -y install gcc bzip2
@@ -2300,7 +2300,7 @@ for name in $RESULT; do
     else 
       cmd=${cmd}"${BUILD_OPTIONS} ipcad;";
     fi;
-  
+
     install_sudo ;
   fi;
  

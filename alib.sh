@@ -109,11 +109,16 @@ guess_plugin(){
 	fi
 
 	#if file exists
-	if [ -f "${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}" ]; then
+	if [ -f "plugins/${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}" ]; then
+
 	  PLUGIN_NAME="${PLUGIN_OS_NAME}_${PLUGIN_OS_VERSION}_x${PLUGIN_OS_ARCH}";
+
+	  echo "Plugin guessed: ${PLUGIN_NAME}";
+
+	else
+	  	echo "Plugin guess failed";
 	fi
 
-#	echo ${PLUGIN_NAME};
 }
 
 #**********************************************************

@@ -16,6 +16,11 @@
 
 # Variable
 
+YES="-y"
+BUILD_OPTIONS=" pkg ${YES} install "
+MYSQLDUMP=usr/local/bin/mysqldump
+GZIP=/usr/bin/gzip/
+
 WEB_SERVER_USER=www
 APACHE_CONF_DIR=/usr/local/etc/mysqld
 RESTART_MYSQL=/usr/local/etc/rc.d/apache24
