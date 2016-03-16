@@ -18,8 +18,8 @@
 
 YES="-y"
 BUILD_OPTIONS=" sudo apt-get ${YES} install "
-MYSQLDUMP=/bin/gzip
-GZIP=/usr/bin/mysqldump
+MYSQLDUMP=usr/bin/mysqldump
+GZIP=/bin/gzip/
 WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql

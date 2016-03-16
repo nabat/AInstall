@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/alib.sh" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/install.sh" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/tests/guess_pacman.sh" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
