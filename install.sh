@@ -2521,7 +2521,7 @@ while [ "${OS_NAME}" = "" ]; do
 
   DIALOG_INSTALLED=`which dialog`;
 
-  if [ x"" == x"${DIALOG_INSTALLED}" ]; then
+  if [ x"" = x"${DIALOG_INSTALLED}" ]; then
     _install dialog;
   fi;
 
