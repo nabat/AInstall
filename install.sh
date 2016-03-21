@@ -2474,7 +2474,7 @@ for _switch ; do
                 shift; shift
                 ;;
         --in_tmux)  IN_TMUX="true";
-                    shift; shift
+                    shift;
                     ;;
         --check_services) check_ps;
                           exit;
@@ -2521,7 +2521,7 @@ while [ "${OS_NAME}" = "" ]; do
 
   DIALOG_INSTALLED=`which dialog`;
 
-  if [ x"" == x"${DIALOG_INSTALLED}" ]; then
+  if [ x"" = x"${DIALOG_INSTALLED}" ]; then
     _install dialog;
   fi;
 
