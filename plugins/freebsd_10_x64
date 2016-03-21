@@ -91,7 +91,7 @@ install_mail () {
 #
 #*******************************************
 _install_ipn(){
-  pkg -y install flow-tools;
+  _install flow-tools;
 
   mkdir -p /usr/abills/var/log/ipn/
   chown -R flowtools /usr/abills/var/log/ipn/
