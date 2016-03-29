@@ -17,8 +17,8 @@
 
 # Variable
 
-YES="-rf"
-BUILD_OPTIONS=" pkg ${YES} install "
+YES="-y"
+BUILD_OPTIONS=" pkg install ${YES}"
 MYSQLDUMP=usr/local/bin/mysqldump
 GZIP=/usr/bin/gzip/
 
