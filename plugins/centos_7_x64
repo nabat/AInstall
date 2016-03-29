@@ -684,5 +684,6 @@ post_install() {
 	service flow-capture start
 
 	echo "Plugin finished";
+	echo "You need to reboot the system after configuration"; 
 	read -p "press Enter to continue...";
 }
