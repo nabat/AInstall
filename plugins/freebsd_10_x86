@@ -17,6 +17,8 @@
 
 # Variable
 
+YES="-y"
+BUILD_OPTIONS=" pkg install ${YES}"
 WEB_SERVER_USER=www
 APACHE_CONF_DIR=/usr/local/etc/apache24/Includes/
 RESTART_MYSQL=/usr/local/etc/rc.d/mysql-server
