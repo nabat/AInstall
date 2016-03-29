@@ -31,6 +31,15 @@ RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
 
 
+#******************************************************************
+# PRE INSTALL SECTION. Installing required packages
+#******************************************************************
+pre_install () {
+  ln -s /usr/local/bin/perl /usr/bin/perl
+
+	CURRENT_DIR=`pwd`
+}
+
 #*******************************************
 # Install mailserver
 #*******************************************

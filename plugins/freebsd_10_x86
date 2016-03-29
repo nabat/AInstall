@@ -6,6 +6,7 @@
 #M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
 #M freeradius:Freeradius_Server:_install freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
+#M flow-tools:Flow-tools,Ipcad:_install_ipn
 #M Mail:Mail_server:install_mail
 # MRTG=
 # IPN=
@@ -23,6 +24,15 @@ RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
 RESTART_APACHE=/usr/local/etc/rc.d/apache24
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
+
+#******************************************************************
+# PRE INSTALL SECTION. Installing required packages
+#******************************************************************
+pre_install () {
+  ln -s /usr/local/bin/perl /usr/bin/perl
+
+	CURRENT_DIR=`pwd`
+}
 
 
 #*******************************************
