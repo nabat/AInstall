@@ -1,6 +1,6 @@
 #OS freebsd 10
 #COMMENTS Freebsd comments
-#M update:upgrade:pkg upgrade -y
+#M update:upgrade:pkg upgrade -rf
 #M mysql:MySQL:_install mysql56-server
 #M apache:apache:_install apache24
 #M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
@@ -17,6 +17,7 @@
 
 # Variable
 
+YES="-rf"
 WEB_SERVER_USER=www
 APACHE_CONF_DIR=/usr/local/etc/apache24/Includes/
 RESTART_MYSQL=/usr/local/etc/rc.d/mysql-server
