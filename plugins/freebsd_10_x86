@@ -11,7 +11,7 @@
 # MRTG=
 # IPN=
 # fsbackup=
-#M build_kernel:Build_Kernel:echo test
+#M build_kernel:Build_Kernel:freebsd_build_kernel
 # perl_speedy 
 #M utils:Utils:_install vim tmux bash git
 
@@ -19,13 +19,17 @@
 
 YES="-y"
 BUILD_OPTIONS=" pkg install ${YES}"
+MYSQLDUMP=usr/local/bin/mysqldump
+GZIP=/usr/bin/gzip/
+
 WEB_SERVER_USER=www
-APACHE_CONF_DIR=/usr/local/etc/apache24/Includes/
-RESTART_MYSQL=/usr/local/etc/rc.d/mysql-server
+APACHE_CONF_DIR=/usr/local/etc/mysqld
+RESTART_MYSQL=/usr/local/etc/rc.d/apache24
 RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
 RESTART_APACHE=/usr/local/etc/rc.d/apache24
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
+
 
 #******************************************************************
 # PRE INSTALL SECTION. Installing required packages
@@ -35,7 +39,6 @@ pre_install () {
 
 	CURRENT_DIR=`pwd`
 }
-
 
 #*******************************************
 # Install mailserver
@@ -47,7 +50,7 @@ install_mail () {
  PORTS_LOCATION="/usr/ports/"
 
  cmd="cd ${PORTS_LOCATION}/security/cyrus-sasl2 ${BUILD_OPTIONS};";
- cmd=${cmd}" cd ${PORTS_LOCATION}/mail/postfix ${BUILD_OPTIONS};"; 
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/postfix ${BUILD_OPTIONS};";
  cmd=${cmd}" cd ${PORTS_LOCATION}/mail/maildrop && make WITH_AUTHLIB=yes MAILDROP_TRUSTED_USERS=vmail MAILDROP_SUID=1005 MAILDROP_SGID=1005 && make install;";
  cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib-base ${BUILD_OPTIONS};"
  cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib ${BUILD_OPTIONS};"
@@ -77,16 +80,16 @@ install_mail () {
  check_php_conf=`grep 'x-httpd-php' ${APACHE_CONFIG}`
  if [ w${check_php_conf} = w ]; then
    echo -n "Can\'t find php in apache config add it? (y/n): "
-   read PHP_CONF=
+   read -p "" PHP_CONF
    if [ w${PHP_CONF} = wy ]; then
      echo "AddType application/x-httpd-php .php" >> ${APACHE_CONFIG}
    fi;
  fi;
- 
+
  PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
  if [ x"${PHP_INDEX}" = x ]; then
    cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
-   cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}      
+   cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}
  fi;
 
  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
@@ -96,3 +99,18 @@ install_mail () {
 #*******************************************
 #
 #*******************************************
+_install_ipn(){
+  _install flow-tools;
+
+  mkdir -p /usr/abills/var/log/ipn/
+  chown -R flowtools /usr/abills/var/log/ipn/
+
+  cat  << '[EOF]' > /etc/rc.conf
+flow_capture_enable="YES"
+flow_capture_datadir="/usr/abills/var/log/ipn/"
+flow_capture_port="9996"
+flow_capture_flags="-S 5 -n 287 -N 0 -d 5"
+[EOF]
+
+  service flow_capture start;
+}
