@@ -11,7 +11,7 @@
 # MRTG=
 # IPN=
 # fsbackup=
-#M build_kernel:Build_Kernel:echo test
+#M build_kernel:Build_Kernel:freebsd_build_kernel
 # perl_speedy 
 #M utils:Utils:_install vim tmux bash git
 
