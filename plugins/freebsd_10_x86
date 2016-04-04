@@ -30,6 +30,9 @@ RESTART_APACHE=/usr/local/etc/rc.d/apache24
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
 
+#Services to check after installation
+PROCESS_LIST="mysql-server radiusd apache24 flow-capture isc-dhcpd";
+
 
 #******************************************************************
 # PRE INSTALL SECTION. Installing required packages
