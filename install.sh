@@ -963,6 +963,8 @@ fi;
 #**********************************************************
 install_freeradius() {
 
+FREERADIUS_VERSION="2.2.9"
+
   if [ -d /usr/local/freeradius/ ]; then
     echo "Radius exists: /usr/local/freeradius/";
     return 0 ;
@@ -970,11 +972,7 @@ install_freeradius() {
 
  _install make gcc libmysqlclient-dev libmysqlclient16 libmysqlclient18 libgdbm3 libgdbm-dev libperl-dev
 
- if [ "${OS_NAME}" = "CentOS" -o "${OS_NAME}" = "Fedora" ]; then
-   _install perl-devel perl-ExtUtils-Embed
- fi;
-
- PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
+ PERL_LIB_DIRS="/usr/local/lib/perl5/5.20/mach/CORE/"
 
 for dir in ${PERL_LIB_DIRS}; do
   if [ "${DEBUG}" = 1 ]; then
@@ -997,12 +995,10 @@ else
   echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
 fi;
 
-FREERADIUS_VERSION="2.2.7"
- 
 _fetch freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
-  echo "Can\'t download freeradius. PLease download and install manual";
+  echo "Can't download freeradius. Please download and install manual";
   exit;
 fi;
 
@@ -1019,162 +1015,6 @@ ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 groupadd ${RADIUS_SERVER_USER}
 useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
-
-#autostart
-# For CentOS
-if [ "${OS}" = 'CentOS' ]; then
-
-(cat <<EOF
-#!/bin/bash
-#
-# radiusd       This shell script takes care of starting and stopping
-#               freeradius.
-#
-# chkconfig: - 58 74
-# description: radiusd is service access provider Daemon. \
-
-### BEGIN INIT INFO
-# Provides: radiusd
-# Should-Start: radiusd
-# Should-Stop: radiusd
-# Short-Description: start and stop radiusd
-# Description: radiusd is access provider service Daemon.
-### END INIT INFO
-
-# Source function library.
-. /etc/init.d/functions
-
-prog=/usr/local/freeradius/sbin/radiusd
-lockfile=/var/lock/subsys/$prog
-
-start() {
-        # Start daemons.
-        echo -n $"Starting $prog: "
-        daemon $prog $OPTIONS
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && touch $lockfile
-        return $RETVAL
-}
-stop() {
-        [ "$EUID" != "0" ] && exit 4
-        echo -n $"Shutting down $prog: "
-        killproc $prog
-        RETVAL=$?
-        echo
-        [ $RETVAL -eq 0 ] && rm -f $lockfile
-        return $RETVAL
-}
-# See how we were called.
-case "$1" in
-  start)
-        start
-        ;;
-  stop)
-        stop
-        ;;
-  status)
-        status $prog
-        ;;
-  restart|force-reload)
-        stop
-        start
-        ;;
-  try-restart|condrestart)
-        if status $prog > /dev/null; then
-            stop
-            start
-        fi
-        ;;
-  reload)
-        exit 3
-        ;;
-  *)
-        echo $"Usage: $0 {start|stop|status|restart|try-restart|force-reload}"
-        exit 2
-esac
-
-EOF)
-
-else
-(cat <<EOF
-#!/bin/sh
-# Start/stop the FreeRADIUS daemon. (ABillS)
-
-### BEGIN INIT INFO
-# Provides:          freeradius
-# Required-Start:    $remote_fs $network $syslog
-# Should-Start:      $time mysql slapd postgresql samba krb5-kdc
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Radius Daemon
-# Description:       Extensible, configurable radius daemon
-### END INIT INFO
-
-set -e
-
-if [ -f /lib/lsb/init-functions ]; then
-. /lib/lsb/init-functions
-elif [ -f /lib/lsb/init-functions ]; then
-. /etc/init.d/functions
-fi;
-
-PROG="freeradius"
-PROGRAM="/usr/sbin/radiusd"
-PIDFILE="/var/run/radiusd/radiusd.pid"
-DESCR="FreeRADIUS daemon"
-
-test -f \$PROGRAM || exit 0
-
-# /var/run may be a tmpfs
-if [ ! -d /var/run/radiusd ]; then
- mkdir -p /var/run/radiusd
- chown freerad:freerad /var/run/radiusd
-fi
-
-export PATH="\${PATH:+\$PATH:}/usr/sbin:/sbin"
-
-ret=0
-
-case "\$1" in
-        start)
-                log_daemon_msg "Starting \$DESCR" "\$PROG"
-                start-stop-daemon --start --quiet --pidfile \$PIDFILE --exec \$PROGRAM || ret=\$?
-                log_end_msg \$ret
-                exit \$ret;
-                ;;
-        stop)
-                log_daemon_msg "Stopping \$DESCR" "\$PROG"
-                if [ -f "\$PIDFILE" ] ; then
-                  start-stop-daemon --stop --retry=TERM/30/KILL/5 --quiet --pidfile \$PIDFILE || ret=\$?
-                  log_end_msg \$ret
-                else
-                  log_action_cont_msg "\$PIDFILE not found"
-                  log_end_msg 0
-                fi
-                ;;
-        restart|force-reload)
-                \$0 stop
-                \$0 start
-                ;;
-        *)
-                echo "Usage: \$0 start|stop|restart|force-reload"
-                exit 1
-                ;;
-esac
-
-exit 0
-
-EOF
-) > /etc/init.d/freeradius
-
-  chmod +x /etc/init.d/freeradius
-  # if CentOS version <= 6 
-    chkconfig freeradius add
-    chkconfig freeradius on
-  #fi;
-  systemctl freeradius enable
 
 fi;
 
