@@ -1016,8 +1016,6 @@ groupadd ${RADIUS_SERVER_USER}
 useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
 
-fi;
-
 AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
 }
 
