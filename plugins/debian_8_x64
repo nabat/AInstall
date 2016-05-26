@@ -29,7 +29,7 @@ RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
 
 #Services to check after installation
-PROCESS_LIST="mysqld radiusd apache2 flow-capture"
+PROCESS_LIST="mysql radiusd apache2 flow-capture"
 
 #******************************************************************
 # PRE INSTALL SECTION. Installing required packages
