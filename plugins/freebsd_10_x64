@@ -19,15 +19,15 @@
 
 YES="-y"
 BUILD_OPTIONS=" pkg install ${YES}"
-MYSQLDUMP=usr/local/bin/mysqldump
-GZIP=/usr/bin/gzip/
+MYSQLDUMP=/usr/local/bin/mysqldump
+GZIP=/usr/bin/gzip
 
 WEB_SERVER_USER=www
 APACHE_CONF_DIR=/usr/local/etc/apache24/Includes/
 RESTART_MYSQL=/usr/local/etc/mysql-server
 RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
 RESTART_APACHE=/usr/local/etc/rc.d/apache24
-RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
+RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcpd
 PING=/sbin/ping
 
 #Services to check after installation
@@ -39,8 +39,7 @@ PROCESS_LIST="mysql-server radiusd apache24 flow-capture isc-dhcpd";
 #******************************************************************
 pre_install () {
   ln -s /usr/local/bin/perl /usr/bin/perl
-
-	CURRENT_DIR=`pwd`
+  CURRENT_DIR=`pwd`
 }
 
 #*******************************************
