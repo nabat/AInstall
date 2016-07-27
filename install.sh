@@ -4,7 +4,7 @@
 # Created By ABillS Team 2010-2016
 #
 #**************************************************************
-fe
+
 VERSION=5.06
 #ABILLS_VERSION="0.58"
 ABILLS_VERSION="0.74.60"
