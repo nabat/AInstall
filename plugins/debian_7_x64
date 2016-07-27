@@ -627,7 +627,7 @@ EOF4
 }
 
 #******************************************************************
-#POST INSTALL
+#  POST INSTALL
 #******************************************************************
 post_install () {
 
@@ -637,8 +637,10 @@ post_install () {
   a2enmod cgi;
 
   service apache2 restart;
-
+  
   rm -f /var/lib/mysql/ib_logfile*
+  
+  cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
 
 	echo "Plugin finished";
 	read -p "press Enter to continue...";

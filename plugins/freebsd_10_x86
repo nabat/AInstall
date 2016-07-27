@@ -117,3 +117,9 @@ flow_capture_flags="-S 5 -n 287 -N 0 -d 5"
 
   service flow_capture start;
 }
+
+post-install(){
+
+  cd /usr/abills/misc && ./perldeps.pl  pkg -batch
+  
+}

@@ -624,7 +624,7 @@ EOF4
 }
 
 #******************************************************************
-#POST INSTALL
+#  POST INSTALL
 #******************************************************************
 post_install () {
 
@@ -632,6 +632,10 @@ post_install () {
   a2enmod ssl;
   a2enmod perl;
   a2enmod cgi;
+
+  touch /etc/crontab
+
+  cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
 
 	echo "Plugin finished";
 	read -p "press Enter to continue...";
