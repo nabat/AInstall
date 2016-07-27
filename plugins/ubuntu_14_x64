@@ -720,6 +720,7 @@ install_mail () {
 #POST INSTALL
 #******************************************************************
 post_install () {
+		cd /usr/abills/misc && ./perldeps.pl  apt-get
 		echo "Plugin finished";
 	  read -p "press Enter to continue...";
 }
