@@ -4,9 +4,10 @@
 # Created By ABillS Team 2010-2016
 #
 #**************************************************************
-
+fe
 VERSION=5.06
-ABILLS_VERSION="0.58"
+#ABILLS_VERSION="0.58"
+ABILLS_VERSION="0.74.60"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
@@ -2211,7 +2212,8 @@ fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
     echo "Fetching ABillS ${ABILLS_VERSION}.\n May take some time that depends off your internet connection speed";
-    URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
+    #URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
+    URL="http://abills.net.ua/misc/abills_test.tgz";
     _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
     tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
   else
