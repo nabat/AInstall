@@ -689,7 +689,7 @@ _install_utils() {
 #  port_install
 #*******************************************
 port_install() {
-  cd /usr/abills/misc && ./perldeps.pl  yum
+  cd /usr/abills/misc && ./perldeps.pl  yum -batch
 }
 
 
