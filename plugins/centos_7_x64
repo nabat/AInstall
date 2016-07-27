@@ -682,7 +682,7 @@ post_install() {
 	systemctl start mariadb
 	service radiusd start
 	service flow-capture start
-	cd /usr/abills/misc && ./perldeps.pl  yum
+	cd /usr/abills/misc && ./perldeps.pl  yum -batch
 	echo "Plugin finished";
 	echo "You need to reboot the system after configuration"; 
 	read -p "press Enter to continue...";
