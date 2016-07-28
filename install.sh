@@ -129,7 +129,9 @@ fi;
 . "${PLUGINS_DIR}/${plugin_name}"
 
 #Make correct time
+echo "Synchronyzing time";
 mk_time;
+
 pre_install;
 
 for name in ${RESULT}; do
@@ -1036,12 +1038,7 @@ if [ x${DEBUG} != x ] ; then
   DIALOG_TITLE=${DIALOG_TITLE}" (DEBUG MODE)";
 fi
 
-RESULT=`grep 'WITHOUT="X11"' /etc/make.conf`;
-if [ "${RESULT}" = "" ]; then
-  #echo 'WITHOUT_X11=yes' >> /etc/make.conf
-  echo 'WITHOUT="X11"' >> /etc/make.conf
-  echo 'WITHOUT_GUI=yes' >> /etc/make.conf
-fi;
+pre_install
 
 if [ x"${BENCHMARK}" != x ]; then
   mk_sysbench;

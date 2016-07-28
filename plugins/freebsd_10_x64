@@ -3,8 +3,8 @@
 #M update:upgrade:pkg upgrade -y
 #M mysql:MySQL:_install mysql56-server
 #M apache:apache:_install_apache
-#M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
-#M freeradius:Freeradius_Server:install_freeradius
+#M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-Spreadsheet-WriteExcel
+#M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
 #M Mail:Mail_server:install_mail
@@ -38,16 +38,18 @@ PROCESS_LIST="mysql radiusd httpd flow-capture"
 # PRE INSTALL SECTION. Installing required packages
 #******************************************************************
 pre_install () {
-  ln -s /usr/local/bin/perl /usr/bin/perl
 
-  RESULT=`grep 'WITHOUT="X11"' /etc/make.conf`;
-  if [ "${RESULT}" = "" ]; then
-    #echo 'WITHOUT_X11=yes' >> /etc/make.conf
+  if [ ! -d /usr/bin/perl ];then
+    ln -s /usr/local/bin/perl /usr/bin/perl;
+  fi;
+
+  WITHOUT_X11=`grep 'WITHOUT="X11"' /etc/make.conf`;
+  if [ x'${WITHOUT_X11}' = x'' ]; then
     echo 'WITHOUT="X11"' >> /etc/make.conf
     echo 'WITHOUT_GUI=yes' >> /etc/make.conf
   fi;
 
-	CURRENT_DIR=`pwd`
+	CURRENT_DIR=`pwd`;
 }
 
 
@@ -107,6 +109,15 @@ install_mail () {
  AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} AMAVIS=1 CLAMAV=1"
 }
 
+
+
+#*******************************************
+#
+#*******************************************
+_install_freeradius(){
+  cd /usr/ports/net/freeradius2 && make WITH="MYSQL USER" WITHOUT="" BATCH=yes install
+}
+
 #*******************************************
 #
 #*******************************************
@@ -133,7 +144,7 @@ _install_apache(){
 
   _install apache24
 
-  cat << '[EOF_APACHE]' >> /usr/local/etc/apache24/modules.d/000_abills_modules.conf
+  cat << '[EOF_APACHE]' > /usr/local/etc/apache24/modules.d/000_abills_modules.conf
   
   LoadModule ssl_module libexec/apache24/mod_ssl.so
   LoadModule rewrite_module libexec/apache24/mod_rewrite.so
