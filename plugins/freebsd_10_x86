@@ -40,6 +40,13 @@ PROCESS_LIST="mysql radiusd httpd flow-capture"
 pre_install () {
   ln -s /usr/local/bin/perl /usr/bin/perl
 
+  RESULT=`grep 'WITHOUT="X11"' /etc/make.conf`;
+  if [ "${RESULT}" = "" ]; then
+    #echo 'WITHOUT_X11=yes' >> /etc/make.conf
+    echo 'WITHOUT="X11"' >> /etc/make.conf
+    echo 'WITHOUT_GUI=yes' >> /etc/make.conf
+  fi;
+
 	CURRENT_DIR=`pwd`
 }
 
