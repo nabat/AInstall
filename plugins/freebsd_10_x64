@@ -43,6 +43,10 @@ pre_install () {
     ln -s /usr/local/bin/perl /usr/bin/perl;
   fi;
 
+  if [ ! -d /etc/crontab ];then
+      touch /etc/crontab;
+    fi;
+
   WITHOUT_X11=`grep 'WITHOUT="X11"' /etc/make.conf`;
   if [ x'${WITHOUT_X11}' = x'' ]; then
     echo 'WITHOUT="X11"' >> /etc/make.conf
@@ -116,6 +120,8 @@ install_mail () {
 #*******************************************
 _install_freeradius(){
   cd /usr/ports/net/freeradius2 && make WITH="MYSQL USER" WITHOUT="" BATCH=yes install
+  
+  service radiusd start
 }
 
 #*******************************************
