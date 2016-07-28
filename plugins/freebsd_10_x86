@@ -2,7 +2,7 @@
 #COMMENTS Freebsd comments
 #M update:upgrade:pkg upgrade -y
 #M mysql:MySQL:_install mysql56-server
-#M apache:apache:_install apache24
+#M apache:apache:_install_apache
 #M perl_modules:Perl_modules:_install p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-RRD-Simple p5-Spreadsheet-WriteExcel
 #M freeradius:Freeradius_Server:install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
@@ -118,8 +118,30 @@ flow_capture_flags="-S 5 -n 287 -N 0 -d 5"
   service flow_capture start;
 }
 
+#*******************************************
+#
+#*******************************************
+_install_apache(){
+
+  _install apache24
+
+  cat << '[EOF_APACHE]' >> /usr/local/etc/apache24/modules.d/000_abills_modules.conf
+  
+  LoadModule ssl_module libexec/apache24/mod_ssl.so
+  LoadModule rewrite_module libexec/apache24/mod_rewrite.so
+  LoadModule cgi_module libexec/apache24/mod_cgi.so
+  
+[EOF_APACHE]
+
+  apachectl -k restart
+  
+}
+
+#*******************************************
+#
+#*******************************************
 post-install(){
 
-  cd /usr/abills/misc && ./perldeps.pl  pkg -batch
+  cd /usr/abills/misc && ./perldeps.pl pkg -batch
   
 }
