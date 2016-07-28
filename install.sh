@@ -971,7 +971,7 @@ FREERADIUS_VERSION="2.2.9"
     return 0 ;
   fi;
 
- _install make gcc libmysqlclient-dev libmysqlclient16 libmysqlclient18 libgdbm3 libgdbm-dev libperl-dev
+ _install make gmake gcc libmysqlclient-dev libmysqlclient16 libmysqlclient18 libgdbm3 libgdbm-dev libperl-dev
 
  PERL_LIB_DIRS="/usr/local/lib/perl5/5.20/mach/CORE/"
 

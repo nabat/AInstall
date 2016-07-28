@@ -24,7 +24,7 @@ GZIP=/usr/bin/gzip
 
 WEB_SERVER_USER=www
 APACHE_CONF_DIR=/usr/local/etc/apache24/Includes/
-RESTART_MYSQL=/usr/local/etc/mysql-server
+RESTART_MYSQL=/usr/local/etc/rc.d/mysql-server
 RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
 RESTART_APACHE=/usr/local/etc/rc.d/apache24
 RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcpd
