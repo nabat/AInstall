@@ -140,7 +140,7 @@ _install_apache(){
 #*******************************************
 #
 #*******************************************
-post-install(){
+post_install(){
 
   cd /usr/abills/misc && ./perldeps.pl pkg -batch
   
