@@ -66,6 +66,8 @@ _install_httpd(){
 	cat config2 > /etc/selinux/config
 	rm -f config2
 	cat /etc/selinux/config | grep 'SELINUX='
+	firewall-cmd --zone=public --add-port=9443/tcp --permanent
+	firewall-cmd --reload
 }
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
