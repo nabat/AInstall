@@ -13,7 +13,7 @@
 # fsbackup=
 #M build_kernel:Build_Kernel:freebsd_build_kernel
 # perl_speedy 
-#M utils:Utils:_install vim tmux bash git
+#M utils:Utils:_install vim-lite tmux bash git
 
 # Variable
 
@@ -38,6 +38,7 @@ PROCESS_LIST="mysql radiusd httpd flow-capture"
 # PRE INSTALL SECTION. Installing required packages
 #******************************************************************
 pre_install () {
+  ln -s /usr/local/bin/perl /usr/bin/perl
 
   if [ ! -d /usr/bin/perl ];then
     ln -s /usr/local/bin/perl /usr/bin/perl;
@@ -45,7 +46,12 @@ pre_install () {
 
   if [ ! -d /etc/crontab ];then
       touch /etc/crontab;
-    fi;
+  fi;
+
+  
+  if [ ! -d /etc/make.conf ];then
+      touch /etc/make.conf;
+  fi;
 
   WITHOUT_X11=`grep 'WITHOUT="X11"' /etc/make.conf`;
   if [ x'${WITHOUT_X11}' = x'' ]; then
@@ -120,6 +126,16 @@ install_mail () {
 #*******************************************
 _install_freeradius(){
   cd /usr/ports/net/freeradius2 && make WITH="MYSQL USER" WITHOUT="" BATCH=yes install
+  
+  
+  RADIUS_ENABLED=`grep 'radiusd_enable' /etc/rc.conf`
+  if [ x"${RADIUS_ENABLED}" = x""  ]; then
+    echo "radiusd_enable=\"YES\"" >> /etc/rc.conf;
+  fi;
+  
+  ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+  
+  cd ${CURRENT_DIR}
   
   service radiusd start
 }

@@ -129,6 +129,7 @@ fi;
 . "${PLUGINS_DIR}/${plugin_name}"
 
 #Make correct time
+clear
 echo "Synchronyzing time";
 mk_time;
 
@@ -147,7 +148,8 @@ for name in ${RESULT}; do
   #result=`${COMMAND}`;
 
   ${COMMAND}
-
+  cd ${CURRENT_DIR}
+  
   AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} ${NAME} "
   #AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS}"
 
@@ -172,10 +174,9 @@ run_plugin () {
 # Check active services
 #
 # Anykey: PROCESS_LIST defined in global scope to redefine it in plugin
-#**********************************************************
 PROCESS_LIST="mysqld radiusd httpd flow-capture mpd named"
+#**********************************************************
 check_ps () {
-ps ax |grep "radius" | grep -v "grep"
 RESULT="-------------------------------------------"
 for ps_name in ${PROCESS_LIST}; do
   status="Not running";
@@ -187,8 +188,6 @@ for ps_name in ${PROCESS_LIST}; do
 
   RESULT="${RESULT}\n${ps_name} ${status}";
 done;
-
-#echo ${RESULT};
 }
 
 #**********************************************************
