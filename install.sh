@@ -7,7 +7,7 @@
 
 VERSION=5.07
 #ABILLS_VERSION="0.58"
-ABILLS_VERSION="0.74.60"
+ABILLS_VERSION="0.74"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
@@ -2207,8 +2207,11 @@ fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
     echo "Fetching ABillS ${ABILLS_VERSION}.\n May take some time that depends off your internet connection speed";
-    #URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
-    URL="http://abills.net.ua/misc/abills_test.tgz";
+    if [ x"${TEST_DISTRO}" = x"" ]; then
+      URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
+    else
+      URL="http://abills.net.ua/misc/abills_test.tgz";
+    fi;
     _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
     tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
   else
@@ -2314,6 +2317,9 @@ for _switch ; do
         --check_services) check_ps;
                           exit;
                           ;;
+        --test)  TEST_DISTRO="true";
+                shift;
+                ;;
         esac
 done
 
