@@ -41,6 +41,9 @@ pre_install () {
 
 	_install dialog nano gcc
   
+  LEGACY_SQL_MODE_ENABLE="SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION';SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';";
+  
+  
 	CURRENT_DIR=`pwd`
 }
 
@@ -106,7 +109,7 @@ _install_freeradius() {
 	_fetch freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
-		echo "Can\'t download freeradius. PLease download and install manual";
+		echo "Can\'t download freeradius. PLease download and install it manual";
 		exit;
 	fi;
 
@@ -116,6 +119,8 @@ _install_freeradius() {
 	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
 	echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
 	make && make install
+
+  echo "" > /usr/local/freeradius/etc/raddb/clients.conf
 
 	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
