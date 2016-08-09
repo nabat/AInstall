@@ -126,11 +126,12 @@ if [ "${RESULT}" = "" ]; then
   return;
 fi;
 
+# Read plugin definitions
 . "${PLUGINS_DIR}/${plugin_name}"
 
 #Make correct time
 clear
-echo "Synchronyzing time";
+echo "Synchronyzing time. Please wait few seconds";
 mk_time;
 
 pre_install;
@@ -150,8 +151,10 @@ for name in ${RESULT}; do
   ${COMMAND}
   cd ${CURRENT_DIR}
   
-  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} ${NAME} "
-  #AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS}"
+  if [ -d "/usr/abills/misc/${NAME}" ]; then
+    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} ${NAME} "
+    #AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS}"
+  fi;
 
   echo "Result: ${result}"
 done;
@@ -166,7 +169,10 @@ done;
 #
 #************************************************
 run_plugin () {
+  # Let user choose required software
   show_dialog "$1" ;
+  
+  # Run plugin defined subroutines to install chosen software
   run_cmd ;
 }
 

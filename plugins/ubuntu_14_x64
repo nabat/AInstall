@@ -37,12 +37,13 @@ PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
 #  PRE INSTALL
 #******************************************************************
 pre_install () {
-	echo "hi";
 
 	_install dialog nano gcc
   
   LEGACY_SQL_MODE_ENABLE="SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION';SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';";
-  
+  find /usr/abills/db/ -type f | while read FILENAME; do
+    sed -i "1 i${LEGACY_SQL_MODE_ENABLE}" ${FILENAME};
+  done;
   
 	CURRENT_DIR=`pwd`
 }
