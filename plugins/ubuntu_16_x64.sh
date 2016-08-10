@@ -24,9 +24,10 @@ GZIP=/usr/bin/mysqldump
 WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql
-RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
+RESTART_RADIUS=/etc/init.d/freeradius
 RESTART_APACHE=/etc/init.d/apache2
-RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
+#TODO check DHCP service script
+RESTART_DHCP=/etc/init.d/isc-dhcp
 PING=/sbin/ping
 
 #Services to check after installation
@@ -125,150 +126,7 @@ _install_freeradius() {
 
 	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
-	#Add user
-	groupadd ${RADIUS_SERVER_USER}
-	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
-	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
-	echo "_________________________________________________________________"
-	echo " RADIUS SCRIPT AUTOSTART"
-	echo "_________________________________________________________________"
-	cat << 'EOF' > /etc/init.d/radiusd
-#!/bin/sh
-#
-# radiusd	Start the radius daemon.
-#
-#    This program is free software; you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation; either version 2 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
-#
-#    Copyright (C) 2001-2008 The FreeRADIUS Project http://www.freeradius.org
-#   chkconfig: - 58 74
-#   description: radiusd is service access provider Daemon.
-### BEGIN INIT INFO
-# Provides: radiusd
-# Should-Start: radiusd
-# Should-Stop: radiusd
-# Short-Description: start and stop radiusd
-# Description: radiusd is access provider service Daemon.
-### END INIT INFO
-
-prefix=/usr/local/freeradius
-exec_prefix=${prefix}
-sbindir=${exec_prefix}/sbin
-localstatedir=/var
-logdir=${localstatedir}/log/radius
-rundir=/usr/local/freeradius/var/run/radiusd/
-sysconfdir=${prefix}/etc
-#
-#  If you have issues with OpenSSL, uncomment these next lines.
-#
-#  Something similar may work for MySQL, and you may also
-#  have to LD_PRELOAD libz.so
-#
-#LD_LIBRARY_PATH=
-#LD_RUN_PATH=:
-#LD_PRELOAD=libcrypto.so
-export LD_LIBRARY_PATH LD_RUN_PATH LD_PRELOAD
-
-RADIUSD=$sbindir/radiusd
-RADDBDIR=${sysconfdir}/raddb
-RADIUS_USER='freerad'
-DESC="FreeRADIUS"
-
-#
-#  See 'man radiusd' for details on command-line options.
-#
-ARGS=""
-
-test -f $RADIUSD || exit 0
-test -f $RADDBDIR/radiusd.conf || exit 0
-
-if [ ! -d $rundir ] ; then
-    mkdir $rundir
-    chown ${RADIUS_USER}:${RADIUS_USER} $rundir
-    chmod 775 $rundir
-fi
-
-if [ ! -d $logdir ] ; then
-    mkdir $logdir
-    chown ${RADIUS_USER}:${RADIUS_USER} $logdir
-    chmod 770 $logdir
-    chmod g+s $logdir
-fi
-
-if [ ! -f $logdir/radius.log ]; then
-        touch $logdir/radius.log
-fi
-
-chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
-chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
-chown -R ${RADIUS_USER}:${RADIUS_USER} ${rundir}
-chmod 660 $logdir/radius.log
-
-case "$1" in
-  start)
-	echo -n "Starting $DESC:"
-	$RADIUSD $ARGS
-	echo "radiusd"
-	;;
-  stop)
-	[ -z "$2" ] && echo -n "Stopping $DESC: "
-        [ -f $rundir/radiusd.pid ] && kill -TERM `cat $rundir/radiusd.pid`
-	[ -z "$2" ] && echo "radiusd."
-	;;
-  reload|force-reload)
-	echo "Reloading $DESC configuration files."
-	[ -f $rundir/radiusd.pid ] && kill -HUP `cat $rundir/radiusd.pid`
-	;;
-  restart)
-	sh $0 stop quiet
-	sleep 3
-	sh $0 start
-	;;
-  check)
-	$RADIUSD -CX $ARGS
-	exit $?
-	;;
-  *)
-        echo "Usage: /etc/init.d/$RADIUS {start|stop|reload|restart|check}"
-        exit 1
-        stop
-        ;;
-  status)
-        status \$prog
-        ;;
-  restart|force-reload)
-        stop
-        start
-        ;;
-  try-restart|condrestart)
-        if status \$prog > /dev/null; then
-            stop
-            start
-        fi
-        ;;
-  reload)
-        exit 3
-        ;;
-  *)
-        echo \$"Usage: \$0 {start|stop|status|restart|try-restart|force-reload}"
-        exit 2
-esac
-
-EOF
-
-	chmod +x /etc/init.d/radiusd
-	update-rc.d radiusd defaults
+	update-rc.d freeradius defaults
 	cd ${CURRENT_DIR}
 }
 
@@ -287,9 +145,9 @@ _install_ipn() {
 	
 	pdate-rc.d flow-capture defaults
 	update-rc.d flow-capture enable
-	echo '##################################################################################################'
-	echo 'FLOWTOOLS INSTALLED ##################################################################################################'
-	echo '##################################################################################################'
+	echo '#################################'
+	echo 'FLOWTOOLS INSTALLED #############'
+	echo '#################################'
 
 
 	_install libpcap-dev;

@@ -24,9 +24,9 @@ GZIP=/usr/bin/mysqldump
 WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql
-RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
+RESTART_RADIUS=/etc/freeradius
 RESTART_APACHE=/etc/init.d/apache2
-RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
+#RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcp
 PING=/sbin/ping
 
 #Services to check after installation
