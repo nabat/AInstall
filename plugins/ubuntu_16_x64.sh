@@ -145,10 +145,6 @@ _install_ipn() {
 	
 	pdate-rc.d flow-capture defaults
 	update-rc.d flow-capture enable
-	echo '#################################'
-	echo 'FLOWTOOLS INSTALLED #############'
-	echo '#################################'
-
 
 	_install libpcap-dev;
 

@@ -114,7 +114,22 @@ get_program_info () {
   fi;
 }
 
-
+#************************************************
+# Apply fixes that will appear in new release
+#************************************************
+dirty_fixes (){
+  # Fix sql.conf
+  SQL_CONF_FILE="/usr/abills/misc/freeradius/v2/sql.conf";
+  TEMP_FILE="tmp/sql.conf";
+  OLD_STRING="SELECT ip";
+  NEW_STRING="SET sql_mode=''; SELECT ip";
+  
+  sed -e "s/${OLD_STRING}/${NEW_STRING}/" ${SQL_CONF_FILE} > ${TEMP_FILE};
+  cat ${TEMP_FILE} > ${SQL_CONF_FILE};
+  
+  rm ${TEMP_FILE};
+  
+}
 #************************************************
 # Run select program
 #************************************************
@@ -161,6 +176,8 @@ done;
  
   #Make post install
   post_install;
+  
+  dirty_fixes;
  
   echo "Install finished"
 }
