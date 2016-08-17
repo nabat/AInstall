@@ -120,7 +120,7 @@ get_program_info () {
 dirty_fixes (){
   # Fix sql.conf
   SQL_CONF_FILE="/usr/abills/misc/freeradius/v2/sql.conf";
-  TEMP_FILE="tmp/sql.conf";
+  TEMP_FILE="/tmp/sql.conf";
   OLD_STRING="SELECT ip";
   NEW_STRING="SET sql_mode=''; SELECT ip";
   
