@@ -135,7 +135,9 @@ _install_freeradius() {
 	make && make install
 
 	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
-
+	
+	firewall-cmd --permanent --zone=public --add-service=radius
+	
 	#Add user
 	groupadd ${RADIUS_SERVER_USER}
 	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
