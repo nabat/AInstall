@@ -2372,7 +2372,7 @@ while [ "${OS_NAME}" = "" ]; do
   #Show plugins
   #prepare dialog
   tempfile=temp.txt;
-  dialog_title="OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM}";
+  dialog_title="OS: ${OS_NAME} ${OS_VERSION} ${OS_NUM} #I:${VERSION}";
   for plugin in ${PLUGINS_DIR}/*; do
     plugin_name="`cat ${plugin} | grep -e '#OS' | sed -e 's/[#]OS/''/' | sed -e 's/ //g'`";
 #    echo "PLUGIN NAME: ${plugin_name}";
