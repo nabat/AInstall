@@ -393,11 +393,8 @@ install_rstat() {
 
  cd ${BASEDIR}/src/
 
- RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
+ git clone git@github.com:nabat/rstat.git
 
- _fetch rstat-0.21.tgz "${RSTAT_URL}"
-
- tar zxvf rstat-0.21.tgz ;
  cd rstat ;
  make install;
 
