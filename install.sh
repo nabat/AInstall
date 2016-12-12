@@ -2226,7 +2226,7 @@ fi;
 fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
-    echo "Fetching ABillS ${ABILLS_VERSION}.\n May take some time that depends off your internet connection speed";
+    echo "Fetching ABillS ${ABILLS_VERSION}.\n May take some time that depends of your internet connection speed";
     if [ x"${TEST_DISTRO}" = x"" ]; then
       URL="http://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}.tgz"
     else
@@ -2250,7 +2250,11 @@ start_tmux_session() {
 
   SESSION_NAME='INSTALL';
 
-  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $* && echo -p 'Script has been ended. Press ENTER to exit'"
+  if [ x"${TMUX}" = x"" ]; then
+    echo "Already in TMUX"
+  else
+    tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $* && echo -p 'Script has been ended. Press ENTER to exit'"
+  fi;
 
   echo "Script ended"
   sleep 2;
