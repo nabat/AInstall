@@ -140,6 +140,7 @@ _install_freeradius() {
 	#Add user
 	groupadd ${RADIUS_SERVER_USER}
 	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
+	mkdir -p /usr/local/freeradius/var/log
 	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius
 
 	cat << 'EOF' > /etc/systemd/system/radiusd.service
@@ -153,6 +154,7 @@ Requires=mariadb.service
 Type=forking
 
 PIDFile=/var/run/radiusd/radiusd.pid
+ExecStartPre=/usr/bin/touch /usr/local/freeradius/var/log/radius.log
 ExecStartPre=/usr/bin/chown freerad:freerad /usr/local/freeradius/var/log/radius.log
 ExecStartPre=/usr/bin/mkdir -p /var/run/radiusd
 ExecStartPre=/usr/bin/chown -R freerad:freerad /var/run/radiusd
@@ -173,7 +175,6 @@ EOF
   chown freerad:freerad -R /usr/local/freeradius/var/log
   
 	systemctl enable radiusd
-	systemctl restart radiusd.service
 	
 	cd ${CURRENT_DIR}
 }
@@ -577,7 +578,9 @@ cd ${CURRENT_DIR}
 #************************************
 post_install() {
 	systemctl start mariadb
-	service radiusd start
+	
+  systemctl restart radiusd.service
+
 	service flow-capture start
 	cd /usr/abills/misc && ./perldeps.pl  rpm -batch
 	echo "Plugin finished";
