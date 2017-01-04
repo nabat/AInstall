@@ -2251,7 +2251,11 @@ start_tmux_session() {
 
   SESSION_NAME='INSTALL';
 
-  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $* && echo -p 'Script has been ended. Press ENTER to exit'"
+  if [ x"${TMUX}" = x"" ]; then
+    echo "Already in TMUX"
+  else
+    tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $* && echo -p 'Script has been ended. Press ENTER to exit'"
+  fi;
 
   echo "Script ended"
   sleep 2;
