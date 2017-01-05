@@ -170,7 +170,7 @@ WantedBy=multi-user.target
 EOF
 
   # Change log file destination
-  sed -i.bak -e 's/logdir\ \=\ \/var\/log/logdir\ \=\ \$\{prefix\}\/var\/log/' /usr/abills/misc/freeradius/v2/radiusd.conf
+  sed -i.bak -e 's/logdir\ \=\ \/var\/log/logdir\ \=\ \$\{prefix\}\/var\/log/' /usr/abills/misc/freeradius/linux/radiusd.conf
 
   chown freerad:freerad -R /usr/local/freeradius/var/log
   
