@@ -1,7 +1,7 @@
 #OS Ubuntu 14_x64
 #COMMENTS Ubuntu comments
 #M update:upgrade:apt-get update
-#M mysql:MySQL:_install mysql-server
+#M mysql:MySQL:_install mysql-server-5.6
 #M apache:apache:_install_apache
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
 #M freeradius:Freeradius_Server:_install_freeradius
