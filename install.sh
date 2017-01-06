@@ -2250,14 +2250,8 @@ start_tmux_session() {
   command -v tmux >/dev/null 2>&1 || ( echo >&2 "tmux is not installed."; return 1 )
 
   SESSION_NAME='INSTALL';
-
-  if [ x"${TMUX}" = x"" ]; then
-    echo "Already in TMUX"
-  else
-    tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $* && echo -p 'Script has been ended. Press ENTER to exit'"
-  fi;
-
-  echo "Script ended"
+  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $* && echo -p 'Script has been ended. Press ENTER to exit'"
+  
   sleep 2;
 }
 
