@@ -192,7 +192,7 @@ if [ "${OS}" = Linux ]; then
   FETCH="wget -q -O"
   MD5="md5sum"
 else 
-  FETCH="fetch -q -o"
+  FETCH="fetch -q -o --no-verify-hostname --no-verify-peer"
   MD5="md5"
 fi;
 
