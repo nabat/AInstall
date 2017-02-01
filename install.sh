@@ -5,8 +5,7 @@
 #
 #**************************************************************
 
-VERSION=5.11
-#ABILLS_VERSION="0.58"
+VERSION=5.12
 ABILLS_VERSION="0.75"
 VERSION_PREFIX=""
 
