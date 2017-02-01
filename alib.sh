@@ -133,7 +133,7 @@ _install () {
     elif [ "${OS}" = "FreeBSD" ]; then
       if [ "${BUILD_OPTIONS}" = ""  ]; then
         BUILD_OPTIONS="pkg install -y"
-	env ASSUME_ALWAYS_YES=YES
+	set ASSUME_ALWAYS_YES=YES
       fi;
       test_program="pkg info"
     else
