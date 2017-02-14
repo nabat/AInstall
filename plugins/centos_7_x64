@@ -16,18 +16,18 @@
 # perl_speedy 
 #M utils:Utils:_install_utils
 
-# Variable
-
+# Variables
 WEB_SERVER_USER=apache
+MYSQLDUMP=/bin/mysqldump
+GZIP=/bin/gzip
 APACHE_CONF_DIR=/etc/httpd/conf.d
-RESTART_MYSQL=/usr/libexec/mysqld
-RESTART_RADIUS=/etc/init.d/radiusd
-RESTART_APACHE=/etc/init.d/httpd
-RESTART_DHCP=/etc/init.d/dhcpd
+RESTART_MYSQL="service mysql"
+RESTART_RADIUS="service radiusd "
+RESTART_APACHE="service httpd "
 PING=/bin/ping
 
 #Services to check after installation
-PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
+PROCESS_LIST="mysqld radiusd httpd flow-capture named"
 
 #*******************************************
 #  Pre install
@@ -45,7 +45,6 @@ _install_mysql(){
   yum install -y mariadb mariadb-devel mariadb-libs mariadb-server
 
   systemctl enable mariadb
- 
 }
 
 #*********************************************************
