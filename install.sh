@@ -6,7 +6,7 @@
 #**************************************************************
 
 VERSION=5.12
-ABILLS_VERSION="0.75.105"
+ABILLS_VERSION="0.75.106"
 VERSION_PREFIX=""
 
 # LIB FUNCTION
