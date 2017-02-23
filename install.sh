@@ -6,8 +6,8 @@
 #**************************************************************
 
 VERSION=5.12
-ABILLS_VERSION="0.75.106"
-VERSION_PREFIX=""
+ABILLS_VERSION="0.75"
+VERSION_PREFIX=".106"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
