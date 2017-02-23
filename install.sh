@@ -2232,6 +2232,7 @@ fetch_free_distro () {
     else
       URL="http://abills.net.ua/misc/abills_test.tgz";
     fi;
+    echo "Fetching ${URL}";
     _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
     tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
   else
