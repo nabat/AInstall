@@ -35,7 +35,8 @@ PROCESS_LIST="mysql radiusd apache2 flow-capture"
 # PRE INSTALL SECTION. Installing required packages
 #******************************************************************
 pre_install () {
-
+  
+  apt-get update
 	apt-get -y install dialog nano gcc sudo
   
 	CURRENT_DIR=`pwd`
