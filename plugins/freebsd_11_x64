@@ -13,7 +13,7 @@
 # fsbackup=
 #M build_kernel:Build_Kernel:freebsd_build_kernel
 # perl_speedy 
-#M utils:Utils:_install vim-lite tmux bash git
+#M utils:Utils:_install vim-lite tmux bash git sudo
 
 # Variable
 
@@ -188,4 +188,10 @@ post_install(){
 
   cd /usr/abills/misc && ./perldeps.pl pkg -batch
   
+  mkdir -p /usr/abills/var/log/sql_errors
+  chmod 666 /usr/abills/var/
+  chmod 666 /usr/abills/var/log/
+  
+  touch /usr/abills/var/log/sql_errors
+  chmod 666 /usr/abills/var/log/sql_errors
 }
