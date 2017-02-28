@@ -42,9 +42,13 @@ pre_install() {
 #  Install MySQL
 #*********************************************************
 _install_mysql(){
-  yum install -y mariadb mariadb-devel mariadb-libs mariadb-server
-
-  systemctl enable mariadb
+  # Install repository
+  yum -y install http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+  
+  # Install server (+client) and devel package to compile Freeradius module
+  yum -y install Percona-Server-server-57 Percona-Server-devel-57
+  
+  systemctl enable mysql
 }
 
 #*********************************************************
@@ -60,9 +64,9 @@ _install_httpd(){
 	iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
 	service iptables save || iptables-save > /etc/sysconfig/iptables || apt-get -y install iptables-persistent
 	echo "#########        Disabling selinux               ############"
-	sed 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config > config2
-	cat config2 > /etc/selinux/config
-	rm -f config2
+	
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+	
 	cat /etc/selinux/config | grep 'SELINUX='
 }
 #*********************************************************
