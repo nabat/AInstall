@@ -51,16 +51,22 @@ _install_mysql(){
   # Install server (+client) and devel package to compile Freeradius module
   yum -y install Percona-Server-server-57 Percona-Server-devel-57
   
-  # Starting to initialize directory
+  echo "Starting Percona to initialize /var/lib/mysql directory"
   systemctl start mysql
+  
+  echo "Stop percona running in normal mode"
   systemctl stop mysql
   
+  echo "Starting Percona without password validate"
   sudo -u mysql /usr/sbin/mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --validate-password=OFF
   
+  echo "Grep generated password from mysqld.log"
   MYSQL_TEMPRORARY_ROOT_PASSWORD=`cat /var/log/mysqld.log | grep generated | awk '{print($11)}'`
 
+  echo "Clear 'root'@'localhost' password"
   mysqladmin -u root --password="${MYSQL_TEMPRORARY_ROOT_PASSWORD}" -h localhost password ""
    
+   echo "Start mysql in normal mode"
   systemctl start mysql
   systemctl enable mysql
 }
