@@ -1,15 +1,15 @@
 #OS CentOS 7_x64
 #COMMENTS CentOS comments
-#M update:upgrade:yum -y update
-#M mysql:MySQL:_install_mysql
-#M apache:apache:_install_httpd
-#M perl_modules:Perl_modules:_install_perl_modules
-#M freeradius:Freeradius_Server:_install_freeradius
+#M update:Upgrade system packages:yum -y update
+#M mysql:Percona_5.7_(required):_install_mysql
+#M apache:HTTP_server_(required):_install_httpd
+#M perl_modules:Perl_modules_(required):_install_perl_modules
+#M freeradius:Freeradius_Server_(required):_install_freeradius
 #M dhcp:Dhcp_server:_install_dhcp
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
 #M mrtg:Mrtg,Rstat:_install_mrtg
 #M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
-#M FSbackup:FSbackup:_install_fsbackup
+#M FSbackup:FSBackup:_install_fsbackup
 #dM Mail:Mail_server:install_mail
 # MRTG=
 # fsbackup=
@@ -48,6 +48,22 @@ _install_mysql(){
   # Install server (+client) and devel package to compile Freeradius module
   yum -y install Percona-Server-server-57 Percona-Server-devel-57
   
+  cat << 'MYSQL_ROOT' > /tmp/mysql_clear_root_passwd.sql
+
+  use mysql;
+  SET PASSWORD FOR root@localhost = '';
+  FLUSH PRIVILEGES;
+  
+MYSQL_ROOT
+
+  # Delete current folder
+  rm -rf /var/lib/mysql
+  
+  # Initialize new data folder and clear password
+  sudo -u mysql mysqld --initialize-insecure --init-file=/tmp/mysql_clear_root_passwd.sql
+  
+  systemctl start mysql
+ 
   systemctl enable mysql
 }
 
@@ -62,7 +78,7 @@ _install_httpd(){
 	echo "#########        Opening firewall ports         ############" 
 	iptables -I INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
 	iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
-	service iptables save || iptables-save > /etc/sysconfig/iptables || apt-get -y install iptables-persistent
+	service iptables save || iptables-save > /etc/sysconfig/iptables || yum -y install iptables-persistent
 	echo "#########        Disabling selinux               ############"
 	
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
@@ -73,8 +89,10 @@ _install_httpd(){
 #  Install EPEL repository CentOS (RedHat)
 #*********************************************************
 _install_epel() {
-	wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-	rpm -ivh epel-release-7-5.noarch.rpm
+  # RPM needs 'y' answer, so to automate installation, use yum
+  yum -y install epel-release
+	# wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+	# rpm -ivh epel-release-7-5.noarch.rpm
  
 }
 
