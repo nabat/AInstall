@@ -1,10 +1,10 @@
 #OS CentOS 7_x64
 #COMMENTS CentOS comments
-#M update:Upgrade system packages:yum -y update
-#M mysql:Percona_5.7_(required):_install_mysql
-#M apache:HTTP_server_(required):_install_httpd
-#M perl_modules:Perl_modules_(required):_install_perl_modules
-#M freeradius:Freeradius_Server_(required):_install_freeradius
+#M update:Upgrade_system:yum -y update
+#M mysql:MySQL:_install_mysql
+#M apache:Apache2.4:_install_httpd
+#M perl_modules:Perl_modules:_install_perl_modules
+#M freeradius:Freeradius_Server:_install_freeradius
 #M dhcp:Dhcp_server:_install_dhcp
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
 #M mrtg:Mrtg,Rstat:_install_mrtg
@@ -45,25 +45,23 @@ _install_mysql(){
   # Install repository
   yum -y install http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
   
+  # Lear log before installation
+  [ -f /var/log/mysqld.log ] && echo '' > /var/log/mysqld.log
+    
   # Install server (+client) and devel package to compile Freeradius module
   yum -y install Percona-Server-server-57 Percona-Server-devel-57
   
-  cat << 'MYSQL_ROOT' > /tmp/mysql_clear_root_passwd.sql
-
-  use mysql;
-  SET PASSWORD FOR root@localhost = '';
-  FLUSH PRIVILEGES;
-  
-MYSQL_ROOT
-
-  # Delete current folder
-  rm -rf /var/lib/mysql
-  
-  # Initialize new data folder and clear password
-  sudo -u mysql mysqld --initialize-insecure --init-file=/tmp/mysql_clear_root_passwd.sql
-  
+  # Starting to initialize directory
   systemctl start mysql
- 
+  systemctl stop mysql
+  
+  sudo -u mysql /usr/sbin/mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --validate-password=OFF
+  
+  MYSQL_TEMPRORARY_ROOT_PASSWORD=`cat /var/log/mysqld.log | grep generated | awk '{print($11)}'`
+
+  mysqladmin -u root --password="${MYSQL_TEMPRORARY_ROOT_PASSWORD}" -h localhost password ""
+   
+  systemctl start mysql
   systemctl enable mysql
 }
 
