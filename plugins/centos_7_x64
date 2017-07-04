@@ -602,11 +602,15 @@ post_install() {
 
 	service flow-capture start
 	cd /usr/abills/misc && ./perldeps.pl  rpm -batch
+	echo " ";
+	echo " ";
 	echo "************************************************************";
         echo "************************************************************";
 	echo "***************     Plugin finished    *********************";
 	echo "**** You need to reboot the system after configuration  ****";
         echo "************************************************************";
         echo "************************************************************";
+	echo " ";
+	echo " ";
 	read -p "press Enter to continue...";
 }
