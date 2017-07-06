@@ -39,19 +39,17 @@ PROCESS_LIST="mysql radiusd httpd flow-capture"
 #******************************************************************
 pre_install () {
   # First run for pkg
-  pkg update
+  pkg update -y
 
-  ln -s /usr/local/bin/perl /usr/bin/perl
-
-  if [ ! -d /usr/bin/perl ];then
+  if [ ! -f /usr/bin/perl ];then
     ln -s /usr/local/bin/perl /usr/bin/perl;
   fi;
 
-  if [ ! -d /etc/crontab ];then
+  if [ ! -f /etc/crontab ];then
       touch /etc/crontab;
   fi;
 
-  if [ ! -d /etc/make.conf ];then
+  if [ ! -f /etc/make.conf ];then
       touch /etc/make.conf;
   fi;
 
@@ -127,7 +125,7 @@ install_mail () {
 #
 #*******************************************
 _install_freeradius(){
-  cd /usr/ports/net/freeradius2 && make WITH="MYSQL USER" WITHOUT="" BATCH=yes install
+  cd /usr/ports/net/freeradius2 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
   
   RADIUS_ENABLED=`grep 'radiusd_enable' /etc/rc.conf`
   if [ x"${RADIUS_ENABLED}" = x""  ]; then
@@ -186,7 +184,7 @@ _install_apache(){
 #*******************************************
 post_install(){
 
-  cd /usr/abills/misc && ./perldeps.pl pkg -batch
+  cd /usr/abills/misc && perl perldeps.pl pkg -batch
   
   mkdir -p /usr/abills/var/log/sql_errors
   chmod 666 /usr/abills/var/
