@@ -23,7 +23,7 @@ GZIP=/bin/gzip
 WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql
-RESTART_RADIUS=/etc/init.d/freeradius
+RESTART_RADIUS=/etc/init.d/radiusd
 RESTART_APACHE=/etc/init.d/apache2
 RESTART_DHCP=/etc/init.d/isc-dhcp
 PING=/bin/ping
@@ -104,12 +104,12 @@ _install_freeradius() {
 	echo "_________________________________________________________________"
 	echo " RADIUS SCRIPT AUTOSTART"
 	echo "_________________________________________________________________"
-	cat << 'EOF' > /etc/init.d/freeradius
+	cat << 'EOF' > /etc/init.d/radiusd
 #!/bin/sh
 # Start/stop the FreeRADIUS daemon.
 
 ### BEGIN INIT INFO
-# Provides:          freeradius
+# Provides:          radiusd
 # Required-Start:    $remote_fs $network $syslog
 # Should-Start:      $time mysql slapd postgresql samba krb5-kdc
 # Required-Stop:     $remote_fs $syslog
@@ -123,7 +123,7 @@ set -e
 
 . /lib/lsb/init-functions
 
-PROG="freeradius"
+PROG="radiusd"
 PROGRAM="/usr/sbin/radiusd"
 PIDFILE="/var/run/radiusd/radiusd.pid"
 DESCR="FreeRADIUS daemon"
@@ -170,8 +170,9 @@ esac
 exit 0
 EOF
 
-	chmod +x /etc/init.d/freeradius
-	update-rc.d freeradius defaults
+	chmod +x /etc/init.d/radiusd
+	update-rc.d radiusd defaults
+	update-rc.d radiusd enable
 	cd ${CURRENT_DIR}
 }
 
