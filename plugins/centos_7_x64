@@ -35,6 +35,7 @@ PROCESS_LIST="mysqld radiusd httpd flow-capture named"
 pre_install() {
   yum -y install wget tmux bash nano gcc;
   _install_epel;
+  
   CURRENT_DIR=`pwd`
 }
 
@@ -45,7 +46,7 @@ _install_mysql(){
   # Install repository
   yum -y install http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
   
-  # Lear log before installation
+  # Clear log before installation
   [ -f /var/log/mysqld.log ] && echo '' > /var/log/mysqld.log
     
   # Install server (+client) and devel package to compile Freeradius module
@@ -75,19 +76,26 @@ _install_mysql(){
 #  Install apache
 #*********************************************************
 _install_httpd(){
-	yum -y install httpd httpd-devel httpd-tools mod_perl
+	yum -y install httpd httpd-devel httpd-tools
 	chkconfig httpd on
 	service httpd start
   
+  cat << '[EOF_APACHE]' > /etc/httpd/modules.d/000_abills_modules.conf
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule cgi_module modules/mod_cgi.so
+[EOF_APACHE]
+
+  apachectl -k restart
+  
+  
 	echo "#########        Opening firewall ports         ############" 
-	iptables -I INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
-	iptables -I INPUT -p tcp --dport 9443 -m state --state NEW -j ACCEPT
-	service iptables save || iptables-save > /etc/sysconfig/iptables || yum -y install iptables-persistent
+	firewall-cmd --zone=public --add-port=9443/tcp --permanent
+	firewall-cmd --reload
 	echo "#########        Disabling selinux               ############"
-	
+
 	sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-	
-	cat /etc/selinux/config | grep 'SELINUX='
+
 }
 #*********************************************************
 #  Install EPEL repository CentOS (RedHat)
@@ -172,8 +180,8 @@ _install_freeradius() {
 [Unit]
 Description=FreeRADIUS Server
 After=network.target
-After=mariadb.service
-Requires=mariadb.service
+After=mysql.service
+Requires=mysql.service
 
 [Service]
 Type=forking
