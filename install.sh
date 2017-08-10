@@ -24,6 +24,7 @@ DIALOG=dialog
 FETCH_FREE_DISTR=1;
 PLUGINS_DIR="plugins"
 
+FREERADIUS_VERSION="2.2.10"
 
 #Get running user
 ID=`id | sed 's/uid\=\([0-9]*\).*/\1/';`;
