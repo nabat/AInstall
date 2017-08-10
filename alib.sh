@@ -190,7 +190,12 @@ if [ "${OS}" = Linux ]; then
     _install wget
   fi;
 
-  FETCH="wget -q -O"
+  WGET_OPTIONS="-q -O"
+  if [ "${OS_NAME}" = "CentOS" ]; then
+    WGET_OPTIONS="--no-check-certificate ${WGET_OPTIONS}"
+  fi;
+
+  FETCH="wget ${WGET_OPTIONS}"
   MD5="md5sum"
 else 
   FETCH="fetch --no-verify-hostname --no-verify-peer -q -o "
