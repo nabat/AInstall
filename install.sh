@@ -986,8 +986,6 @@ fi;
 #**********************************************************
 install_freeradius() {
 
-FREERADIUS_VERSION="2.2.9"
-
   if [ -d /usr/local/freeradius/ ]; then
     echo "Radius exists: /usr/local/freeradius/";
     return 0 ;
