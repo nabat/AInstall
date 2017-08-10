@@ -2226,10 +2226,12 @@ fi;
 fetch_free_distro () {
 
   if [ ! -d /usr/abills ]; then
-    echo "Fetching ABillS ${ABILLS_VERSION}${VERSION_PREFIX}.\n May take some time that depends off your internet connection speed";
+    echo "Downloading ABillS ${ABILLS_VERSION}${VERSION_PREFIX}"
+    echo "May take some time that depends off your internet connection speed";
     if [ x"${TEST_DISTRO}" = x"" ]; then
       URL="https://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz"
     else
+      echo "Downloading from abills.net.ua";
       URL="http://abills.net.ua/misc/abills_test.tgz";
     fi;
     echo "Fetching ${URL}";
