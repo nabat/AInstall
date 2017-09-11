@@ -24,11 +24,11 @@ GZIP=/usr/bin/mysqldump
 WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql
-RESTART_RADIUS=/etc/init.d/freeradius
+RESTART_RADIUS="service radiusd"
 RESTART_APACHE=/etc/init.d/apache2
 #TODO check DHCP service script
 RESTART_DHCP=/etc/init.d/isc-dhcp
-PING=/sbin/ping
+PING=/bin/ping
 
 #Services to check after installation
 PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
@@ -726,6 +726,17 @@ install_mail () {
 #******************************************************************
 post_install () {
 		cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
+		touch /usr/abills/var/log/sql_errors
+		chmod +w /usr/abills/var/log/sql_errors
+
+		mkdir /usr/abills/var/
+		chmod -R +w /usr/abills/var/
+
+		mkdir /usr/abills/var/log/
+		chmod -R +w /usr/abills/var/log/
+
+		
+		
 		echo "Plugin finished";
 	  read -p "press Enter to continue...";
 }
