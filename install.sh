@@ -2224,21 +2224,39 @@ fi;
 #**********************************************************
 fetch_free_distro () {
 
-  if [ ! -d /usr/abills ]; then
-    echo "Downloading ABillS ${ABILLS_VERSION}${VERSION_PREFIX}"
-    echo "May take some time that depends off your internet connection speed";
-    if [ x"${TEST_DISTRO}" = x"" ]; then
-      URL="https://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz"
-    else
-      echo "Downloading from abills.net.ua";
-      URL="http://abills.net.ua/misc/abills_test.tgz";
-    fi;
-    echo "Fetching ${URL}";
-    _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
-    tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
+  if [ -d /usr/abills ]; then
+     echo "ABillS exists at /usr/abills/. Will not download"
+     return;
+  fi
+
+  VERSION_FETCH_URL="https://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/"
+  
+  echo "Downloading ABillS ${ABILLS_VERSION}${VERSION_PREFIX}"
+  echo "May take some time that depends off your internet connection speed";
+  if [ x"${TEST_DISTRO}" = x"" ]; then
+    echo "Downloading from SourceForge";
+    URL="${VERSION_FETCH_URL}abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz"
+    
+    echo "Downloading checksum";
+    _fetch '/tmp/checksum' ${VERSION_FETCH_URL};
+    FILE_CHECKSUM=`grep -Eo '\"sha1\": \"[a-z0-9]+\"' /tmp/checksum`
+    echo "File checksum ${FILE_CHECKSUM}";
+    
   else
-     echo "ABillS exists at /usr/abills/"
+    echo "Downloading from abills.net.ua";
+    URL="http://abills.net.ua/misc/abills_test.tgz";
   fi;
+  echo "Fetching ${URL}";
+  
+  _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
+  
+  if [ x"${FILE_CHECKSUM}" != x"" ]; then
+    CALCULATED_CHECKSUM=`sha1sum abills-${ABILLS_VERSION}.tgz | awk '{ print $1 }'`
+    echo "Calculated checksum ${CALCULATED_CHECKSUM}";
+    CHECKSUM_IS_OK=`echo ${FILE_CHECKSUM} | grep ${CALCULATED_CHECKSUM}`;
+  fi;
+ 
+  tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
 }
 
 #**********************************************************
