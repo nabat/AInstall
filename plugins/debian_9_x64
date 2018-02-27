@@ -124,7 +124,7 @@ set -e
 
 PROG="radiusd"
 PROGRAM="/usr/sbin/radiusd"
-PIDFILE="/var/run/radiusd/radiusd.pid"
+PIDFILE="/usr/local/freeradius/var/run/radiusd/radiusd.pid"
 DESCR="FreeRADIUS daemon"
 
 test -f $PROGRAM || exit 0
