@@ -100,6 +100,7 @@ _install_freeradius() {
 	groupadd ${RADIUS_SERVER_USER}
 	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
+	echo '' > /usr/local/freeradius/etc/raddb/clients.conf
 	echo "_________________________________________________________________"
 	echo " RADIUS SCRIPT AUTOSTART"
 	echo "_________________________________________________________________"
