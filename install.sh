@@ -2240,9 +2240,9 @@ fetch_free_distro () {
   fi;
   echo "Fetching ${URL}";
   
-  _fetch abills-${ABILLS_VERSION}.tgz "${URL}";
+  _fetch abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz "${URL}";
   
-  tar zxvf abills-${ABILLS_VERSION}.tgz -C /usr/
+  tar zxvf abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz -C /usr/
   
   if [ ! -f /usr/abills/VERSION ]; then
     echo "Can't download ABillS or archive is corrupted. Exit";
