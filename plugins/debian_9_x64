@@ -90,8 +90,8 @@ _install_freeradius() {
 	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 	cd freeradius-server-${FREERADIUS_VERSION}
-	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-dhcp=yes > 1
-	echo "/configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl=yes --with-dhcp=yes " > configure_abills
+	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes > 1
+	echo "/configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes " > configure_abills
 	make && make install
 
 	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
