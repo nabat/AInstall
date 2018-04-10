@@ -5,7 +5,7 @@
 #
 #**************************************************************
 
-VERSION=5.14
+VERSION=5.20
 ABILLS_VERSION="0.77"
 VERSION_PREFIX=".77"
 
@@ -16,15 +16,21 @@ ${BASEDIR} ./alib.sh
 TMPOPTIONSFILE="/tmp/abills.tmp"
 CMD_LOG="/tmp/ports_builder_cmd.log"
 BILLING_DIR='/usr/abills';
+BASE_INSTALL_DIR=${BILLING_DIR}
 BASE_PWD=`pwd`;
 COMMERCIAL_MODULES="Cards Paysys Ashield Maps Storage Iptv"
-HOSTNAME=`hostname`
+SERVER_HOSTNAME=`hostname`
 DEFAULT_HOSTNAME="aserver"
 DIALOG=dialog
 FETCH_FREE_DISTR=1;
 PLUGINS_DIR="plugins"
-
+BENCHMARTK=""
+OS=""
+OS_NAME=""
+OS_VERSION=""
+OS_NUM=""
 FREERADIUS_VERSION="2.2.10"
+CURRENT_DIR=""
 
 #Get running user
 ID=`id | sed 's/uid\=\([0-9]*\).*/\1/';`;
@@ -231,18 +237,18 @@ fi;
 
 #Add hosts
 if [ "${OS}" = "FreeBSD" ]; then
-  if [ x"${HOSTNAME}" = x ]; then 
+  if [ "${SERVER_HOSTNAME}" = "" ]; then
     echo "${DEFAULT_HOSTNAME}." >> /etc/rc.conf
-    HOSTNAME=${DEFAULT_HOSTNAME}
+    SERVER_HOSTNAME=${DEFAULT_HOSTNAME}
     hostname ${DEFAULT_HOSTNAME}
   fi;
 
-  CHECK_HOSTS=`grep "${HOSTNAME}" /etc/hosts`
+  CHECK_HOSTS=`grep "${SERVER_HOSTNAME}" /etc/hosts`
 
   IP=`ifconfig \`route -n get default | grep interface | tail -1 | awk '{ print $2 }'\` | grep "inet " | awk '{ print $2 }' | head -1`
 
   if [ x"${CHECK_HOSTS}" = x ]; then
-    echo "${IP}  ${HOSTNAME}" >> /etc/hosts
+    echo "${IP}  ${SERVER_HOSTNAME}" >> /etc/hosts
   fi;
 
   BILLING_WEB_IP=${IP}
@@ -1376,7 +1382,7 @@ if [ x${DEBUG} != x ] ; then
 fi
 
 RESULT=`grep 'WITHOUT="X11"' /etc/make.conf`;
-if [ "${RESUL}" = "" ]; then
+if [ "${RESULT}" = "" ]; then
   #echo 'WITHOUT_X11=yes' >> /etc/make.conf
   echo 'WITHOUT="X11"' >> /etc/make.conf
   echo 'WITHOUT_GUI=yes' >> /etc/make.conf
@@ -1830,17 +1836,17 @@ case "${OS_NAME}" in
   *andriva)
     rpm -qa | grep dialog > /dev/null 2>&1
     a=`echo $?`;
-    if [ $a = 1 ];  then
+    if [ ${a} = 1 ];  then
       urpmi -a --auto dialog
     fi;
 
     rpm -qa | grep cvs > /dev/null 2>&1
     b=`echo $?`;
-    if [ $b = 1 ]; then
+    if [ ${b} = 1 ]; then
       urpmi -a --auto cvs
     fi;
 
-    if [ w${REBUILD} != w ]; then
+    if [ "${REBUILD}" != "" ]; then
       BUILD_OPTIONS=" urpme -a --auto  "
     else
       BUILD_OPTIONS=" urpmi -a --auto ";
@@ -1849,24 +1855,24 @@ case "${OS_NAME}" in
   ARCH)
     pacman -Q dialog > /dev/null 2>&1
     a=`echo $?`;
-    if [ $a = 1 ];  then
+    if [ ${a} = 1 ];  then
       pacman -S --noconfirm dialog
     fi;
     pacman -Q cvs > /dev/null 2>&1
 
     b=`echo $?`;
-    if [ $b = 1 ]; then
+    if [ ${b} = 1 ]; then
       pacman -S --noconfirm cvs
     fi;
 
-    if [ w${REBUILD} != w ]; then
+    if [ "${REBUILD}" != "" ]; then
       BUILD_OPTIONS=" pacman -R --noconfirm   "
     else
       BUILD_OPTIONS=" pacman -S --noconfirm   ";
     fi;
   ;;
   *entoo)
-    if [ w${REBUILD} != w ]; then
+    if [ "${REBUILD}" != "" ]; then
       BUILD_OPTIONS=" emerge -pv  "
     else
       BUILD_OPTIONS=" emerge -pv  ";
@@ -1880,7 +1886,7 @@ case "${OS_NAME}" in
     RESTART_RADIUS=/etc/init.d/radiusd
     RESTART_APACHE=/etc/init.d/httpd
 
-    if [ w${REBUILD} != w ]; then
+    if [ "${REBUILD}" != "" ]; then
       BUILD_OPTIONS=" yum  remove "
     else
       BUILD_OPTIONS=" yum  install ";
@@ -1915,14 +1921,14 @@ case "${OS_NAME}" in
   ;;
 esac
 
-if [ x"${BENCHMARTK}" != x ]; then
+if [ "${BENCHMARTK}" != "" ]; then
   mk_sysbench;
   exit;
 fi;
 
 DIALOG_TITLE="Options for ABillS LINUX";
 DIALOG_TITLE=${DIALOG_TITLE}`echo ; uname -a`;
-if [ w${DEBUG} != w ] ; then
+if [ "${DEBUG}" != "" ] ; then
   DIALOG_TITLE=${DIALOG_TITLE}' (DEBUG MODE)';
 fi;
 
@@ -1934,7 +1940,7 @@ if [ "${RESULT}" = "" ]; then
   exit;
 fi;
 
-for name in $RESULT; do
+for name in ${RESULT}; do
   name=`echo ${name} | sed 's/\"//g'`;
   echo "Program: ${name}";
   cmd="";
@@ -1996,7 +2002,7 @@ for name in $RESULT; do
     else
       cmd="${BUILD_OPTIONS} pptp-linux";
       pptp=`apt-cache show ppp |grep Version | awk '{print $2}' | cut -c 1-5`;
-      if [ $pptp1="2.4.4" ]; then 
+      if [ ${pptp1}="2.4.4" ]; then
         for pkg in patch make gcc; do
           apt-get -y install ${pkg};
         done 
@@ -2269,6 +2275,7 @@ start_tmux_session() {
 #
 #**********************************************************
 fetch_distro(){
+
   if [ "${FETCH_FREE_DISTR}"  != "" -a "${COM_DISTRO}" = "" ] ; then
     echo "===============================================================";
     fetch_free_distro;
@@ -2295,7 +2302,7 @@ fetch_distro(){
 # Proccess command-line options
 #
 for _switch ; do
-        case $_switch in
+        case ${_switch} in
         -d)
                 DEBUG=1
                 shift
@@ -2391,7 +2398,7 @@ while [ "${OS_NAME}" = "" ]; do
 
   DIALOG_INSTALLED=`which dialog`;
 
-  if [ x"" = x"${DIALOG_INSTALLED}" ]; then
+  if [ "" = "${DIALOG_INSTALLED}" ]; then
     _install dialog;
   fi;
 
@@ -2430,12 +2437,12 @@ done;
 mk_file_definition
 
 cd ${BILLING_DIR}/misc/
-mkdir /usr/abills/var/ /usr/abills/var/log/
+mkdir /usr/abills/var/ /usr/abills/var/log/ /usr/abills/var/ /usr/abills/var/log/ipn/
 
 AUTOCONF_PROGRAMS=`echo ${AUTOCONF_PROGRAMS} | sed 's/ /,/g'`
 echo "Autoconf: ${AUTOCONF_PROGRAMS}";
 
-if [ x${WEB_SERVER_USER} = x ]; then
+if [ ${WEB_SERVER_USER} = "" ]; then
   WEB_SERVER_USER=www
 fi;
 
@@ -2449,7 +2456,7 @@ echo "Autoconf programs: ${AUTOCONF_PROGRAMS}";
 #  chcon -R -t httpd_sys_content_t ${BILLING_DIR}/cgi-bin/graphics.cgi
 #fi;
 
-if [ x"${BILLING_WEB_IP}" = x ]; then
+if [ "${BILLING_WEB_IP}" = "" ]; then
   BILLING_WEB_IP="your.host"
 fi;
 

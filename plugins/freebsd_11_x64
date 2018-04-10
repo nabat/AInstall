@@ -59,7 +59,7 @@ pre_install () {
     echo 'WITHOUT_GUI=yes' >> /etc/make.conf
   fi;
 
-	CURRENT_DIR=`pwd`;
+  CURRENT_DIR=`pwd`;
 }
 
 
@@ -110,7 +110,7 @@ install_mail () {
  fi;
  
  PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
- if [ x"${PHP_INDEX}" = x ]; then
+ if [ "${PHP_INDEX}" = "" ]; then
    cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
    cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}      
  fi;
@@ -120,12 +120,11 @@ install_mail () {
 }
 
 
-
 #*******************************************
 #
 #*******************************************
 _install_freeradius(){
-  cd /usr/ports/net/freeradius2 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
+  cd /usr/ports/net/freeradius3 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
   
   RADIUS_ENABLED=`grep 'radiusd_enable' /etc/rc.conf`
   if [ x"${RADIUS_ENABLED}" = x""  ]; then
@@ -135,7 +134,9 @@ _install_freeradius(){
   ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
   
   echo '' > /usr/local/etc/raddb/clients.conf
-  
+
+  AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
+
   cd ${CURRENT_DIR}
   
   service radiusd start
