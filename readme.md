@@ -28,6 +28,12 @@ If you want avoid tmux session use ''--in_tmux'' key
 <code>
   # ./install.sh --in_tmux
 </code>
+
+If you want to install custom version use ''--install-version'' key
+
+<code>
+./install.sh --install-version 78.25 
+ </code>
   
 Plugin Format
 -------------
