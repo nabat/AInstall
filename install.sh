@@ -1,11 +1,11 @@
 #!/bin/sh
 # ABillS Auto Programs Building
 #
-# Created By ABillS Team 2010-2017
+# Created By ABillS Team 2010-2018
 #
 #**************************************************************
 
-VERSION=5.20
+VERSION=5.21
 ABILLS_VERSION="0.77"
 VERSION_PREFIX=".77"
 
@@ -18,7 +18,7 @@ CMD_LOG="/tmp/ports_builder_cmd.log"
 BILLING_DIR='/usr/abills';
 BASE_INSTALL_DIR=${BILLING_DIR}
 BASE_PWD=`pwd`;
-COMMERCIAL_MODULES="Cards Paysys Ashield Maps Storage Iptv"
+COMMERCIAL_MODULES="Paysys Ashield Maps Storage Iptv Cablecat"
 SERVER_HOSTNAME=`hostname`
 DEFAULT_HOSTNAME="aserver"
 DIALOG=dialog
@@ -29,7 +29,7 @@ OS=""
 OS_NAME=""
 OS_VERSION=""
 OS_NUM=""
-FREERADIUS_VERSION="2.2.10"
+FREERADIUS_VERSION="3.0.17"
 CURRENT_DIR=""
 
 #Get running user
