@@ -32,7 +32,7 @@ OS_NUM=""
 FREERADIUS_VERSION="3.0.17"
 CURRENT_DIR=""
 PLUGIN_NAME=""
-
+TOTAL_ARGS=$*
 result=""
 TMUX=""
 
@@ -2277,7 +2277,7 @@ start_tmux_session() {
   command -v tmux >/dev/null 2>&1 || ( echo >&2 "tmux is not installed."; return 1 )
 
   SESSION_NAME='INSTALL';
-  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux $* && echo -p 'Script has been ended. Press ENTER to exit'"
+  tmux attach-session -t ${SESSION_NAME} || tmux new-session -n ${SESSION_NAME} -s ${SESSION_NAME} "./install.sh --in_tmux ${TOTAL_ARGS} && echo -p 'Script has been ended. Press ENTER to exit'"
   
   sleep 2;
 }
