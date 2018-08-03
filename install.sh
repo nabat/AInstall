@@ -2241,8 +2241,9 @@ fetch_free_distro () {
   fi
 
   if [ "${INSTALL_VERSION}" != "" ]; then
-    ABILLS_VERSION=`echo "${INSTALL_VERSION}" | awk -F. '{print $1 }'`;
-    VERSION_PREFIX=`echo "${INSTALL_VERSION}" | awk -F. '{print $2 }'`;
+    ABILLS_VERSION=`echo "${INSTALL_VERSION}" | awk -F. '{print "0."$1 }'`;
+    VERSION_PREFIX=`echo "${INSTALL_VERSION}" | awk -F. '{print "."$2 }'`;
+    URL="https://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz";
   elif [ "${TEST_DISTRO}" = "" ]; then
     echo "Downloading from SourceForge";
     URL="https://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz"
