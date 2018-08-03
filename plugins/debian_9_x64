@@ -52,7 +52,7 @@ _install_freeradius() {
 		echo "Radius exists: /usr/local/freeradius/";
 		return 0 ;
 	fi;
-  FREERADIUS_VERSION=3.0.15
+  FREERADIUS_VERSION=3.0.17
   PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
   
 	for dir in ${PERL_LIB_DIRS}; do
