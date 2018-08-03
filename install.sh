@@ -31,6 +31,7 @@ OS_VERSION=""
 OS_NUM=""
 FREERADIUS_VERSION="3.0.17"
 CURRENT_DIR=""
+PLUGIN_NAME=""
 
 result=""
 TMUX=""
@@ -507,7 +508,7 @@ mk_sysbench() {
 
 is_sysbench=`which sysbench`;
 
-if [ x"${is_sysbench}" = x ]; then
+if [ "${is_sysbench}" = "" ]; then
   if [ "${OS}" = Linux ]; then
     if [ "${OS_NAME}" = "CentOS" ]; then 
     rpm -ivh http://fedora.ip-connect.vn.ua/fedora-epel/7/$(arch)/e/epel-release-7-5.noarch.rpm  ;
@@ -2239,9 +2240,6 @@ fetch_free_distro () {
      return;
   fi
 
-  echo "Downloading ABillS ${ABILLS_VERSION}${VERSION_PREFIX}"
-  echo "May take some time that depends off your internet connection speed";
-
   if [ "${INSTALL_VERSION}" != "" ]; then
     ABILLS_VERSION=`echo "${INSTALL_VERSION}" | awk -F. '{print $1 }'`;
     VERSION_PREFIX=`echo "${INSTALL_VERSION}" | awk -F. '{print $2 }'`;
@@ -2252,6 +2250,9 @@ fetch_free_distro () {
     echo "Downloading from abills.net.ua";
     URL="http://abills.net.ua/misc/abills_test.tgz";
   fi;
+
+  echo "Downloading ABillS ${ABILLS_VERSION}${VERSION_PREFIX}"
+  echo "May take some time that depends off your internet connection speed";
 
   echo "Fetching ${URL}";
   
@@ -2307,6 +2308,7 @@ fetch_distro(){
 }
 
 
+#*********************************************************
 # Installation proccess
 # Proccess command-line options
 #
