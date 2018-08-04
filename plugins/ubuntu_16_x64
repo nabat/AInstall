@@ -3,7 +3,7 @@
 #M update:upgrade:apt-get update
 #M mysql:MySQL:_install mysql-server
 #M apache:apache:_install_apache
-#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
+#M perl_modules:Perl_modules:_install libjson-perl libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
@@ -39,103 +39,109 @@ PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
 #******************************************************************
 pre_install () {
 
-	_install dialog nano gcc
+  _install dialog nano gcc
   
   LEGACY_SQL_MODE_ENABLE="SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION';SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';";
   find /usr/abills/db/ -type f | while read FILENAME; do
     sed -i "1 i${LEGACY_SQL_MODE_ENABLE}" ${FILENAME};
   done;
   
-	CURRENT_DIR=`pwd`
+  CURRENT_DIR=`pwd`
 }
-
 
 
 #******************************************************************
 # Apache2
 #******************************************************************
 _install_apache() {
-	_install apache2 
-	_install apache2-doc 
-	_install apache2-utils 
-	_install apache2-mpm-prefork
-	a2enmod ssl
-	a2enmod rewrite
-	a2enmod suexec
-	a2enmod include
-	a2enmod cgid
-	
-	chown -Rf www-data:www-data /usr/abills/cgi-bin
-	chown -Rf www-data:www-data /usr/abills/Abills/templates
-	chown -Rf www-data:www-data /usr/abills/backup
-	${RESTART_APACHE} restart
+
+  _install apache2
+  _install apache2-doc 
+  _install apache2-utils 
+  _install apache2-mpm-prefork
+  a2enmod ssl
+  a2enmod rewrite
+  a2enmod suexec
+  a2enmod include
+  a2enmod cgid
+  
+  chown -Rf www-data:www-data /usr/abills/cgi-bin
+  chown -Rf www-data:www-data /usr/abills/Abills/templates
+  chown -Rf www-data:www-data /usr/abills/backup
+
+  ${RESTART_APACHE} restart
+
+  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} apache "
 }
+
+
 #*******************************************
 #  Radius 
 #*******************************************
 _install_freeradius() {
-		_install gcc make libmysqlclient-dev
+
+  _install gcc make libmysqlclient-dev
   
-	if [ -d /usr/local/freeradius/ ]; then
-		echo "Radius exists: /usr/local/freeradius/";
-		return 0 ;
-	fi;
+  if [ -d /usr/local/freeradius/ ]; then
+    echo "Radius exists: /usr/local/freeradius/";
+    return 0 ;
+  fi;
   
   PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
   
-	for dir in ${PERL_LIB_DIRS}; do
-	if [ "${DEBUG}" = 1 ]; then
-		echo "ls ${dir}/libperl* | head -1"  
-	fi;
+  for dir in ${PERL_LIB_DIRS}; do
+  if [ "${DEBUG}" = 1 ]; then
+    echo "ls ${dir}/libperl* | head -1"  
+  fi;
 
-	PERL_LIB=`ls ${dir}/libperl* | head -1`;
-	if [ x"${PERL_LIB}" != x ]; then
-		PERL_LIB_DIR=${dir}
-		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
-		ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
-		fi;
-	fi;
-	done;
+  PERL_LIB=`ls ${dir}/libperl* | head -1`;
+  if [ x"${PERL_LIB}" != x ]; then
+    PERL_LIB_DIR=${dir}
+    if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
+    ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
+    fi;
+  fi;
+  done;
 
 
-	if [ x"${PERL_LIB_DIR}" = x ]; then
-		echo "Perl lib not found";
-		exit;
-	else
-		echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
-	fi;
+  if [ x"${PERL_LIB_DIR}" = x ]; then
+    echo "Perl lib not found";
+    exit;
+  else
+    echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
+  fi;
 
-	RADIUS_SERVER_USER="freerad"
+  RADIUS_SERVER_USER="freerad"
  
-	_fetch freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+  _fetch freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
-	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
-		echo "Can\'t download freeradius. PLease download and install it manual";
-		exit;
-	fi;
+  if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
+    echo "Can\'t download freeradius. PLease download and install it manual";
+    exit;
+  fi;
 
-	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+  tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
-	cd freeradius-server-${FREERADIUS_VERSION}
-	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
-	echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
-	make && make install
+  cd freeradius-server-${FREERADIUS_VERSION}
+  ./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+  echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
+  make && make install
 
   echo "" > /usr/local/freeradius/etc/raddb/clients.conf
 
-	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+  ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
 
-	#Add user
-	groupadd ${RADIUS_SERVER_USER}
-	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
-	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
-	echo "_________________________________________________________________"
-	echo " RADIUS SCRIPT AUTOSTART"
-	echo "_________________________________________________________________"
-	cat << 'EOF' > /etc/init.d/radiusd
+  #Add user
+  groupadd ${RADIUS_SERVER_USER}
+  useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
+  chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
+  echo "_________________________________________________________________"
+  echo " RADIUS SCRIPT AUTOSTART"
+  echo "_________________________________________________________________"
+  cat << 'EOF' > /etc/init.d/radiusd
 #!/bin/sh
 #
-# radiusd	Start the radius daemon.
+# radiusd  Start the radius daemon.
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -217,28 +223,28 @@ chmod 660 $logdir/radius.log
 
 case "$1" in
   start)
-	echo -n "Starting $DESC:"
-	$RADIUSD $ARGS
-	echo "radiusd"
-	;;
+  echo -n "Starting $DESC:"
+  $RADIUSD $ARGS
+  echo "radiusd"
+  ;;
   stop)
-	[ -z "$2" ] && echo -n "Stopping $DESC: "
+  [ -z "$2" ] && echo -n "Stopping $DESC: "
         [ -f $rundir/radiusd.pid ] && kill -TERM `cat $rundir/radiusd.pid`
-	[ -z "$2" ] && echo "radiusd."
-	;;
+  [ -z "$2" ] && echo "radiusd."
+  ;;
   reload|force-reload)
-	echo "Reloading $DESC configuration files."
-	[ -f $rundir/radiusd.pid ] && kill -HUP `cat $rundir/radiusd.pid`
-	;;
+  echo "Reloading $DESC configuration files."
+  [ -f $rundir/radiusd.pid ] && kill -HUP `cat $rundir/radiusd.pid`
+  ;;
   restart)
-	sh $0 stop quiet
-	sleep 3
-	sh $0 start
-	;;
+  sh $0 stop quiet
+  sleep 3
+  sh $0 start
+  ;;
   check)
-	$RADIUSD -CX $ARGS
-	exit $?
-	;;
+  $RADIUSD -CX $ARGS
+  exit $?
+  ;;
   *)
         echo "Usage: /etc/init.d/$RADIUS {start|stop|reload|restart|check}"
         exit 1
@@ -267,9 +273,12 @@ esac
 
 EOF
 
-	chmod +x /etc/init.d/radiusd
-	update-rc.d radiusd defaults
-	cd ${CURRENT_DIR}
+  chmod +x /etc/init.d/radiusd
+  update-rc.d radiusd defaults
+
+  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
+
+  cd ${CURRENT_DIR}
 }
 
 
@@ -278,79 +287,79 @@ EOF
 #*******************************************
 _install_ipn() {
 
-	_install flow-tools
-	
-	mkdir -p /usr/abills/var/log/ipn/
-	
-	echo "-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996" > /etc/flow-tools/flow-capture.conf
-
-	
-	pdate-rc.d flow-capture defaults
-	update-rc.d flow-capture enable
-
-	_install libpcap-dev;
+  _install flow-tools
+  
+  mkdir -p /usr/abills/var/log/ipn/
+  
+  echo "-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996" > /etc/flow-tools/flow-capture.conf
 
   
-	echo '********************************************************************';
-	echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
-	echo '********************************************************************';
+  pdate-rc.d flow-capture defaults
+  update-rc.d flow-capture enable
+
+  _install libpcap-dev;
+
   
-	# will be installed in /usr/
-	cd /usr/
+  echo '********************************************************************';
+  echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
+  echo '********************************************************************';
   
-	#remove if already extracted
-	if [ -d /usr/ipcad-3.7.3 ]; then
-		rm -rf ipcad-3.7.3
-	fi;
+  # will be installed in /usr/
+  cd /usr/
   
-	# do not download if present
-	if [ -f "ipcad-3.7.3.tar.gz" ]; then
-		echo "INFO: Already downloaded";
-	else
-		wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
-	fi;
+  #remove if already extracted
+  if [ -d /usr/ipcad-3.7.3 ]; then
+    rm -rf ipcad-3.7.3
+  fi;
   
-	tar -xvzf ipcad-3.7.3.tar.gz
-	cd ipcad-3.7.3
+  # do not download if present
+  if [ -f "ipcad-3.7.3.tar.gz" ]; then
+    echo "INFO: Already downloaded";
+  else
+    wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
+  fi;
   
-	LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
-	LINE2_NUM=$(( LINE1_NUM + 2 ));
+  tar -xvzf ipcad-3.7.3.tar.gz
+  cd ipcad-3.7.3
   
-	sed -i "${LINE2_NUM}d" headers.h;
-	sed -i "${LINE1_NUM}d" headers.h;
+  LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
+  LINE2_NUM=$(( LINE1_NUM + 2 ));
   
-	echo
+  sed -i "${LINE2_NUM}d" headers.h;
+  sed -i "${LINE1_NUM}d" headers.h;
   
-	if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
-		echo "INFO:  Error "
-	else
-		echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
-	fi;
+  echo
+  
+  if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
+    echo "INFO:  Error "
+  else
+    echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
+  fi;
   
   
-	sed -i "1i #include \"signal.h\"" main.c;
+  sed -i "1i #include \"signal.h\"" main.c;
   
-	echo
+  echo
   
-	sed -i "1i #include \"headers.h\"" pps.c;
-	sed -i "1i #include \"signal.h\"" pps.c;
+  sed -i "1i #include \"headers.h\"" pps.c;
+  sed -i "1i #include \"signal.h\"" pps.c;
   
-	echo "INFO: Added to pps.c"
+  echo "INFO: Added to pps.c"
     
-	sed -i "1i #include \"signal.h\"" servers.h;
+  sed -i "1i #include \"signal.h\"" servers.h;
   
-	echo "INFO: Added to servers.h"
+  echo "INFO: Added to servers.h"
   
-	./configure && make && make install
+  ./configure && make && make install
   
-	if [ -d  /var/ipcad/ ]; then
-		echo "directory /var/ipcad/ exists";
-	else
-		mkdir /var/ipcad/;
-	fi;
+  if [ -d  /var/ipcad/ ]; then
+    echo "directory /var/ipcad/ exists";
+  else
+    mkdir /var/ipcad/;
+  fi;
   
 
-	cat << 'EOF' > /usr/local/etc/ipcad.conf
+  cat << 'EOF' > /usr/local/etc/ipcad.conf
 # ???????????????????? ?????? ?????????? ????????????????????
 interface eth0;
 # ?????????????????????? ???? ???????????? 
@@ -377,54 +386,59 @@ rsh enable at 127.0.0.1;
 memory_limit = 16m;
 
 EOF
-	cd ${CURRENT_DIR}
-	echo '##################################################################################################'
-	echo 'IPCAD INSTALLED ##################################################################################################'
-	echo '##################################################################################################'
+
+  cd ${CURRENT_DIR}
+  echo '##################################################################################################'
+  echo 'IPCAD INSTALLED ##################################################################################################'
+  echo '##################################################################################################'
+
+  AUTOCONF_PROGRAMS=${AUTOCONF_PROGRAMS}" ipcad"
 }
 
 #************************************
 # MRTG install
 #************************************
 _install_mrtg() {
-	_install mrtg snmp 
+  _install mrtg snmp 
 
-	install_rstat
+  install_rstat
 
   echo "PATH"
-	if [ ! -d /usr/abills/webreports/ ]; then
-	  mkdir /usr/abills/webreports/
-	fi;
+  if [ ! -d /usr/abills/webreports/ ]; then
+    mkdir /usr/abills/webreports/
+  fi;
 
-	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+  #indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+  #echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
 
-	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} mrtg "
+
 }
 
 ##**********************************************************
 ## FSBackup install
 ##**********************************************************
 #_install_fsbackup() {
-#	echo "FSBACKUP START INSTALL"
-#	url="http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz"
+#  echo "FSBACKUP START INSTALL"
+#  url="http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz"
 #
-#	wget ${url}
+#  wget ${url}
 #
-#	tar zxvf fsbackup-1.2pl2.tar.gz;
-#	cd fsbackup-1.2pl2;
-#	./install.pl;
-#	mkdir /usr/local/fsbackup/archive;
+#  tar zxvf fsbackup-1.2pl2.tar.gz;
+#  cd fsbackup-1.2pl2;
+#  ./install.pl;
+#  mkdir /usr/local/fsbackup/archive;
 #
-#	echo "!/usr/local/fsbackup" >> /usr/local/fsbackup/cfg_example
-#	cp /usr/local/fsbackup/create_backup.sh /usr/local/fsbackup/create_backup.sh_back
-#	cat /usr/local/fsbackup/create_backup.sh_back | sed 's/config_files=\".*\"/config_files=\"cfg_example\"/' > /usr/local/fsbackup/create_backup.sh
+#  echo "!/usr/local/fsbackup" >> /usr/local/fsbackup/cfg_example
+#  cp /usr/local/fsbackup/create_backup.sh /usr/local/fsbackup/create_backup.sh_back
+#  cat /usr/local/fsbackup/create_backup.sh_back | sed 's/config_files=\".*\"/config_files=\"cfg_example\"/' > /usr/local/fsbackup/create_backup.sh
 #
-#	check_fsbackup_cron=`grep create_backup /etc/crontab`
-#	if [ x"${check_fsbackup_cron}" = x ]; then
-#		echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
-#	fi;
-#	
-#	cd ${CURRENT_DIR}
+#  check_fsbackup_cron=`grep create_backup /etc/crontab`
+#  if [ x"${check_fsbackup_cron}" = x ]; then
+#    echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
+#  fi;
+#  
+#  cd ${CURRENT_DIR}
 #}
 
 #**********************************************************
@@ -450,165 +464,165 @@ _install_accel_pppoe() {
   make
   make install
   
-cat << 'EOF1' > /etc/accel-ppp.conf
-[modules]
-#path=/usr/local/lib/accel-ppp
-log_file
-#log_tcp
-#log_pgsql
-pptp
-pppoe
-#l2tp
-auth_mschap_v2
-#auth_mschap_v1
-#auth_chap_md5
-#auth_pap
-radius
-#ippool
-sigchld
-pppd_compat
-shaper_tbf
-#chap-secrets
-
-[core]
-log-error=/var/log/accel-ppp/core.log
-thread-count=4
-
-[ppp]
-verbose=1
-min-mtu=1000
-mtu=1400
-mru=1400
-#ccp=0
-#sid-case=upper
-#check-ip=0
-#single-session=replace
-#mppe=require
-
-[lcp]
-echo-interval=30
-echo-failure=3
-
-[pptp]
-echo-interval=30
-verbose=1
-
-[pppoe]
-# ???????????????????? ???? ?????????????? ?????????????? pppoe ???????????? ( ???????????? ???????? ???????????????????????????? ?????????????? ????????????????????)
-interface=eth1
-interface=vlan2
-interface=vlan3
-interface=vlan4
-#ac-name=xxx
-#service-name=yyy
-#pado-delay=0
-#pado-delay=0,100:100,200:200,-1:500
-#ifname-in-sid=called-sid
-#tr101=1
-verbose=1
-
-#[l2tp]
-#dictionary=/usr/local/share/accel-ppp/l2tp/dictionary
-#hello-interval=60
-#timeout=60
-#rtimeout=5
-#retransmit=5
-#host-name=accel-ppp
+#cat << 'EOF1' > /etc/accel-ppp.conf
+#[modules]
+##path=/usr/local/lib/accel-ppp
+#log_file
+##log_tcp
+##log_pgsql
+#pptp
+#pppoe
+##l2tp
+#auth_mschap_v2
+##auth_mschap_v1
+##auth_chap_md5
+##auth_pap
+#radius
+##ippool
+#sigchld
+#pppd_compat
+#shaper_tbf
+##chap-secrets
+#
+#[core]
+#log-error=/var/log/accel-ppp/core.log
+#thread-count=4
+#
+#[ppp]
 #verbose=1
+#min-mtu=1000
+#mtu=1400
+#mru=1400
+##ccp=0
+##sid-case=upper
+##check-ip=0
+##single-session=replace
+##mppe=require
+#
+#[lcp]
+#echo-interval=30
+#echo-failure=3
+#
+#[pptp]
+#echo-interval=30
+#verbose=1
+#
+#[pppoe]
+## ???????????????????? ???? ?????????????? ?????????????? pppoe ???????????? ( ???????????? ???????? ???????????????????????????? ?????????????? ????????????????????)
+#interface=eth1
+#interface=vlan2
+#interface=vlan3
+#interface=vlan4
+##ac-name=xxx
+##service-name=yyy
+##pado-delay=0
+##pado-delay=0,100:100,200:200,-1:500
+##ifname-in-sid=called-sid
+##tr101=1
+#verbose=1
+#
+##[l2tp]
+##dictionary=/usr/local/share/accel-ppp/l2tp/dictionary
+##hello-interval=60
+##timeout=60
+##rtimeout=5
+##retransmit=5
+##host-name=accel-ppp
+##verbose=1
+#
+#[dns]
+#dns1=10.0.0.10
+##dns2=172.16.1.1
+#
+#[radius]
+#dictionary=/usr/local/share/accel-ppp/radius/dictionary
+#nas-identifier=accel-ppp
+#nas-ip-address=127.0.0.1
+#gw-ip-address=10.0.0.10
+#auth-server=127.0.0.1:1812,secretpass
+#acct-server=127.0.0.1:1813,secretpass
+#dae-server=127.0.0.1:3799,secretpass
+#verbose=1
+##timeout=3
+##max-try=3
+##acct-timeout=120
+##acct-delay-time=0
+#
+#[client-ip-range]
+#disable
+##10.0.0.0/8 # ?????????????? ?????????????????? ?????????????????????? ???????????????? ?? (???? DHCP ?????? ??????????????).
+#         # ??????????: ?????? ???? ???????????? ?????????????????????? ?? ???????????? PPPOE ?????? PPTP ?????????????? ??????????????.
+#
+##[ip-pool]
+##gw-ip-address=192.168.0.1
+##192.168.0.2-255
+##192.168.1.1-255
+##192.168.2.1-255
+##192.168.3.1-255
+##192.168.4.0/24
+#
+#[log]
+#log-file=/var/log/accel-ppp/accel-ppp.log
+#log-emerg=/var/log/accel-ppp/emerg.log
+#log-fail-file=/var/log/accel-ppp/auth-fail.log
+##log-debug=/dev/stdout
+##log-tcp=127.0.0.1:3000
+#copy=1
+##color=1
+##per-user-dir=per_user
+##per-session-dir=per_session
+##per-session=1
+#level=3
+##log-tcp=127.0.0.1:3000
+#
+##[log-pgsql]
+##conninfo=user=log
+##log-table=log
+#
+#[pppd-compat]
+##ip-pre-up=/etc/ppp/ip-pre-up
+##ip-up=/etc/ppp/ip-up
+##ip-down=/etc/ppp/ip-down
+##ip-change=/etc/ppp/ip-change
+#radattr-prefix=/var/run/radattr
+#verbose=1
+#
+##[chap-secrets]
+##gw-ip-address=192.168.100.1
+##chap-secrets=/etc/ppp/chap-secrets
+#
+#[tbf]
+##attr=Filter-Id
+##down-burst-factor=0.1
+##up-burst-factor=1.0
+##latency=50
+#attr-down=PPPD-Downstream-Speed-Limit
+#attr-up=PPPD-Upstream-Speed-Limit
+#
+#
+#[cli]
+#telnet=127.0.0.1:2000
+##tcp=127.0.0.1:2001
+#EOF1
 
-[dns]
-dns1=10.0.0.10
-#dns2=172.16.1.1
-
-[radius]
-dictionary=/usr/local/share/accel-ppp/radius/dictionary
-nas-identifier=accel-ppp
-nas-ip-address=127.0.0.1
-gw-ip-address=10.0.0.10
-auth-server=127.0.0.1:1812,secretpass
-acct-server=127.0.0.1:1813,secretpass
-dae-server=127.0.0.1:3799,secretpass
-verbose=1
-#timeout=3
-#max-try=3
-#acct-timeout=120
-#acct-delay-time=0
-
-[client-ip-range]
-disable
-#10.0.0.0/8 # ?????????????? ?????????????????? ?????????????????????? ???????????????? ?? (???? DHCP ?????? ??????????????). 
-         # ??????????: ?????? ???? ???????????? ?????????????????????? ?? ???????????? PPPOE ?????? PPTP ?????????????? ??????????????.
-
-#[ip-pool]
-#gw-ip-address=192.168.0.1
-#192.168.0.2-255
-#192.168.1.1-255
-#192.168.2.1-255
-#192.168.3.1-255
-#192.168.4.0/24
-
-[log]
-log-file=/var/log/accel-ppp/accel-ppp.log
-log-emerg=/var/log/accel-ppp/emerg.log
-log-fail-file=/var/log/accel-ppp/auth-fail.log
-#log-debug=/dev/stdout
-#log-tcp=127.0.0.1:3000
-copy=1
-#color=1
-#per-user-dir=per_user
-#per-session-dir=per_session
-#per-session=1
-level=3
-#log-tcp=127.0.0.1:3000
-
-#[log-pgsql]
-#conninfo=user=log
-#log-table=log
-
-[pppd-compat]
-#ip-pre-up=/etc/ppp/ip-pre-up
-#ip-up=/etc/ppp/ip-up
-#ip-down=/etc/ppp/ip-down
-#ip-change=/etc/ppp/ip-change
-radattr-prefix=/var/run/radattr
-verbose=1
-
-#[chap-secrets]
-#gw-ip-address=192.168.100.1
-#chap-secrets=/etc/ppp/chap-secrets
-
-[tbf]
-#attr=Filter-Id
-#down-burst-factor=0.1
-#up-burst-factor=1.0
-#latency=50
-attr-down=PPPD-Downstream-Speed-Limit
-attr-up=PPPD-Upstream-Speed-Limit
-
-
-[cli]
-telnet=127.0.0.1:2000
-#tcp=127.0.0.1:2001  
-EOF1
-
-cat << 'EOF2' >> /usr/local/share/accel-ppp/radius/dictionary
-# Limit session traffic
-ATTRIBUTE Session-Octets-Limit 227 integer
-# What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
-ATTRIBUTE Octets-Direction 228 integer
-# Connection Speed Limit
-ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
-ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
-ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
-ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
-ATTRIBUTE Acct-Interim-Interval 85 integer 
-ATTRIBUTE Acct-Input-Gigawords    52      integer
-ATTRIBUTE Acct-Output-Gigawords   53      integer 
-EOF2
+#cat << 'EOF2' >> /usr/local/share/accel-ppp/radius/dictionary
+## Limit session traffic
+#ATTRIBUTE Session-Octets-Limit 227 integer
+## What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
+#ATTRIBUTE Octets-Direction 228 integer
+## Connection Speed Limit
+#ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
+#ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
+#ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
+#ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
+#ATTRIBUTE Acct-Interim-Interval 85 integer
+#ATTRIBUTE Acct-Input-Gigawords    52      integer
+#ATTRIBUTE Acct-Output-Gigawords   53      integer
+#EOF2
   
 modprobe -r ip_gre
 
@@ -617,30 +631,30 @@ echo 'blacklist ip_gre' >> /etc/modprobe.d/blacklist.conf
 echo 'pptp' >> /etc/modules
 echo 'pppoe' >> /etc/modules
 
-cat << 'EOF3' >> /usr/local/freeradius/etc/raddb/dictionary
-# Limit session traffic
-ATTRIBUTE Session-Octets-Limit 227 integer
-# What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
-ATTRIBUTE Octets-Direction 228 integer
-# Connection Speed Limit
-ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
-ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
-ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
-ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
-ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
-ATTRIBUTE Acct-Interim-Interval 85 integer 
-ATTRIBUTE Acct-Input-Gigawords    52      integer
-EOF3
+#cat << 'EOF3' >> /usr/local/freeradius/etc/raddb/dictionary
+## Limit session traffic
+#ATTRIBUTE Session-Octets-Limit 227 integer
+## What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
+#ATTRIBUTE Octets-Direction 228 integer
+## Connection Speed Limit
+#ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
+#ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
+#ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
+#ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
+#ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
+#ATTRIBUTE Acct-Interim-Interval 85 integer
+#ATTRIBUTE Acct-Input-Gigawords    52      integer
+#EOF3
 
 
-	touch /etc/init.d/accel-ppp
-	chmod +x /etc/init.d/accel-ppp
-	
-	cat << 'EOF4' >> /etc/init.d/accel-ppp
-	#!/bin/sh
+  touch /etc/init.d/accel-ppp
+  chmod +x /etc/init.d/accel-ppp
+  
+  cat << 'EOF4' >> /etc/init.d/accel-ppp
+  #!/bin/sh
 # /etc/init.d/accel-pppd: set up the accel-ppp server
 ### BEGIN INIT INFO
 # Provides:          accel-ppp
@@ -700,14 +714,16 @@ esac
 
 exit 0 
 EOF4
-	update-rc.d accel-ppp defaults
-	update-rc.d accel-ppp enable
+  update-rc.d accel-ppp defaults
+  update-rc.d accel-ppp enable
 #accel-pppd  -p 'var/run/accel.pid' -c '/etc/accel-ppp.conf'
-	sed -i 's/mpd5/accel_ppp/g' /usr/abills/db/abills.sql
+  sed -i 's/mpd5/accel_ppp/g' /usr/abills/db/abills.sql
 
-	sed -i 's/127\.0\.0\.1\:5005/127\.0\.0\.1\:3799\:2001/g' /usr/abills/db/abills.sql
+  sed -i 's/127\.0\.0\.1\:5005/127\.0\.0\.1\:3799\:2001/g' /usr/abills/db/abills.sql
 
-	cd ${CURRENT_DIR}
+  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} accel_ppp "
+
+  cd ${CURRENT_DIR}
 
 }
 
@@ -725,18 +741,18 @@ install_mail () {
 #POST INSTALL
 #******************************************************************
 post_install () {
-		cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
-		touch /usr/abills/var/log/sql_errors
-		chmod +w /usr/abills/var/log/sql_errors
 
-		mkdir /usr/abills/var/
-		chmod -R +w /usr/abills/var/
+  cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
 
-		mkdir /usr/abills/var/log/
-		chmod -R +w /usr/abills/var/log/
+  touch /usr/abills/var/log/sql_errors
+  chmod +w /usr/abills/var/log/sql_errors
 
-		
-		
-		echo "Plugin finished";
-	  read -p "press Enter to continue...";
+  mkdir /usr/abills/var/
+  chmod -R +w /usr/abills/var/
+
+  mkdir /usr/abills/var/log/
+  chmod -R +w /usr/abills/var/log/
+
+  echo "Plugin finished";
+  read -p "press Enter to continue...";
 }
