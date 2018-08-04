@@ -381,6 +381,7 @@ ipn_configure () {
 #
 #*****************************************
 help () {
+
 echo "
  ABillS Ports Builder (ver. ${VERSION})
   -d     Debug mode
@@ -393,6 +394,8 @@ echo "
   -u     Uninstall (abills mysql)
   -p     use plugin [plugin name]
   -h     This help
+  --install-version 0.78.25 -
+  --upgrade 0.78.25  - Upgrade cur version tp 0.78.25
 "
   exit;
 }
@@ -2309,6 +2312,23 @@ fetch_distro(){
 }
 
 
+#**********************************************************
+#
+#**********************************************************
+upgrade_distro() {
+
+  echo "Upgrade to: ${UPGRADE_VERSION}";
+
+  #Make distro copy
+
+  #Download version
+
+  #Copy new version
+
+  #Make check sql db_check
+
+}
+
 #*********************************************************
 # Installation proccess
 # Proccess command-line options
@@ -2368,12 +2388,19 @@ for _switch ; do
         --check_services) check_ps;
                 exit;
                 ;;
+        --upgrade) UPGRADE_VERSION=$2
+                shift; shift;
+                ;;
         --test)  TEST_DISTRO="true";
                 shift;
                 ;;
         esac
 done
 
+if [ "${UPGRADE_VERSION}" != "" ]; then
+  upgrade_distro
+  exit;
+fi;
 
 if [ "${UNINSTALL}" != "" ]; then
   _uninstall
@@ -2418,18 +2445,18 @@ while [ "${OS_NAME}" = "" ]; do
   fi;
 
   #try to guess plugin
-	guess_plugin;
+  guess_plugin;
 
-	if [ "${use_plugin}" ]; then
-	  USE_PLUGIN=${use_plugin};
+  if [ "${use_plugin}" ]; then
+    USE_PLUGIN=${use_plugin};
   else
-	  if [ "${PLUGIN_NAME}" ]; then
-	    USE_PLUGIN=${PLUGIN_NAME}
-	  else
-	    dialog --title "${dialog_title}" --menu "Choose plugin" 40 40 10 ${plugins_list} 2>$tempfile;
+    if [ "${PLUGIN_NAME}" ]; then
+      USE_PLUGIN=${PLUGIN_NAME}
+    else
+      dialog --title "${dialog_title}" --menu "Choose plugin" 40 40 10 ${plugins_list} 2>$tempfile;
       USE_PLUGIN=`cat $tempfile`;
       rm -f $tempfile;
-	  fi
+    fi
   fi;
 
   #  echo "Use plugin [enter for default plugin]: ";
