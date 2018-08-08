@@ -2,7 +2,7 @@
 Installer for ABillS based on plugin system
 ===============================================
 
-ver. 5.22
+ver. 5.24
 
 Installing:
   * ABillS
