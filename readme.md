@@ -16,15 +16,15 @@ Installing:
 
 Support OS:
 
- 	centos_7_x64
-	 debian_8_x64
-	 debian_9_x64
-	 freebsd_10_x64
-	 freebsd_10_x86
-	 freebsd_11_x64
-	 ubuntu_14_x64
-	 ubuntu_16_x64
-	 ubuntu_18_x64
+ - centos_7_x64
+ - debian_8_x64
+ - debian_9_x64
+ - freebsd_10_x64
+ - freebsd_10_x86
+ - freebsd_11_x64
+ - ubuntu_14_x64
+ - ubuntu_16_x64
+ - ubuntu_18_x64
 
 Plugins are structured as plugins/Distributive_Version_Arch
 
