@@ -80,7 +80,7 @@ _install_apache() {
 #*******************************************
 _install_freeradius() {
 
-  _install gcc make libmysqlclient-dev libtalloc-dev libperl-dev libhiredis-dev
+  _install gcc make libmysqlclient-dev
 
   if [ -d /usr/local/freeradius/ ]; then
     echo "Radius exists: /usr/local/freeradius/";
