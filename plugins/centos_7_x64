@@ -119,6 +119,7 @@ _install_perl_modules() {
 #  Radius 
 #*******************************************
 _install_freeradius() {
+	yum -y install gdbm gdbm-devel install perl-ExtUtils-Embed gcc libtalloc-devel
   
 	if [ -d /usr/local/freeradius/ ]; then
 		echo "Radius exists: /usr/local/freeradius/";
