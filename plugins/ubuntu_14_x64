@@ -1,7 +1,7 @@
 #OS Ubuntu 14_x64
 #COMMENTS Ubuntu comments
 #M update:upgrade:apt-get update
-#M mysql:MySQL:_install mysql-server-5.6
+#M mysql:MySQL:_install_mysql
 #M apache:apache:_install_apache
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
 #M freeradius:Freeradius_Server:_install_freeradius
@@ -51,29 +51,19 @@ pre_install () {
 
 
 #******************************************************************
-# Apache2
+# MySQL 5.6
 #******************************************************************
-_install_apache() {
-	_install apache2 
-	_install apache2-doc 
-	_install apache2-utils 
-	_install apache2-mpm-prefork
-	a2enmod ssl
-	a2enmod rewrite
-	a2enmod suexec
-	a2enmod include
-	a2enmod cgid
-	
-	chown -Rf www-data:www-data /usr/abills/cgi-bin
-	chown -Rf www-data:www-data /usr/abills/Abills/templates
-	chown -Rf www-data:www-data /usr/abills/backup
-	${RESTART_APACHE} restart
+_install_mysql() {
+	_install mysql-common-5.6
+	_install mysql-server-5.6
+	_install mysql-client-5.6
 }
+
 #*******************************************
 #  Radius 
 #*******************************************
 _install_freeradius() {
-	_install gcc make libmysqlclient-dev
+	_install gcc make libmysqlclient-dev libtalloc-dev libperl-dev libhiredis-dev
   
 	if [ -d /usr/local/freeradius/ ]; then
 		echo "Radius exists: /usr/local/freeradius/";
