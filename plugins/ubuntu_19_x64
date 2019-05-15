@@ -1,4 +1,4 @@
-#OS Ubuntu 14_x64
+#OS Ubuntu 19_x64
 #COMMENTS Ubuntu comments
 #M update:upgrade:apt-get update
 #M mysql:MySQL:_install mysql-server

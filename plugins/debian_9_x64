@@ -1,4 +1,4 @@
-#OS Debian_8_x64
+#OS Debian_9_x64
 #COMMENTS Debian comments
 #M update:upgrade:apt-get update && apt-get upgrade
 #M mysql:MySQL:_install mariadb-server mariadb mariadb-client
