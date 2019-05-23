@@ -51,7 +51,7 @@ _install_mysql(){
   [ -f /var/log/mysqld.log ] && echo '' > /var/log/mysqld.log
     
   # Install server (+client) and devel package to compile Freeradius module
-  yum -y install percona-server-server percona-server-devel.]
+  yum -y install percona-server-server percona-server-devel
   
   echo "Starting Percona to initialize /var/lib/mysql directory"
   systemctl start mysql
