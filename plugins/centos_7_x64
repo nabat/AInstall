@@ -113,7 +113,8 @@ _install_epel() {
 #  Install Perl modules
 #*********************************************************
 _install_perl_modules() {
-	yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File
+	yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File perl-App-cpanminus
+	cpanm Devel::NYTProf Imager::QRCode
 }
 
 #*******************************************
@@ -181,8 +182,8 @@ _install_freeradius() {
 [Unit]
 Description=FreeRADIUS Server
 After=network.target
-After=mysql.service
-Requires=mysql.service
+After=mysqld.service
+Requires=mysqld.service
 
 [Service]
 Type=forking
@@ -611,7 +612,7 @@ cd ${CURRENT_DIR}
 # Post install
 #************************************
 post_install() {
-	systemctl start mariadb
+	systemctl start mysqld
 	
   systemctl restart radiusd.service
 
