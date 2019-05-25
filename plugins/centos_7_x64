@@ -71,7 +71,6 @@ _install_mysql(){
   echo "Stopping mysql without validate password"
   kill -2 `cat /var/run/mysqld/mysqld.pid`
   
-  
   echo "Starting mysql in normal mode"
   systemctl start mysqld
   systemctl enable mysqld
