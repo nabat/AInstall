@@ -67,10 +67,16 @@ _install_mysql(){
 
   echo "Clear 'root'@'localhost' password"
   mysqladmin -u root --password="${MYSQL_TEMPRORARY_ROOT_PASSWORD}" -h localhost password ""
-   
+  
+  echo "Stopping mysql without validate password"
+  kill -2 `cat /var/run/mysqld/mysqld.pid`
+  
   echo "Starting mysql in normal mode"
   systemctl start mysqld
   systemctl enable mysqld
+  
+  echo "Disabling special character password policy"
+  mysql -e "SET GLOBAL validate_password_special_char_count=0;"
 }
 
 #*********************************************************
