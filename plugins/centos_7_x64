@@ -120,7 +120,7 @@ _install_epel() {
 #*********************************************************
 _install_perl_modules() {
 	yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File perl-App-cpanminus
-	cpanm Devel::NYTProf Imager::QRCode
+	cpanm Devel::NYTProf Imager::QRCode autodie
 }
 
 #*******************************************
