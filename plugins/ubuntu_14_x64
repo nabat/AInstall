@@ -155,7 +155,7 @@ _install_freeradius() {
 #   description: radiusd is service access provider Daemon.
 ### BEGIN INIT INFO
 # Provides: radiusd
-# Should-Start: radiusd
+# Should-Start: mysql radiusd
 # Should-Stop: radiusd
 # Short-Description: start and stop radiusd
 # Description: radiusd is access provider service Daemon.
@@ -211,7 +211,7 @@ fi
 
 chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
 chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
-chown -R ${RADIUS_USER}:${RADIUS_USER} ${rundir}
+chown -R ${RADIUS_USER}:${RADIUS_USER} ${rundir}/..
 chmod 660 $logdir/radius.log
 
 case "$1" in
