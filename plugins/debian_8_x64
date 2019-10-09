@@ -17,7 +17,7 @@
 # Variable
 
 YES="-y"
-BUILD_OPTIONS=" sudo apt-get ${YES} install "
+BUILD_OPTIONS=" apt-get ${YES} install "
 MYSQLDUMP=/usr/bin/mysqldump
 GZIP=/bin/gzip
 WEB_SERVER_USER=www-data
