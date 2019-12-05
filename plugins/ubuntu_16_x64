@@ -161,8 +161,12 @@ _install_freeradius() {
 #   description: radiusd is service access provider Daemon.
 ### BEGIN INIT INFO
 # Provides: radiusd
+# Required-Start: $remote_fs $network $syslog
 # Should-Start: mysql radiusd
+# Required-Stop: $remote_fs $syslog
 # Should-Stop: radiusd
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
 # Short-Description: start and stop radiusd
 # Description: radiusd is access provider service Daemon.
 ### END INIT INFO
