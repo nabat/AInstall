@@ -1,0 +1,641 @@
+#OS CentOS 7_x64
+#COMMENTS CentOS comments
+#M update:Upgrade_system:yum -y update
+#M mysql:MySQL:_install_mysql
+#M apache:Apache2.4:_install_httpd
+#M perl_modules:Perl_modules:_install_perl_modules
+#M freeradius:Freeradius_Server:_install_freeradius
+#M dhcp:Dhcp_server:_install_dhcp
+#M flow-tools:Flow-tools,Ipcad:_install_ipn
+#M mrtg:Mrtg,Rstat:_install_mrtg
+#M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
+#M FSbackup:FSBackup:_install_fsbackup
+#dM Mail:Mail_server:install_mail
+# MRTG=
+# fsbackup=
+# perl_speedy 
+#M utils:Utils:_install_utils
+
+# Variables
+WEB_SERVER_USER=apache
+MYSQLDUMP=/bin/mysqldump
+GZIP=/bin/gzip
+APACHE_CONF_DIR=/etc/httpd/conf.d
+RESTART_MYSQL="service mysqld"
+RESTART_RADIUS="service radiusd "
+RESTART_APACHE="service httpd "
+PING=/bin/ping
+
+#Services to check after installation
+PROCESS_LIST="mysqld radiusd httpd flow-capture named"
+
+#*******************************************
+#  Pre install
+#*******************************************
+pre_install() {
+  yum -y install wget tmux bash nano gcc ca-certificates;
+  _install_epel;
+  yum config-manager --set-enabled PowerTools;
+  
+  CURRENT_DIR=`pwd`
+}
+
+#*********************************************************
+#  Install MySQL
+#*********************************************************
+_install_mysql(){
+  # Install repository
+  dnf -y module disable mysql
+  yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  percona-release setup ps57
+  
+  # Clear log before installation
+  [ -f /var/log/mysqld.log ] && echo '' > /var/log/mysqld.log
+    
+  # Install server (+client) and devel package to compile Freeradius module
+  yum -y install Percona-Server-server-57 Percona-Server-devel-57
+  
+  echo "Starting Percona to initialize /var/lib/mysql directory"
+  systemctl start mysqld
+  
+  echo "Stop percona running in normal mode"
+  systemctl stop mysqld
+  
+  echo "Starting Percona without password validate"
+  sudo -u mysql /usr/sbin/mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --validate-password=OFF
+  
+  echo "Grep generated password from mysqld.log"
+  MYSQL_TEMPRORARY_ROOT_PASSWORD=`cat /var/log/mysqld.log | grep generated | awk '{print($11)}'`
+
+  echo "Clear 'root'@'localhost' password"
+  mysqladmin -u root --password="${MYSQL_TEMPRORARY_ROOT_PASSWORD}" -h localhost password ""
+  
+  echo "Stopping mysql without validate password"
+  kill -15 `cat /var/run/mysqld/mysqld.pid`
+  
+  echo "Starting mysql in normal mode"
+  systemctl start mysqld
+  systemctl enable mysqld
+  
+  echo "Disabling special character password policy"
+  mysql -e "SET GLOBAL validate_password_special_char_count=0;"
+}
+
+#*********************************************************
+#  Install apache
+#*********************************************************
+_install_httpd(){
+	yum -y install httpd httpd-devel httpd-tools
+	chkconfig httpd on
+	service httpd start
+  
+  cat << '[EOF_APACHE]' > /etc/httpd/modules.d/000_abills_modules.conf
+LoadModule ssl_module modules/mod_ssl.so
+LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule cgi_module modules/mod_cgi.so
+[EOF_APACHE]
+
+  apachectl -k restart
+  
+  
+	echo "#########        Opening firewall ports         ############" 
+	firewall-cmd --zone=public --add-port=9443/tcp --permanent
+	firewall-cmd --reload
+	echo "#########        Disabling selinux               ############"
+
+	sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+
+  apachectl -k restart
+}
+#*********************************************************
+#  Install EPEL repository CentOS (RedHat)
+#*********************************************************
+_install_epel() {
+  # RPM needs 'y' answer, so to automate installation, use yum
+  yum -y install epel-release
+	# wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+	# rpm -ivh epel-release-7-5.noarch.rpm
+ 
+}
+
+#*********************************************************
+#  Install Perl modules
+#*********************************************************
+_install_perl_modules() {
+	yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-JSON perl-JSON-XS perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File perl-autodie perl-App-cpanminus perl-Time-Piece perl-Authen-Captcha perl-Crypt-DES perl-Digest-MD4 perl-GD perl-Spreadsheet-WriteExcel perl-XML-Simple perl-LWP-Protocol-https perl-Text-CSV perl-AnyEvent perl-AnyEvent-HTTP
+	cpanm Devel::NYTProf Imager::QRCode Crypt::OpenSSL::X509 Digest::MD4 PDF::API2 autodie
+}
+
+#*******************************************
+#  Radius 
+#*******************************************
+_install_freeradius() {
+	yum -y install gdbm gdbm-devel perl-ExtUtils-Embed gcc libtalloc-devel
+  
+	if [ -d /usr/local/freeradius/ ]; then
+		echo "Radius exists: /usr/local/freeradius/";
+		return 0 ;
+	fi;
+  
+  PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
+  
+	for dir in ${PERL_LIB_DIRS}; do
+	if [ "${DEBUG}" = 1 ]; then
+		echo "ls ${dir}/libperl* | head -1"  
+	fi;
+
+	PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	if [ x"${PERL_LIB}" != x ]; then
+		PERL_LIB_DIR=${dir}
+		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
+		ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
+		fi;
+	fi;
+	done;
+
+
+	if [ x"${PERL_LIB_DIR}" = x ]; then
+		echo "Perl lib not found";
+		exit;
+	else
+		echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
+	fi;
+
+	RADIUS_SERVER_USER="freerad"
+ 
+	_fetch freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+
+	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
+		echo "Can\'t download freeradius. PLease download and install manual";
+		exit;
+	fi;
+
+	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+
+	cd freeradius-server-${FREERADIUS_VERSION}
+	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
+	#echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
+	make && make install
+
+	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+	
+	firewall-cmd --permanent --zone=public --add-service=radius
+	
+	#Add user
+	groupadd ${RADIUS_SERVER_USER}
+	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
+	mkdir -p /usr/local/freeradius/var/log
+	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius
+	echo '' > /usr/local/freeradius/etc/raddb/clients.conf
+	cat << 'EOF' > /etc/systemd/system/radiusd.service
+[Unit]
+Description=FreeRADIUS Server
+After=network.target
+After=mysqld.service
+Requires=mysqld.service
+
+[Service]
+Type=forking
+
+#PIDFile=/var/run/radiusd/radiusd.pid
+ExecStartPre=/usr/bin/touch /usr/local/freeradius/var/log/radius.log
+ExecStartPre=/usr/bin/chown freerad:freerad /usr/local/freeradius/var/log/radius.log
+ExecStartPre=/usr/bin/mkdir -p /var/run/radiusd
+ExecStartPre=/usr/bin/chown -R freerad:freerad /var/run/radiusd
+ExecStartPre=/usr/local/freeradius/sbin/radiusd -C
+
+ExecStart=/usr/local/freeradius/sbin/radiusd -d /usr/local/freeradius/etc/raddb
+
+ExecReload=/usr/local/freeradius/sbin/radiusd -C
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  # Change log file destination
+  sed -i.bak -e 's/logdir\ \=\ \/var\/log/logdir\ \=\ \$\{prefix\}\/var\/log/' /usr/abills/misc/freeradius/linux/radiusd.conf
+
+  chown freerad:freerad -R /usr/local/freeradius/var/log
+  
+	systemctl enable radiusd
+	
+	cd ${CURRENT_DIR}
+}
+
+#*******************************************
+#  Dhcp server
+#*******************************************
+_install_dhcp() {
+	yum -y install dhcp
+}
+
+#*******************************************
+#  Utils 
+#*******************************************
+_install_utils() {
+	yum -y install vim tmux bash git
+}
+
+#*******************************************
+# Flow-tools + Ipcad
+#*******************************************
+_install_ipn() {
+	yum install -y flow-tools
+	
+	mkdir -p /usr/abills/var/log/ipn/
+	
+	echo  'OPTIONS="-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996"' > /etc/sysconfig/flow-capture
+
+	
+	chkconfig --add flow-capture
+	chkconfig flow-capture on
+	echo '##################################################################################################'
+	echo 'FLOWTOOLS INSTALLED ##################################################################################################'
+	echo '##################################################################################################'
+
+
+	yum -y install libpcap libpcap-devel;
+
+  
+	echo '********************************************************************';
+	echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
+	echo '********************************************************************';
+  
+	# will be installed in /usr/
+	cd /usr/
+  
+	#remove if already extracted
+	if [ -d /usr/ipcad-3.7.3 ]; then
+		rm -rf ipcad-3.7.3
+	fi;
+  
+	# do not download if present
+	if [ -f "ipcad-3.7.3.tar.gz" ]; then
+		echo "INFO: Already downloaded";
+	else
+		wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
+	fi;
+  
+	tar -xvzf ipcad-3.7.3.tar.gz
+	cd ipcad-3.7.3
+  
+	LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
+	LINE2_NUM=$(( LINE1_NUM + 2 ));
+  
+	sed -i "${LINE2_NUM}d" headers.h;
+	sed -i "${LINE1_NUM}d" headers.h;
+  
+	echo
+  
+	if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
+		echo "INFO:  Error "
+	else
+		echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
+	fi;
+  
+  
+	sed -i "1i #include \"signal.h\"" main.c;
+  
+	echo
+  
+	sed -i "1i #include \"headers.h\"" pps.c;
+	sed -i "1i #include \"signal.h\"" pps.c;
+  
+	echo "INFO: Added to pps.c"
+    
+	sed -i "1i #include \"signal.h\"" servers.h;
+  
+	echo "INFO: Added to servers.h"
+  
+	./configure && make && make install
+  
+	if [ -d  /var/ipcad/ ]; then
+		echo "directory /var/ipcad/ exists";
+	else
+		mkdir /var/ipcad/;
+	fi;
+  
+
+	cat << 'EOF' > /usr/local/etc/ipcad.conf
+# Èíòåðôåéñû äëÿ ñáîðà ñòàòèñòèêè
+interface eth0;
+# äåòàëèçàöèÿ ïî ïîðòàì 
+#capture-ports enable;
+
+# Àãðåãèðîâàòü ïîðòû, óìåíüøàåò ðàçìåð áàçû äåòàëèçàöèè 
+#aggregate 1024-65535    into 65535;     /* Aggregate wildly */
+#aggregate 3128-3128     into 3128;      /* Protect these ports */
+#aggregate 150-1023      into 1023;      /* General low range */
+
+# Åêñïîðòèðîâàíèå ñòàòèñòèêè íà àäðåñ 127.0.0.1 ïîðò 9996
+netflow export destination 127.0.0.1 9996;
+netflow export version 5;       # NetFlow export format version {1|5}
+netflow timeout active 30;      # Timeout when flow is active, in minutes
+netflow timeout inactive 15;    # Flow inactivity timeout, in seconds
+netflow engine-type 73;         # v5 engine_type; 73='I' for "IPCAD"
+netflow engine-id 1;            # Useful to differentiate multiple ipcads.
+
+dumpfile = ipcad.dump;
+chroot = /var/ipcad/;
+pidfile = ipcad.pid;  
+
+rsh enable at 127.0.0.1;
+memory_limit = 16m;
+
+EOF
+	cd ${CURRENT_DIR}
+	echo '##################################################################################################'
+	echo 'IPCAD INSTALLED ##################################################################################################'
+	echo '##################################################################################################'
+}
+
+#************************************
+# rstat install
+#************************************
+_install_rstat() {
+	RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
+
+	wget ${RSTAT_URL}
+
+	tar zxvf rstat-0.21.tgz ;
+	cd rstat ;
+	make install ;
+	cd ${CURRENT_DIR}
+}
+#************************************
+# MRTG install
+#************************************
+_install_mrtg() {
+	yum -y install mrtg net-snmp net-snmp-utils net-tools
+	_install_rstat
+	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+}
+
+#**********************************************************
+# FSBackup install
+#**********************************************************
+_install_fsbackup() {
+	echo "FSBACKUP START INSTALL"
+	url="http://www.opennet.ru/dev/fsbackup/src/fsbackup-1.2pl2.tar.gz"
+
+	wget ${url}
+
+	tar zxvf fsbackup-1.2pl2.tar.gz;
+	cd fsbackup-1.2pl2;
+	./install.pl;
+	mkdir /usr/local/fsbackup/archive;
+
+	echo "!/usr/local/fsbackup" >> /usr/local/fsbackup/cfg_example
+	cp /usr/local/fsbackup/create_backup.sh /usr/local/fsbackup/create_backup.sh_back
+	cat /usr/local/fsbackup/create_backup.sh_back | sed 's/config_files=\".*\"/config_files=\"cfg_example\"/' > /usr/local/fsbackup/create_backup.sh
+
+	check_fsbackup_cron=`grep create_backup /etc/crontab`
+	if [ x"${check_fsbackup_cron}" = x ]; then
+		echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
+	fi;
+	
+	cd ${CURRENT_DIR}
+}
+
+#**********************************************************
+# ACCEL-PPPoE install
+#**********************************************************
+_install_accel_pppoe() {
+
+  yum -y install kernel-headers kernel-devel bzip2 cmake
+
+  echo
+  echo "#############################################"
+  echo "##  Installing  ACCEL-PPP ${ACCEL_PPPP_VERSION} "
+  echo "#############################################"
+  echo
+  
+  
+  wget http://sourceforge.net/projects/accel-ppp/files/accel-ppp-1.7.4.tar.bz2
+  tar -xjf accel-ppp-1.7.4.tar.bz2
+  cd accel-ppp-1.7.4
+  mkdir build
+  cd build
+  cmake -DBUILD_DRIVER=FALSE -DRADIUS=TRUE -DKDIR=/usr/src/kernels/`uname -r` -DCMAKE_INSTALL_PREFIX=/usr/local ..
+  make
+  make install
+  
+cat << 'EOF1' > /etc/accel-ppp.conf
+[modules]
+#path=/usr/local/lib/accel-ppp
+log_file
+#log_tcp
+#log_pgsql
+pptp
+pppoe
+#l2tp
+auth_mschap_v2
+#auth_mschap_v1
+#auth_chap_md5
+#auth_pap
+radius
+#ippool
+sigchld
+pppd_compat
+shaper_tbf
+#chap-secrets
+
+[core]
+log-error=/var/log/accel-ppp/core.log
+thread-count=4
+
+[ppp]
+verbose=1
+min-mtu=1000
+mtu=1400
+mru=1400
+#ccp=0
+#sid-case=upper
+#check-ip=0
+#single-session=replace
+#mppe=require
+
+[lcp]
+echo-interval=30
+echo-failure=3
+
+[pptp]
+echo-interval=30
+verbose=1
+
+[pppoe]
+# íòåðôåéñû íà êîòîðûõ çàïóùåí pppoe ñåðâåð ( äîëæíû áûòü ñîîòâåòñòâåííî ïîäíßòû èíòåðôåéñû)
+interface=eth1
+interface=vlan2
+interface=vlan3
+interface=vlan4
+#ac-name=xxx
+#service-name=yyy
+#pado-delay=0
+#pado-delay=0,100:100,200:200,-1:500
+#ifname-in-sid=called-sid
+#tr101=1
+verbose=1
+
+#[l2tp]
+#dictionary=/usr/local/share/accel-ppp/l2tp/dictionary
+#hello-interval=60
+#timeout=60
+#rtimeout=5
+#retransmit=5
+#host-name=accel-ppp
+#verbose=1
+
+[dns]
+dns1=10.0.0.10
+#dns2=172.16.1.1
+
+[radius]
+dictionary=/usr/local/share/accel-ppp/radius/dictionary
+nas-identifier=accel-ppp
+nas-ip-address=127.0.0.1
+gw-ip-address=10.0.0.10
+auth-server=127.0.0.1:1812,secretpass
+acct-server=127.0.0.1:1813,secretpass
+dae-server=127.0.0.1:3799,secretpass
+verbose=1
+#timeout=3
+#max-try=3
+#acct-timeout=120
+#acct-delay-time=0
+
+[client-ip-range]
+disable
+#10.0.0.0/8 # êàçàòü äèàïàçîíû ðàçäàâàåìûå êëèåíòàì â (ïî DHCP èëè âðó÷íóþ). 
+         # : îíè íå äîëæíû ïåðåñåêàòñß ñ ïóëàìè PPPOE èëè PPTP ñåðâåðà äîñòóïà.
+
+#[ip-pool]
+#gw-ip-address=192.168.0.1
+#192.168.0.2-255
+#192.168.1.1-255
+#192.168.2.1-255
+#192.168.3.1-255
+#192.168.4.0/24
+
+[log]
+log-file=/var/log/accel-ppp/accel-ppp.log
+log-emerg=/var/log/accel-ppp/emerg.log
+log-fail-file=/var/log/accel-ppp/auth-fail.log
+#log-debug=/dev/stdout
+#log-tcp=127.0.0.1:3000
+copy=1
+#color=1
+#per-user-dir=per_user
+#per-session-dir=per_session
+#per-session=1
+level=3
+#log-tcp=127.0.0.1:3000
+
+#[log-pgsql]
+#conninfo=user=log
+#log-table=log
+
+[pppd-compat]
+#ip-pre-up=/etc/ppp/ip-pre-up
+#ip-up=/etc/ppp/ip-up
+#ip-down=/etc/ppp/ip-down
+#ip-change=/etc/ppp/ip-change
+radattr-prefix=/var/run/radattr
+verbose=1
+
+#[chap-secrets]
+#gw-ip-address=192.168.100.1
+#chap-secrets=/etc/ppp/chap-secrets
+
+[tbf]
+#attr=Filter-Id
+#down-burst-factor=0.1
+#up-burst-factor=1.0
+#latency=50
+attr-down=PPPD-Downstream-Speed-Limit
+attr-up=PPPD-Upstream-Speed-Limit
+
+
+[cli]
+telnet=127.0.0.1:2000
+#tcp=127.0.0.1:2001  
+EOF1
+
+cat << 'EOF2' >> /usr/local/share/accel-ppp/radius/dictionary
+# Limit session traffic
+ATTRIBUTE Session-Octets-Limit 227 integer
+# What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
+ATTRIBUTE Octets-Direction 228 integer
+# Connection Speed Limit
+ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
+ATTRIBUTE Acct-Interim-Interval 85 integer 
+ATTRIBUTE Acct-Input-Gigawords    52      integer
+ATTRIBUTE Acct-Output-Gigawords   53      integer 
+EOF2
+  
+modprobe -r ip_gre
+
+echo 'blacklist ip_gre' >> /etc/modprobe.d/blacklist.conf
+
+echo 'pptp' >> /etc/modules
+echo 'pppoe' >> /etc/modules
+
+cat << 'EOF3' >> /usr/local/freeradius/etc/raddb/dictionary
+# Limit session traffic
+ATTRIBUTE Session-Octets-Limit 227 integer
+# What to assume as limit - 0 in+out, 1 in, 2 out, 3 max(in,out)
+ATTRIBUTE Octets-Direction 228 integer
+# Connection Speed Limit
+ATTRIBUTE PPPD-Upstream-Speed-Limit 230 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit 231 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-1 232 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-1 233 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
+ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
+ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
+ATTRIBUTE Acct-Interim-Interval 85 integer 
+ATTRIBUTE Acct-Input-Gigawords    52      integer
+EOF3
+
+#accel-pppd  -p 'var/run/accel.pid' -c '/etc/accel-ppp.conf'
+
+sed -i 's/mpd5/accel_ppp/g' /usr/abills/db/abills.sql
+
+sed -i 's/127\.0\.0\.1\:5005/127\.0\.0\.1\:3799\:2001/g' /usr/abills/db/abills.sql
+
+cd ${CURRENT_DIR}
+
+}
+
+#************************************
+# Post install
+#************************************
+post_install() {
+	systemctl start mysqld
+	
+  systemctl restart radiusd.service
+
+	service flow-capture start
+	cd /usr/abills/misc && ./perldeps.pl  rpm -batch
+	echo " ";
+	echo " ";
+	echo "************************************************************";
+        echo "************************************************************";
+	echo "***************     Plugin finished    *********************";
+	echo "**** You need to reboot the system after configuration  ****";
+        echo "************************************************************";
+        echo "************************************************************";
+	echo " ";
+	echo " ";
+	read -p "press Enter to continue...";
+}
