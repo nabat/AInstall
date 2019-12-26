@@ -1,13 +1,14 @@
 #!/bin/sh
+#**************************************************************
 # ABillS Auto Programs Building
 #
-# Created By ABillS Team 2010-2017
+# Created By ABillS Team 2010-2019
 #
 #**************************************************************
 
-VERSION=5.24
-ABILLS_VERSION="0.81"
-VERSION_PREFIX=".16"
+VERSION=5.25
+ABILLS_VERSION="0.82"
+VERSION_PREFIX=".03"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
