@@ -104,7 +104,7 @@ _install_freeradius() {
 	echo "_________________________________________________________________"
 	echo " RADIUS SCRIPT AUTOSTART"
 	echo "_________________________________________________________________"
-	cat << 'EOF' > /etc/init.d/freeradius
+	cat << 'EOF' > /etc/init.d/radiusd
 #!/bin/sh
 # Start/stop the FreeRADIUS daemon.
 
