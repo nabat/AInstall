@@ -174,7 +174,7 @@ EOF
 	update-rc.d radiusd defaults
 	update-rc.d radiusd enable
         service radiusd start
-        AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
+        #AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
 	cd ${CURRENT_DIR}
 }
 
@@ -316,8 +316,8 @@ _install_rstat() {
 _install_mrtg() {
 	apt-get -y install mrtg snmp 
 	_install_rstat
-	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
-	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+#	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+#	echo "*/5 * * * * root env LANG=C /usr/bin/mrtg /usr/local/etc/mrtg/mrtg.cfg" >> /etc/crontab
 }
 
 #**********************************************************
