@@ -8,6 +8,9 @@
 
 ALIB_LOADED="Loaded";
 
+#**********************************************************
+# Get OS
+#**********************************************************
 get_os () {
 
 OS=`uname -s`
@@ -17,17 +20,17 @@ OS_NAME=""
 
 if [ "${OS}" = "SunOS" ] ; then
   OS=Solaris
-  ARCH=`uname -p`  
+  ARCH=`uname -p`
   OSSTR="${OS} ${OS_VERSION}(${ARCH} `uname -v`)"
 elif [ "${OS}" = "AIX" ] ; then
   OSSTR="${OS} `oslevel` (`oslevel -r`)"
 elif [ "${OS}" = "FreeBSD" ] ; then
   OS_NAME="FreeBSD";
-  OS_NUM=`uname -r | awk -F\. '{ print $1 }'`
+  #OS_VERSION=`uname -r | awk -F\. '{ print $1 }'`
 elif [ "${OS}" = "Linux" ] ; then
   #GetVersionFromFile
   KERNEL=`uname -r`
-  if [ -f /etc/altlinux-release ]; then     
+  if [ -f /etc/altlinux-release ]; then
     OS_NAME=`cat /etc/altlinux-release | awk '{ print $1 $2 }'`
     OS_VERSION=`cat /etc/altlinux-release | awk '{ print $3 }'`
   #RedHat CentOS
@@ -47,14 +50,14 @@ elif [ "${OS}" = "Linux" ] ; then
 #  elif [ -f /etc/debian_version ] ; then
 #    OS_NAME="Debian `cat /etc/debian_version`"
 #    OS_VERSION=`cat /etc/issue | head -1 |awk '{ print $3 }'`
-  elif [ -f /etc/slackware-version ]; then 
+  elif [ -f /etc/slackware-version ]; then
     OS_NAME=`cat /etc/slackware-version | awk '{ print $1 }'`
-    OS_VERSION=`cat /etc/slackware-version | awk '{ print $2 }'`   
+    OS_VERSION=`cat /etc/slackware-version | awk '{ print $2 }'`
   elif [ -f /etc/gentoo-release ]; then
     OS_NAME=`cat /etc/os-release | grep "^NAME=" | awk -F= '{ print $2 }'`
-    OS_VERSION=`cat /etc/gentoo-release`   
+    OS_VERSION=`cat /etc/gentoo-release`
   else
-    #Debian 
+    #Debian
     OS_NAME=`cat /etc/issue| head -1 |awk '{ print $1 }'`
     OS_VERSION=`cat /etc/issue | head -1 |awk '{ print $3 }'`
   fi
