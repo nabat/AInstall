@@ -2,11 +2,14 @@
 #**************************************************************
 # ABillS Auto Programs Building
 #
-# Created By ABillS Team 2010-2019
+# Created By ABillS Team 2010-2020
+#
+# UPDATED: 20200422
 #
 #**************************************************************
 
-VERSION=5.25
+VERSION=5.26
+
 ABILLS_VERSION="0.82"
 VERSION_PREFIX=".03"
 
