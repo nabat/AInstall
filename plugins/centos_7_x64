@@ -141,7 +141,7 @@ _install_freeradius() {
 		echo "ls ${dir}/libperl* | head -1"  
 	fi;
 
-	PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
 	if [ x"${PERL_LIB}" != x ]; then
 		PERL_LIB_DIR=${dir}
 		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then

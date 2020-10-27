@@ -3,7 +3,7 @@
 #M update:upgrade:apt-get update && apt-get upgrade
 #M mysql:MySQL:_install mariadb-server mariadb mariadb-client
 #M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork libapache2-mod-perl2
-#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
+#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
@@ -60,7 +60,7 @@ _install_freeradius() {
 	  	echo "ls ${dir}/libperl* | head -1"
 	  fi;
 
-	  PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	  PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
 	  if [ x"${PERL_LIB}" != x ]; then
 	  	PERL_LIB_DIR=${dir}
 	  	if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
@@ -644,6 +644,6 @@ post_install () {
 
   cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
 
-	echo "Plugin finished";
-	read -p "press Enter to continue...";
+  echo "Plugin finished";
+  read -p "press Enter to continue...";
 }
