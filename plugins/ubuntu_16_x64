@@ -276,8 +276,6 @@ EOF
   chmod +x /etc/init.d/radiusd
   update-rc.d radiusd defaults
 
-  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
-
   cd ${CURRENT_DIR}
 }
 

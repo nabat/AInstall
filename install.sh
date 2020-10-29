@@ -403,7 +403,7 @@ echo "
   -u     Uninstall (abills mysql)
   -p     use plugin [plugin name]
   -h     This help
-  --install-version 0.78.25 -
+  --install-version 81.16 - Install version 0.81.16 instead of $ABILLS_VERSION$VERSION_PREFIX
   --upgrade 0.78.25  - Upgrade cur version tp 0.78.25
   --in_tmux - Do not start tmux
 "
@@ -2404,6 +2404,9 @@ for _switch ; do
         --test)  TEST_DISTRO="true";
                 shift;
                 ;;
+        *)      echo "Unknown option $1"
+                help
+                exit 1;
         esac
 done
 
