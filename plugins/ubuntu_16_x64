@@ -3,7 +3,7 @@
 #M update:upgrade:apt-get update
 #M mysql:MySQL:_install mysql-server
 #M apache:apache:_install_apache
-#M perl_modules:Perl_modules:_install libjson-perl libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
+#M perl_modules:Perl_modules:_install libjson-perl libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
@@ -57,7 +57,6 @@ _install_apache() {
   _install apache2
   _install apache2-doc 
   _install apache2-utils 
-  _install apache2-mpm-prefork
   a2enmod ssl
   a2enmod rewrite
   a2enmod suexec
@@ -69,8 +68,6 @@ _install_apache() {
   chown -Rf www-data:www-data /usr/abills/backup
 
   ${RESTART_APACHE} restart
-
-  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} apache "
 }
 
 
@@ -93,7 +90,7 @@ _install_freeradius() {
     echo "ls ${dir}/libperl* | head -1"  
   fi;
 
-  PERL_LIB=`ls ${dir}/libperl* | head -1`;
+  PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
   if [ x"${PERL_LIB}" != x ]; then
     PERL_LIB_DIR=${dir}
     if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
@@ -278,8 +275,6 @@ EOF
 
   chmod +x /etc/init.d/radiusd
   update-rc.d radiusd defaults
-
-  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} freeradius"
 
   cd ${CURRENT_DIR}
 }
@@ -746,15 +741,6 @@ install_mail () {
 post_install () {
 
   cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
-
-  touch /usr/abills/var/log/sql_errors
-  chmod +w /usr/abills/var/log/sql_errors
-
-  mkdir /usr/abills/var/
-  chmod -R +w /usr/abills/var/
-
-  mkdir /usr/abills/var/log/
-  chmod -R +w /usr/abills/var/log/
 
   echo "Plugin finished";
   read -p "press Enter to continue...";

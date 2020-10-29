@@ -3,7 +3,7 @@
 #M update:upgrade:apt-get update
 #M mysql:MySQL:_install mysql-common-5.6 mysql-server-5.6 mysql-client-5.6
 #M apache:apache:_install_apache
-#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
+#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
@@ -86,7 +86,7 @@ _install_freeradius() {
 		echo "ls ${dir}/libperl* | head -1"  
 	fi;
 
-	PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
 	if [ x"${PERL_LIB}" != x ]; then
 		PERL_LIB_DIR=${dir}
 		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
