@@ -25,6 +25,8 @@ Support OS:
  - ubuntu_14_x64
  - ubuntu_16_x64
  - ubuntu_18_x64
+ - ubuntu_19_x64
+ - ubuntu_20_x64
 
 Plugins are structured as plugins/Distributive_Version_Arch
 
