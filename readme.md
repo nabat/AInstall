@@ -2,7 +2,7 @@
 Installer for ABillS based on plugin system
 ===============================================
 
-ver. 5.24
+ver. 5.28
 
 Installing:
   * ABillS
@@ -19,6 +19,7 @@ Support OS:
  - centos_7_x64
  - debian_8_x64
  - debian_9_x64
+ - debian_10_x64
  - freebsd_10_x64
  - freebsd_10_x86
  - freebsd_11_x64
@@ -32,13 +33,13 @@ Plugins are structured as plugins/Distributive_Version_Arch
 
 As of version 5.05 it can guess your system.
 If guessed wrong, use ''-p'' key
-  
+
  <code>
   # ./install.sh -p centos_7_x64
- </code>   
-   
+ </code>
+
 If you want avoid tmux session use ''--in_tmux'' key
-    
+
 <code>
   # ./install.sh --in_tmux
 </code>
@@ -46,9 +47,9 @@ If you want avoid tmux session use ''--in_tmux'' key
 If you want to install custom version use ''--install-version'' key
 
 <code>
-./install.sh --install-version 78.25 
+./install.sh --install-version 78.25
  </code>
-  
+
 Plugin Format
 -------------
 
@@ -88,8 +89,8 @@ Plugin Format
 
 </table>
 
-As command you can use shell command like 
-  <b>pkg install www</b> 
+As command you can use shell command like
+  <b>pkg install www</b>
 or shell function:
   <b>shell_function</b>
 
@@ -110,15 +111,15 @@ Inside plugin you can use these functions to execute custom commands.
     <td>
        executes after full installation (before autoconf)
     </td>
-  </tr>  
-</table> 
+  </tr>
+</table>
 
 
 Plugin execution flow
 ----------------
 <table>
   <tr><td>
-    Pre install 
+    Pre install
   </td></tr>
   <tr><td>
     Install programs
@@ -127,7 +128,7 @@ Plugin execution flow
     Post install
   </td></tr>
   <tr><td>
-    Run misc/autoconf 
+    Run misc/autoconf
   </td></tr>
   <tr><td>
     Show result

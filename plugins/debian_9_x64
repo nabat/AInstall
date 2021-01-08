@@ -1,9 +1,9 @@
-#OS Debian_8_x64
+#OS Debian_9_x64
 #COMMENTS Debian comments
 #M update:upgrade:apt-get update && apt-get upgrade
 #M mysql:MySQL:_install mariadb-server mariadb mariadb-client
 #M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork libapache2-mod-perl2
-#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
+#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
@@ -17,7 +17,7 @@
 # Variable
 
 YES="-y"
-BUILD_OPTIONS=" sudo apt-get ${YES} install "
+BUILD_OPTIONS=" apt-get ${YES} install "
 MYSQLDUMP=/usr/bin/mysqldump
 GZIP=/bin/gzip
 WEB_SERVER_USER=www-data
@@ -60,7 +60,7 @@ _install_freeradius() {
 	  	echo "ls ${dir}/libperl* | head -1"
 	  fi;
 
-	  PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	  PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
 	  if [ x"${PERL_LIB}" != x ]; then
 	  	PERL_LIB_DIR=${dir}
 	  	if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
@@ -174,7 +174,7 @@ EOF
 	update-rc.d radiusd defaults
 	update-rc.d radiusd enable
         service radiusd start
-        AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
+        #AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
 	cd ${CURRENT_DIR}
 }
 
@@ -316,8 +316,8 @@ _install_rstat() {
 _install_mrtg() {
 	apt-get -y install mrtg snmp 
 	_install_rstat
-	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
-	echo "*/5 * * * * env LANG=C /usr/bin/mrtg /etc/mrtg/mrtg.cfg" >> /etc/crontab
+#	indexmaker /etc/mrtg/mrtg.cfg > /usr/abills/webreports/index.htm
+#	echo "*/5 * * * * root env LANG=C /usr/bin/mrtg /usr/local/etc/mrtg/mrtg.cfg" >> /etc/crontab
 }
 
 #**********************************************************
@@ -644,6 +644,6 @@ post_install () {
 
   cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
 
-	echo "Plugin finished";
-	read -p "press Enter to continue...";
+  echo "Plugin finished";
+  read -p "press Enter to continue...";
 }

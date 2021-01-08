@@ -1,8 +1,8 @@
-#OS Debian_8_x64
+#OS Debian_10_x64
 #COMMENTS Debian comments
-#M update:upgrade:apt-get update && apt-get upgrade
-#M mysql:MySQL:_install mariadb-server mariadb mariadb-client libmysqlclient-dev
-#M apache:apache:_install apache2 apache2-doc apache2-utils apache2-mpm-prefork libapache2-mod-perl2
+#M update:upgrade:_update
+#M mysql:MySQL:_install mariadb-server mariadb-client
+#M apache:apache:_install apache2 apache2-doc apache2-utils libapache2-mod-perl2
 #M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp-server
@@ -12,7 +12,7 @@
 #M FSbackup:FSbackup:_install_fsbackup
 #M Mail:Mail_server:install_mail
 # perl_speedy 
-#M utils:Utils:_install vim tmux bash git
+#M utils:Utils:_install vim tmux bash git tcpdump
 
 # Variable
 
@@ -27,6 +27,7 @@ RESTART_RADIUS=/etc/init.d/radiusd
 RESTART_APACHE=/etc/init.d/apache2
 RESTART_DHCP=/etc/init.d/isc-dhcp
 PING=/bin/ping
+PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 #Services to check after installation
 PROCESS_LIST="mysql radiusd apache2 flow-capture"
@@ -37,50 +38,57 @@ PROCESS_LIST="mysql radiusd apache2 flow-capture"
 pre_install () {
   
   apt-get update
-	apt-get -y install dialog nano gcc sudo
+	apt-get install -yq dialog nano gcc sudo
   
 	CURRENT_DIR=`pwd`
+}
+
+#*******************************************
+#  Update and upgrade 
+#*******************************************
+_update() {
+	apt-get update && apt-get upgrade;
 }
 
 #*******************************************
 #  Radius 
 #*******************************************
 _install_freeradius() {
-	apt-get -y install gcc 
-	apt-get -y install make
-  
+	apt-get -y install gcc make libtalloc-dev libmariadb-dev libmariadbclient-dev libmariadb-dev-compat
+
 	if [ -d /usr/local/freeradius/ ]; then
 		echo "Radius exists: /usr/local/freeradius/";
 		return 0 ;
 	fi;
-  
+  FREERADIUS_VERSION=3.0.17
   PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
   
 	for dir in ${PERL_LIB_DIRS}; do
-	if [ "${DEBUG}" = 1 ]; then
-		echo "ls ${dir}/libperl* | head -1"  
-	fi;
+	  if [ "${DEBUG}" = 1 ]; then
+	  	echo "ls ${dir}/libperl* | head -1"
+	  fi;
 
-	PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
-	if [ x"${PERL_LIB}" != x ]; then
-		PERL_LIB_DIR=${dir}
-		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
-		ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
-		fi;
-	fi;
+	  PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
+	  if [ x"${PERL_LIB}" != x ]; then
+	  	PERL_LIB_DIR=${dir}
+	  	if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
+	  	ln -s ${PERL_LIB} ${PERL_LIB_DIR}libperl.so
+	  	fi;
+	  fi;
 	done;
 
 
 	if [ x"${PERL_LIB_DIR}" = x ]; then
-		echo "Perl lib not found";
-		exit;
+		echo "Perl lib not found. Not building FreeRadius. Waiting 5 sec...";
+		sleep 5;
+		return
 	else
 		echo "Perl lib: ${PERL_LIB_DIR}libperl.so"
 	fi;
 
 	RADIUS_SERVER_USER="freerad"
- 
-	wget freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+
+	wget -O freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
 		echo "Can\'t download freeradius. PLease download and install manual";
@@ -90,8 +98,8 @@ _install_freeradius() {
 	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 	cd freeradius-server-${FREERADIUS_VERSION}
-	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp > 1
-	echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
+	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes > 1
+	echo "/configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes " > configure_abills
 	make && make install
 
 	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
@@ -100,6 +108,7 @@ _install_freeradius() {
 	groupadd ${RADIUS_SERVER_USER}
 	useradd -g ${RADIUS_SERVER_USER} -s /bash/bash ${RADIUS_SERVER_USER}
 	chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/raddb
+	echo '' > /usr/local/freeradius/etc/raddb/clients.conf
 	echo "_________________________________________________________________"
 	echo " RADIUS SCRIPT AUTOSTART"
 	echo "_________________________________________________________________"
@@ -124,7 +133,7 @@ set -e
 
 PROG="radiusd"
 PROGRAM="/usr/sbin/radiusd"
-PIDFILE="/var/run/radiusd/radiusd.pid"
+PIDFILE="/usr/local/freeradius/var/run/radiusd/radiusd.pid"
 DESCR="FreeRADIUS daemon"
 
 test -f $PROGRAM || exit 0
@@ -172,6 +181,8 @@ EOF
 	chmod +x /etc/init.d/radiusd
 	update-rc.d radiusd defaults
 	update-rc.d radiusd enable
+        service radiusd start
+        AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
 	cd ${CURRENT_DIR}
 }
 
@@ -642,5 +653,6 @@ post_install () {
   cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
 
   echo "Plugin finished";
-  read -p "press Enter to continue...";
+  echo -n "press Enter to continue...";
+  read _;
 }

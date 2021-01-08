@@ -3,7 +3,7 @@
 #M update:upgrade:apt-get update
 #M mysql:MySQL:_install mysql-common-5.6 mysql-server-5.6 mysql-client-5.6
 #M apache:apache:_install_apache
-#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libgdbm3 libgdbm-dev
+#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp43-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
@@ -11,7 +11,6 @@
 #M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
 #M FSbackup:FSbackup:install_fsbackup
 #M Mail:Mail_server:install_mail
-#M build_kernel:Build_Kernel:echo test
 # perl_speedy 
 #M utils:Utils:_install vim tmux bash git
 
@@ -87,7 +86,7 @@ _install_freeradius() {
 		echo "ls ${dir}/libperl* | head -1"  
 	fi;
 
-	PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
 	if [ x"${PERL_LIB}" != x ]; then
 		PERL_LIB_DIR=${dir}
 		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
@@ -155,8 +154,12 @@ _install_freeradius() {
 #   description: radiusd is service access provider Daemon.
 ### BEGIN INIT INFO
 # Provides: radiusd
-# Should-Start: radiusd
+# Required-Start: $remote_fs $network $syslog
+# Should-Start: mysql radiusd
+# Required-Stop: $remote_fs $syslog
 # Should-Stop: radiusd
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
 # Short-Description: start and stop radiusd
 # Description: radiusd is access provider service Daemon.
 ### END INIT INFO
@@ -211,7 +214,7 @@ fi
 
 chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
 chown -R ${RADIUS_USER}:${RADIUS_USER} /usr/local/freeradius/etc/raddb
-chown -R ${RADIUS_USER}:${RADIUS_USER} ${rundir}
+chown -R ${RADIUS_USER}:${RADIUS_USER} ${rundir}/..
 chmod 660 $logdir/radius.log
 
 case "$1" in

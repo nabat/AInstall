@@ -21,7 +21,7 @@ WEB_SERVER_USER=apache
 MYSQLDUMP=/bin/mysqldump
 GZIP=/bin/gzip
 APACHE_CONF_DIR=/etc/httpd/conf.d
-RESTART_MYSQL="service mysql"
+RESTART_MYSQL="service mysqld"
 RESTART_RADIUS="service radiusd "
 RESTART_APACHE="service httpd "
 PING=/bin/ping
@@ -44,7 +44,8 @@ pre_install() {
 #*********************************************************
 _install_mysql(){
   # Install repository
-  yum -y install http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+  yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  percona-release setup ps57
   
   # Clear log before installation
   [ -f /var/log/mysqld.log ] && echo '' > /var/log/mysqld.log
@@ -53,10 +54,10 @@ _install_mysql(){
   yum -y install Percona-Server-server-57 Percona-Server-devel-57
   
   echo "Starting Percona to initialize /var/lib/mysql directory"
-  systemctl start mysql
+  systemctl start mysqld
   
   echo "Stop percona running in normal mode"
-  systemctl stop mysql
+  systemctl stop mysqld
   
   echo "Starting Percona without password validate"
   sudo -u mysql /usr/sbin/mysqld --daemonize --pid-file=/var/run/mysqld/mysqld.pid --validate-password=OFF
@@ -66,10 +67,16 @@ _install_mysql(){
 
   echo "Clear 'root'@'localhost' password"
   mysqladmin -u root --password="${MYSQL_TEMPRORARY_ROOT_PASSWORD}" -h localhost password ""
-   
-   echo "Start mysql in normal mode"
-  systemctl start mysql
-  systemctl enable mysql
+  
+  echo "Stopping mysql without validate password"
+  kill -2 `cat /var/run/mysqld/mysqld.pid`
+  
+  echo "Starting mysql in normal mode"
+  systemctl start mysqld
+  systemctl enable mysqld
+  
+  echo "Disabling special character password policy"
+  mysql -e "SET GLOBAL validate_password_special_char_count=0;"
 }
 
 #*********************************************************
@@ -112,7 +119,8 @@ _install_epel() {
 #  Install Perl modules
 #*********************************************************
 _install_perl_modules() {
-	yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File
+	yum -y install expat-devel expat mod_ssl openssl openssl-devel perl-DBI perl-JSON perl-DBD-MySQL perl-Digest-MD5 perl-Digest-SHA1 perl-Time-HiRes perl-ExtUtils-Embed perl-DB_File perl-autodie perl-App-cpanminus perl-Time-Piece
+	cpanm Devel::NYTProf Imager::QRCode autodie
 }
 
 #*******************************************
@@ -133,7 +141,7 @@ _install_freeradius() {
 		echo "ls ${dir}/libperl* | head -1"  
 	fi;
 
-	PERL_LIB=`ls ${dir}/libperl* | head -1`;
+	PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
 	if [ x"${PERL_LIB}" != x ]; then
 		PERL_LIB_DIR=${dir}
 		if [ ! -f ${PERL_LIB_DIR}/libperl.so ]; then
@@ -180,8 +188,8 @@ _install_freeradius() {
 [Unit]
 Description=FreeRADIUS Server
 After=network.target
-After=mysql.service
-Requires=mysql.service
+After=mysqld.service
+Requires=mysqld.service
 
 [Service]
 Type=forking
@@ -610,7 +618,7 @@ cd ${CURRENT_DIR}
 # Post install
 #************************************
 post_install() {
-	systemctl start mariadb
+	systemctl start mysqld
 	
   systemctl restart radiusd.service
 
