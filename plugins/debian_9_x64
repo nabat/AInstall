@@ -645,5 +645,6 @@ post_install () {
   cd /usr/abills/misc && ./perldeps.pl  apt-get -batch
 
   echo "Plugin finished";
-  read -p "press Enter to continue...";
+  echo -n "press Enter to continue...";
+  read _;
 }
