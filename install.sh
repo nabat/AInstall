@@ -2,16 +2,16 @@
 #**************************************************************
 # ABillS Auto Programs Building
 #
-# Created By ABillS Team 2010-2020
+# Created By ABillS Team 2010-2021
 #
-# UPDATED: 20201030
+# UPDATED: 20210507
 #
 #**************************************************************
 
-VERSION=5.28
+VERSION=5.29
 
-ABILLS_VERSION="0.84"
-VERSION_PREFIX=".06"
+ABILLS_VERSION="0.90"
+VERSION_PREFIX=".50_rc1"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
