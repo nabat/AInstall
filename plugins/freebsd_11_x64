@@ -13,7 +13,7 @@
 #M fsbackup:FSBackup:_install_fsbackup
 #M build_kernel:Build_Kernel:freebsd_build_kernel
 # perl_speedy 
-#M utils:Utils:_install vim-lite tmux bash git sudo
+#M utils:Utils:_install vim-console tmux bash git sudo
 
 # Variable
 
