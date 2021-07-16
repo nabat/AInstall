@@ -1388,7 +1388,7 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 #**********************************************************
 # Build freebsd programs
 #**********************************************************
-freebsd_build2 () {
+freebsd_build2 () { #XXX is not used anywhere
 echo -e '\a \a \a';
 
 FILE_PING='/sbin/ping';
