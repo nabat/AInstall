@@ -350,13 +350,13 @@ EOF
 #************************************
 # rstat install
 #************************************
-_install_rstat() {
-	RSTAT_URL="http://heanet.dl.sourceforge.net/project/abills/Misc/rstat-0.21/rstat-0.21.tgz";
+_install_rstat() { #TODO: use install_rstat() from install.sh instead?
+	RSTAT_URL="https://github.com/nabat/rstat/archive/refs/heads/master.tar.gz";
 
 	wget ${RSTAT_URL}
 
-	tar zxvf rstat-0.21.tgz ;
-	cd rstat ;
+	tar zxvf master.tar.gz ;
+	cd rstat-master ;
 	make install ;
 	cd ${CURRENT_DIR}
 }
