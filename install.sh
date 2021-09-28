@@ -8,10 +8,10 @@
 #
 #**************************************************************
 
-VERSION=5.30
+VERSION=5.31
 
 ABILLS_VERSION="0.91"
-VERSION_PREFIX=".21"
+VERSION_PREFIX=".27"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
