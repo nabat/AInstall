@@ -176,7 +176,8 @@ _install_freeradius() {
 	#echo "./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --without-openssl --with-dhcp " > configure_abills
 	make && make install
 
-	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+	ln -s /usr/local/freeradius/bin/* /usr/bin/
+	ln -s /usr/local/freeradius/sbin/* /usr/sbin/
 	
 	firewall-cmd --permanent --zone=public --add-service=radius
 	

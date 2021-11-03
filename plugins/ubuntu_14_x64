@@ -121,7 +121,8 @@ _install_freeradius() {
 
   echo "" > /usr/local/freeradius/etc/raddb/clients.conf
 
-	ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
+	ln -s /usr/local/freeradius/bin/* /usr/bin/
+	ln -s /usr/local/freeradius/sbin/* /usr/sbin/
 
 	#Add user
 	groupadd ${RADIUS_SERVER_USER}
