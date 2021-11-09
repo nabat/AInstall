@@ -11,7 +11,7 @@
 #M accel_ppp:ACCEL-PPPoE:_install_accel_pppoe
 #M FSbackup:FSbackup:install_fsbackup
 #M Mail:Mail_server:install_mail
-# perl_speedy 
+# perl_speedy
 #M utils:Utils:_install vim tmux bash git
 
 # Variable
@@ -38,12 +38,12 @@ PROCESS_LIST="mysqld radiusd apache2 flow-capture named"
 pre_install () {
 
 	_install dialog nano gcc
-  
+
   LEGACY_SQL_MODE_ENABLE="SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION';SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION';";
   find /usr/abills/db/ -type f | while read FILENAME; do
     sed -i "1 i${LEGACY_SQL_MODE_ENABLE}" ${FILENAME};
   done;
-  
+
 	CURRENT_DIR=`pwd`
 }
 
@@ -53,37 +53,37 @@ pre_install () {
 # Apache2
 #******************************************************************
 _install_apache() {
-	_install apache2 
-	_install apache2-doc 
-	_install apache2-utils 
+	_install apache2
+	_install apache2-doc
+	_install apache2-utils
 	_install apache2-mpm-prefork
 	a2enmod ssl
 	a2enmod rewrite
 	a2enmod suexec
 	a2enmod include
 	a2enmod cgid
-	
+
 	chown -Rf www-data:www-data /usr/abills/cgi-bin
 	chown -Rf www-data:www-data /usr/abills/Abills/templates
 	chown -Rf www-data:www-data /usr/abills/backup
 	${RESTART_APACHE} restart
 }
 #*******************************************
-#  Radius 
+#  Radius
 #*******************************************
 _install_freeradius() {
 	_install gcc make libmysqlclient-dev
-  
+
 	if [ -d /usr/local/freeradius/ ]; then
 		echo "Radius exists: /usr/local/freeradius/";
 		return 0 ;
 	fi;
-  
+
   PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
-  
+
 	for dir in ${PERL_LIB_DIRS}; do
 	if [ "${DEBUG}" = 1 ]; then
-		echo "ls ${dir}/libperl* | head -1"  
+		echo "ls ${dir}/libperl* | head -1"
 	fi;
 
 	PERL_LIB=`ls ${dir}/libperl* 2>/dev/null | head -1`;
@@ -104,7 +104,7 @@ _install_freeradius() {
 	fi;
 
 	RADIUS_SERVER_USER="freerad"
- 
+
 	_fetch freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
 	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
@@ -282,12 +282,12 @@ EOF
 _install_ipn() {
 
 	_install flow-tools
-	
+
 	mkdir -p /usr/abills/var/log/ipn/
-	
+
 	echo "-S 5 -n 287 -N 0  -d 5 -w /usr/abills/var/log/ipn/  0/0/9996" > /etc/flow-tools/flow-capture.conf
 
-	
+
 	pdate-rc.d flow-capture defaults
 	update-rc.d flow-capture enable
 	echo '##################################################################################################'
@@ -297,73 +297,73 @@ _install_ipn() {
 
 	_install libpcap-dev;
 
-  
+
 	echo '********************************************************************';
 	echo '***        THIS SCRIPT APPLIES SOME FIXES TO BUILD IPCAD         ***';
 	echo '********************************************************************';
-  
+
 	# will be installed in /usr/
 	cd /usr/
-  
+
 	#remove if already extracted
 	if [ -d /usr/ipcad-3.7.3 ]; then
 		rm -rf ipcad-3.7.3
 	fi;
-  
+
 	# do not download if present
 	if [ -f "ipcad-3.7.3.tar.gz" ]; then
 		echo "INFO: Already downloaded";
 	else
 		wget http://lionet.info/soft/ipcad-3.7.3.tar.gz
 	fi;
-  
+
 	tar -xvzf ipcad-3.7.3.tar.gz
 	cd ipcad-3.7.3
-  
+
 	LINE1_NUM=`grep -n 'HAVE_LINUX_NETLINK_H' headers.h | cut -d : -f 1`
 	LINE2_NUM=$(( LINE1_NUM + 2 ));
-  
+
 	sed -i "${LINE2_NUM}d" headers.h;
 	sed -i "${LINE1_NUM}d" headers.h;
-  
+
 	echo
-  
+
 	if [ `cat headers.h | grep 'HAVE_LINUX_NETLINK_H'` ]; then
 		echo "INFO:  Error "
 	else
 		echo "INFO:  HAVE_LINUX_NETLINK_H Deleted";
 	fi;
-  
-  
+
+
 	sed -i "1i #include \"signal.h\"" main.c;
-  
+
 	echo
-  
+
 	sed -i "1i #include \"headers.h\"" pps.c;
 	sed -i "1i #include \"signal.h\"" pps.c;
-  
+
 	echo "INFO: Added to pps.c"
-    
+
 	sed -i "1i #include \"signal.h\"" servers.h;
-  
+
 	echo "INFO: Added to servers.h"
-  
+
 	./configure && make && make install
-  
+
 	if [ -d  /var/ipcad/ ]; then
 		echo "directory /var/ipcad/ exists";
 	else
 		mkdir /var/ipcad/;
 	fi;
-  
+
 
 	cat << 'EOF' > /usr/local/etc/ipcad.conf
 # ???????????????????? ?????? ?????????? ????????????????????
 interface eth0;
-# ?????????????????????? ???? ???????????? 
+# ?????????????????????? ???? ????????????
 #capture-ports enable;
 
-# ???????????????????????? ??????????, ?????????????????? ???????????? ???????? ?????????????????????? 
+# ???????????????????????? ??????????, ?????????????????? ???????????? ???????? ??????????????????????
 #aggregate 1024-65535    into 65535;     /* Aggregate wildly */
 #aggregate 3128-3128     into 3128;      /* Protect these ports */
 #aggregate 150-1023      into 1023;      /* General low range */
@@ -378,7 +378,7 @@ netflow engine-id 1;            # Useful to differentiate multiple ipcads.
 
 dumpfile = ipcad.dump;
 chroot = /var/ipcad/;
-pidfile = ipcad.pid;  
+pidfile = ipcad.pid;
 
 rsh enable at 127.0.0.1;
 memory_limit = 16m;
@@ -394,7 +394,7 @@ EOF
 # MRTG install
 #************************************
 _install_mrtg() {
-	_install mrtg snmp 
+	_install mrtg snmp
 
 	install_rstat
 
@@ -430,7 +430,7 @@ _install_mrtg() {
 #	if [ x"${check_fsbackup_cron}" = x ]; then
 #		echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
 #	fi;
-#	
+#
 #	cd ${CURRENT_DIR}
 #}
 
@@ -447,7 +447,7 @@ _install_accel_pppoe() {
   echo "#############################################"
   echo
   cd /usr/
-  
+
   wget http://sourceforge.net/projects/accel-ppp/files/accel-ppp-1.7.4.tar.bz2
   tar -xjf accel-ppp-1.7.4.tar.bz2
   cd accel-ppp-1.7.4
@@ -456,7 +456,7 @@ _install_accel_pppoe() {
   cmake -DBUILD_DRIVER=FALSE -DRADIUS=TRUE -DKDIR=/usr/src/linux-headers-`uname -r` -DCMAKE_INSTALL_PREFIX=/usr/local ..
   make
   make install
-  
+
 cat << 'EOF1' > /etc/accel-ppp.conf
 [modules]
 #path=/usr/local/lib/accel-ppp
@@ -543,7 +543,7 @@ verbose=1
 
 [client-ip-range]
 disable
-#10.0.0.0/8 # ?????????????? ?????????????????? ?????????????????????? ???????????????? ?? (???? DHCP ?????? ??????????????). 
+#10.0.0.0/8 # ?????????????? ?????????????????? ?????????????????????? ???????????????? ?? (???? DHCP ?????? ??????????????).
          # ??????????: ?????? ???? ???????????? ?????????????????????? ?? ???????????? PPPOE ?????? PPTP ?????????????? ??????????????.
 
 #[ip-pool]
@@ -595,7 +595,7 @@ attr-up=PPPD-Upstream-Speed-Limit
 
 [cli]
 telnet=127.0.0.1:2000
-#tcp=127.0.0.1:2001  
+#tcp=127.0.0.1:2001
 EOF1
 
 cat << 'EOF2' >> /usr/local/share/accel-ppp/radius/dictionary
@@ -612,11 +612,11 @@ ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
 ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
 ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
 ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
-ATTRIBUTE Acct-Interim-Interval 85 integer 
+ATTRIBUTE Acct-Interim-Interval 85 integer
 ATTRIBUTE Acct-Input-Gigawords    52      integer
-ATTRIBUTE Acct-Output-Gigawords   53      integer 
+ATTRIBUTE Acct-Output-Gigawords   53      integer
 EOF2
-  
+
 modprobe -r ip_gre
 
 echo 'blacklist ip_gre' >> /etc/modprobe.d/blacklist.conf
@@ -638,14 +638,14 @@ ATTRIBUTE PPPD-Upstream-Speed-Limit-2 234 integer
 ATTRIBUTE PPPD-Downstream-Speed-Limit-2 235 integer
 ATTRIBUTE PPPD-Upstream-Speed-Limit-3 236 integer
 ATTRIBUTE PPPD-Downstream-Speed-Limit-3 237 integer
-ATTRIBUTE Acct-Interim-Interval 85 integer 
+ATTRIBUTE Acct-Interim-Interval 85 integer
 ATTRIBUTE Acct-Input-Gigawords    52      integer
 EOF3
 
 
 	touch /etc/init.d/accel-ppp
 	chmod +x /etc/init.d/accel-ppp
-	
+
 	cat << 'EOF4' >> /etc/init.d/accel-ppp
 	#!/bin/sh
 # /etc/init.d/accel-pppd: set up the accel-ppp server
@@ -705,7 +705,7 @@ case "$1" in
     ;;
 esac
 
-exit 0 
+exit 0
 EOF4
 	update-rc.d accel-ppp defaults
 	update-rc.d accel-ppp enable

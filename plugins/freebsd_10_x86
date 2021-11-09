@@ -12,7 +12,7 @@
 # IPN=
 # fsbackup=
 #M build_kernel:Build_Kernel:freebsd_build_kernel
-# perl_speedy 
+# perl_speedy
 #M utils:Utils:_install vim-lite tmux bash git
 
 # Variable
@@ -48,7 +48,7 @@ pre_install () {
       touch /etc/crontab;
   fi;
 
-  
+
   if [ ! -d /etc/make.conf ];then
       touch /etc/make.conf;
   fi;
@@ -108,7 +108,7 @@ install_mail () {
      echo "AddType application/x-httpd-php .php" >> ${APACHE_CONFIG}
    fi;
  fi;
- 
+
  PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
  if [ x"${PHP_INDEX}" = x ]; then
    cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
@@ -125,24 +125,24 @@ install_mail () {
 #
 #*******************************************
 _install_freeradius(){
-  
+
   if [ -d '/usr/local/freeradius' ]; then
     echo "Freeradius already installed";
     return;
   fi;
-  
+
   cd /usr/ports/net/freeradius2 && make WITH="MYSQL USER" WITHOUT="" BATCH=yes install
   echo '' > /usr/local/freeradius/etc/raddb/clients.conf
-  
+
   RADIUS_ENABLED=`grep 'radiusd_enable' /etc/rc.conf`
   if [ x"${RADIUS_ENABLED}" = x""  ]; then
     echo "radiusd_enable=\"YES\"" >> /etc/rc.conf;
   fi;
-  
+
   ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
-  
+
   service radiusd start
- 
+
   cd ${CURRENT_DIR}
 }
 
@@ -173,15 +173,15 @@ _install_apache(){
   _install apache24
 
   cat << '[EOF_APACHE]' > /usr/local/etc/apache24/modules.d/000_abills_modules.conf
-  
+
   LoadModule ssl_module libexec/apache24/mod_ssl.so
   LoadModule rewrite_module libexec/apache24/mod_rewrite.so
   LoadModule cgi_module libexec/apache24/mod_cgi.so
-  
+
 [EOF_APACHE]
 
   apachectl -k restart
-  
+
 }
 
 #*******************************************
@@ -190,5 +190,5 @@ _install_apache(){
 post_install(){
 
   cd /usr/abills/misc && ./perldeps.pl pkg -batch
-  
+
 }

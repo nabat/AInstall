@@ -12,7 +12,7 @@
 #M FSbackup:FSbackup:install_fsbackup
 #M Mail:Mail_server:install_mail
 # perl_speedy
-#M utils:Utils:_install vim tmux bash git
+#M utils:Utils:_install vim tmux bash git socat snmp
 
 # Variable
 
