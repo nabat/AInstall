@@ -12,8 +12,8 @@
 # IPN=
 #M fsbackup:FSBackup:_install_fsbackup
 #M build_kernel:Build_Kernel:freebsd_build_kernel
-# perl_speedy 
-#M utils:Utils:_install vim-console tmux bash git sudo
+# perl_speedy
+#M utils:Utils:_install vim-console tmux bash git sudo net-snmp socat
 
 # Variable
 
@@ -38,9 +38,6 @@ PROCESS_LIST="mysql radiusd httpd flow-capture"
 # PRE INSTALL SECTION. Installing required packages
 #******************************************************************
 pre_install () {
-  # First run for pkg
-  pkg update -y
-
   if [ ! -f /usr/bin/perl ];then
     ln -s /usr/local/bin/perl /usr/bin/perl;
   fi;
@@ -59,6 +56,8 @@ pre_install () {
     echo 'WITHOUT_GUI=yes' >> /etc/make.conf
   fi;
 
+  echo >> /etc/rc.conf
+
   CURRENT_DIR=`pwd`;
 }
 
@@ -73,7 +72,7 @@ install_mail () {
  PORTS_LOCATION="/usr/ports/"
 
  cmd="cd ${PORTS_LOCATION}/security/cyrus-sasl2 ${BUILD_OPTIONS};";
- cmd=${cmd}" cd ${PORTS_LOCATION}/mail/postfix ${BUILD_OPTIONS};"; 
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/postfix ${BUILD_OPTIONS};";
  cmd=${cmd}" cd ${PORTS_LOCATION}/mail/maildrop && make WITH_AUTHLIB=yes MAILDROP_TRUSTED_USERS=vmail MAILDROP_SUID=1005 MAILDROP_SGID=1005 && make install;";
  cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib-base ${BUILD_OPTIONS};"
  cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib ${BUILD_OPTIONS};"
@@ -108,11 +107,11 @@ install_mail () {
      echo "AddType application/x-httpd-php .php" >> ${APACHE_CONFIG}
    fi;
  fi;
- 
+
  PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
  if [ "${PHP_INDEX}" = "" ]; then
    cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
-   cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}      
+   cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}
  fi;
 
  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
@@ -125,21 +124,10 @@ install_mail () {
 #*******************************************
 _install_freeradius(){
   cd /usr/ports/net/freeradius3 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
-  
-  RADIUS_ENABLED=`grep 'radiusd_enable' /etc/rc.conf`
-  if [ x"${RADIUS_ENABLED}" = x""  ]; then
-    echo "radiusd_enable=\"YES\"" >> /etc/rc.conf;
-  fi;
-  
-  ln -s /usr/local/freeradius/sbin/radiusd /usr/sbin/radiusd
-  
-  echo '' > /usr/local/etc/raddb/clients.conf
 
   AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
 
   cd ${CURRENT_DIR}
-  
-  service radiusd start
 }
 
 #*******************************************
@@ -169,44 +157,44 @@ _install_apache(){
   _install apache24
 
   cat << '[EOF_APACHE]' > /usr/local/etc/apache24/modules.d/000_abills_modules.conf
-  
+
   LoadModule ssl_module libexec/apache24/mod_ssl.so
   LoadModule rewrite_module libexec/apache24/mod_rewrite.so
   LoadModule cgi_module libexec/apache24/mod_cgi.so
-  
-[EOF_APACHE]
 
-  apachectl -k restart
-  
+[EOF_APACHE]
 }
 
+#*******************************************
+#
+#*******************************************
 _install_fsbackup() {
-  
+
   cd ~ ;
-  
+
   FSBACKUP_DIR="fsbackup-1.2pl2"
   FSBACKUP_FILE_NAME="${FSBACKUP_DIR}.tar.gz"
-  
+
   FSBACKUP_URL="http://www.opennet.ru/dev/fsbackup/src/${FSBACKUP_FILE_NAME}"
-  
+
   fetch "${FSBACKUP_URL}";
-  
+
   if [ !-f  ${FSBACKUP_FILE_NAME} ];then
     echo "#############################################"
     echo "#########     Can't load FSBackup      ######"
     echo "#############################################"
     return
   fi
-  
+
   tar zxvf ${FSBACKUP_FILE_NAME};
   cd ${FSBACKUP_DIR};
   ./install.pl;
   mkdir -p /usr/local/fsbackup/archive;
-  
+
   echo "!/usr/local/fsbackup" >> /usr/local/fsbackup/cfg_example
   cp /usr/local/fsbackup/create_backup.sh /usr/local/fsbackup/create_backup.sh_back
   cat /usr/local/fsbackup/create_backup.sh_back | sed 's/config_files=\".*\"/config_files=\"cfg_example\"/' > /usr/local/fsbackup/create_backup.sh
-  
+
   check_fsbackup_cron=`grep create_backup /etc/crontab`
   if [ x"${check_fsbackup_cron}" = x ]; then
     echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
@@ -218,9 +206,5 @@ _install_fsbackup() {
 #
 #*******************************************
 post_install(){
-
   cd /usr/abills/misc && perl perldeps.pl pkg -batch
-
-  chmod 666 /usr/abills/var/
-  chmod 666 /usr/abills/var/log/
 }
