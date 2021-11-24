@@ -149,13 +149,6 @@ _install_ipn(){
   mkdir -p /usr/abills/var/log/ipn/
   chown -R flowtools /usr/abills/var/log/ipn/
 
-  cat  << '[EOF]' >> /etc/rc.conf
-flow_capture_enable="YES"
-flow_capture_datadir="/usr/abills/var/log/ipn/"
-flow_capture_port="9996"
-flow_capture_flags="-S 5 -n 287 -N 0 -d 5"
-[EOF]
-
   service flow_capture start;
 }
 
