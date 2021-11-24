@@ -379,14 +379,6 @@ ${DIALOG} --msgbox "Benchmark\n" 20  52
 }
 
 #*****************************************
-# ipn configure
-#*****************************************
-ipn_configure () {
-  echo "Ipn Configure"
-
-}
-
-#*****************************************
 #
 #*****************************************
 help () {
@@ -854,7 +846,7 @@ install_ipn() {
   make install
 
   if [ -d ${BILLING_DIR} ]; then
-    ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
+    ls -s ${BILLING_DIR}/Abills/modules/Internet/traffic2sql ${BILLING_DIR}/libexec/
   fi;
 }
 
@@ -1345,7 +1337,7 @@ chown -R ${RADIUS_SERVER_USER}:${RADIUS_SERVER_USER} /usr/local/freeradius/etc/r
 #    AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} flow-tools"
 #
 #    if [ -d ${BILLING_DIR} ]; then
-#      ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
+#      ls -s ${BILLING_DIR}/Abills/modules/Internet/traffic2sql ${BILLING_DIR}/libexec/
 #    fi;
 #  fi;
 #
@@ -1597,7 +1589,7 @@ for name in ${RESULT}; do
     AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} flow-tools"
 
     if [ -d ${BILLING_DIR} ]; then
-      ls -s ${BILLING_DIR}/Abills/modules/Ipn/traffic2sql ${BILLING_DIR}/libexec/
+      ls -s ${BILLING_DIR}/Abills/modules/Internet/traffic2sql ${BILLING_DIR}/libexec/
     fi;
   fi;
 
