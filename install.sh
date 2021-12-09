@@ -4,14 +4,14 @@
 #
 # Created By ABillS Team 2010-2021
 #
-# UPDATED: 20210507
+# UPDATED: 20211209
 #
 #**************************************************************
 
-VERSION=5.31
+VERSION=5.32
 
-ABILLS_VERSION="0.91"
-VERSION_PREFIX=".27"
+ABILLS_VERSION="0.92"
+VERSION_PREFIX=".05"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
