@@ -2396,9 +2396,11 @@ for _switch ; do
         --test)  TEST_DISTRO="true";
                 shift;
                 ;;
-        *)      echo "Unknown option $1"
-                help
-                exit 1;
+        *)      if [ "$1" != "" ]; then
+                  echo "Unknown option '$1'"
+        	  help;
+                  exit 1;
+                fi;
         esac
 done
 
