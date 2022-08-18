@@ -8,7 +8,7 @@
 #
 #**************************************************************
 
-VERSION=5.34
+VERSION=5.35
 
 ABILLS_VERSION="0.93"
 VERSION_PREFIX=".06"
@@ -2262,9 +2262,14 @@ fetch_free_distro () {
 
   echo "Fetching ${URL}";
 
-  _fetch abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz "${URL}";
+  if [ ! "abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz" ]; then
+    _fetch abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz "${URL}";
+  fi;
 
   tar zxvf abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz -C /usr/
+
+  echo "Downloaded: abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz";
+  sleep 10;
 
   if [ ! -f /usr/abills/VERSION ]; then
     echo "Can't download ABillS or archive is corrupted. Exit";

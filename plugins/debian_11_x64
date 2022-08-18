@@ -54,7 +54,7 @@ _update() {
 #  Radius
 #*******************************************
 _install_freeradius() {
-	apt-get -y install gcc make libtalloc-dev libmariadb-dev libmariadbclient-dev libmariadb-dev-compat
+	apt-get -y install gcc make libtalloc-dev libmariadb-dev libmariadb-dev-compat
 
 	if [ -d /usr/local/freeradius/ ]; then
 		echo "Radius exists: /usr/local/freeradius/";
@@ -102,6 +102,7 @@ _install_freeradius() {
 	echo "/configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes " > configure_abills
 	make && make install
 
+sleep 100;
 	ln -s /usr/local/freeradius/bin/* /usr/bin/
 	ln -s /usr/local/freeradius/sbin/* /usr/sbin/
 
@@ -182,7 +183,9 @@ EOF
 	chmod +x /etc/init.d/radiusd
 	update-rc.d radiusd defaults
 	update-rc.d radiusd enable
-        service radiusd start
+        systemctl enable radiusd
+        systemctl start radiusd
+#        service radiusd start
         AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
 	cd ${CURRENT_DIR}
 }
