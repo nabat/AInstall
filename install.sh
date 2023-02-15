@@ -8,9 +8,9 @@
 #
 #**************************************************************
 
-VERSION=5.36
+VERSION=5.37
 
-ABILLS_VERSION="0.94"
+ABILLS_VERSION="0.95"
 VERSION_PREFIX=".05"
 
 # LIB FUNCTION
