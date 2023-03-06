@@ -2262,7 +2262,7 @@ fetch_free_distro () {
 
   echo "Fetching ${URL}";
 
-  if [ ! "abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz" ]; then
+  if [ ! -f "abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz" ]; then
     _fetch abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz "${URL}";
   fi;
 
