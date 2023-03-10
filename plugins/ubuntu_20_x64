@@ -64,6 +64,7 @@ _install_apache() {
   a2enmod suexec
   a2enmod include
   a2enmod cgid
+  a2enmod headers
 
   chown -Rf www-data:www-data /usr/abills/cgi-bin
   chown -Rf www-data:www-data /usr/abills/Abills/templates
