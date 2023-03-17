@@ -20,6 +20,7 @@ Support OS:
  - debian_8_x64
  - debian_9_x64
  - debian_10_x64
+ - debian_11_x64
  - freebsd_10_x64
  - freebsd_10_x86
  - freebsd_11_x64
