@@ -3,7 +3,7 @@
 #M update:upgrade:_update
 #M mysql:MySQL:_install mariadb-server mariadb-client
 #M apache:apache:_install apache2 apache2-doc apache2-utils libapache2-mod-perl2
-#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl
+#M perl_modules:Perl_modules:_install libexpat1 ssl-cert cvs libdbi-perl libdbd-mysql-perl libdigest-md4-perl libdigest-sha-perl libcrypt-des-perl libjson-perl
 #M freeradius:Freeradius_Server:_install_freeradius
 #M DHCP:Dhcp_server:_install isc-dhcp-server
 #M flow-tools:Flow-tools,Ipcad:_install_ipn
@@ -648,6 +648,7 @@ post_install () {
   a2enmod ssl;
   a2enmod perl;
   a2enmod cgi;
+  a2enmod headers;
 
   touch /etc/crontab
 
