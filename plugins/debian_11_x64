@@ -30,7 +30,7 @@ PING=/bin/ping
 PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 #Services to check after installation
-PROCESS_LIST="mysql radiusd apache2 flow-capture"
+PROCESS_LIST="mariadbd radiusd apache2 flow-capture"
 
 #******************************************************************
 # PRE INSTALL SECTION. Installing required packages
