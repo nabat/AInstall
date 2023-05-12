@@ -2,16 +2,16 @@
 #**************************************************************
 # ABillS Auto Programs Building
 #
-# Created By ABillS Team 2010-2022
+# Created By ABillS Team 2010-2023
 #
-# UPDATED: 20220830
+# UPDATED: 20230512
 #
 #**************************************************************
 
-VERSION=5.38
+VERSION=5.39
 
-ABILLS_VERSION="0.95"
-VERSION_PREFIX=".28"
+BILLS_VERSION="1.0"
+VERSION_PREFIX=".05"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
@@ -22,7 +22,7 @@ CMD_LOG="/tmp/ports_builder_cmd.log"
 BILLING_DIR='/usr/abills';
 BASE_INSTALL_DIR=${BILLING_DIR}
 BASE_PWD=`pwd`;
-COMMERCIAL_MODULES="Cards Paysys Ashield Maps Storage Iptv"
+COMMERCIAL_MODULES="Cards Paysys Maps Storage Iptv"
 SERVER_HOSTNAME=`hostname`
 DEFAULT_HOSTNAME="aserver"
 DIALOG=dialog
