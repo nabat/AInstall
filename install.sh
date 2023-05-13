@@ -8,9 +8,9 @@
 #
 #**************************************************************
 
-VERSION=5.39
+VERSION=5.40
 
-BILLS_VERSION="1.0"
+BILLS_VERSION="1.00"
 VERSION_PREFIX=".05"
 
 # LIB FUNCTION
@@ -396,7 +396,7 @@ echo "
   -p     use plugin [plugin name]
   -h     This help
   --install-version 81.16 - Install version 0.81.16 instead of $ABILLS_VERSION$VERSION_PREFIX
-  --upgrade 0.78.25  - Upgrade cur version tp 0.78.25
+  --upgrade 0.78.25  - Upgrade cur version to 0.78.25
   --in_tmux - Do not start tmux
 "
   exit;
@@ -2246,7 +2246,7 @@ fetch_free_distro () {
   fi
 
   if [ "${INSTALL_VERSION}" != "" ]; then
-    ABILLS_VERSION=`echo "${INSTALL_VERSION}" | awk -F. '{print "0."$1 }'`;
+    ABILLS_VERSION=`echo "${INSTALL_VERSION}" | awk -F. '{print $1"."$2 }'`;
     VERSION_PREFIX=`echo "${INSTALL_VERSION}" | awk -F. '{print "."$2 }'`;
     URL="https://downloads.sourceforge.net/project/abills/abills/${ABILLS_VERSION}/abills-${ABILLS_VERSION}${VERSION_PREFIX}.tgz";
   elif [ "${TEST_DISTRO}" = "" ]; then
