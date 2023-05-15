@@ -8,7 +8,7 @@
 #
 #**************************************************************
 
-VERSION=5.42
+VERSION=5.43
 
 ABILLS_VERSION="1.00"
 VERSION_PREFIX=".05"
@@ -20,7 +20,7 @@ ${BASEDIR} ./alib.sh
 TMPOPTIONSFILE="/tmp/abills.tmp"
 CMD_LOG="/tmp/ports_builder_cmd.log"
 BILLING_DIR='/usr/abills';
-BASE_INSTALL_DIR=${BILLING_DIR}
+BASE_INSTALL_DIR=$(dirname $0) #${BILLING_DIR}
 BASE_PWD=`pwd`;
 COMMERCIAL_MODULES="Cards Paysys Maps Storage Iptv"
 SERVER_HOSTNAME=`hostname`
@@ -1988,9 +1988,12 @@ fetch_distro(){
       _fetch update.sh "${UPDATE_URL}";
       chmod +x update.sh
     fi;
+
     if [ "${BASE_INSTALL_DIR}" != "" ]; then
       KEY_DIR="-key ${BASE_INSTALL_DIR}"
     fi;
+
+    echo "BASE_INSTALL_DIR: ${BASE_INSTALL_DIR} ";
 
     ./update.sh -git ${KEY_DIR}
   fi;
