@@ -4,13 +4,13 @@
 #
 # Created By ABillS Team 2010-2023
 #
-# UPDATED: 2023051
+# UPDATED: 20230515
 #
 #**************************************************************
 
-VERSION=5.41
+VERSION=5.42
 
-BILLS_VERSION="1.00"
+ABILLS_VERSION="1.00"
 VERSION_PREFIX=".05"
 
 # LIB FUNCTION
@@ -559,11 +559,12 @@ FILE2=`cat fileio.sysbench | tail -1`
 echo "Filesystem write: ${FILE1}"
 echo "Filesystem read : ${FILE2}"
 
-if [ x"${OS}" = xLinux ]; then
-  wget --no-check-certificate "https://support.abills.net.ua/sysbench.cgi?CPU_ONE=$CPU1&CPU_MULT=$CPU2&MEM_WR=$MEM1&MEM_RD=$MEM2&FILE_WR=$FILE1&FILE_RD=$FILE2";
+if [ "${OS}" = Linux ]; then
+   wget --no-check-certificate "https://support.abills.net.ua/sysbench.cgi?CPU_ONE=$CPU1&CPU_MULT=$CPU2&MEM_WR=$MEM1&MEM_RD=$MEM2&FILE_WR=$FILE1&FILE_RD=$FILE2";
 else
- fetch "https://support.abills.net.ua/sysbench.cgi?CPU_ONE=$CPU1&CPU_MULT=$CPU2&MEM_WR=$MEM1&MEM_RD=$MEM2&FILE_WR=$FILE1&FILE_RD=$FILE2";
+  fetch "https://support.abills.net.ua/sysbench.cgi?CPU_ONE=$CPU1&CPU_MULT=$CPU2&MEM_WR=$MEM1&MEM_RD=$MEM2&FILE_WR=$FILE1&FILE_RD=$FILE2";
 fi;
+
 #${DIALOG} --msgbox "Benchmark\n" 20  52
 
 }
