@@ -166,6 +166,7 @@ _install_freeradius() {
 # Provides: radiusd
 # Should-Start: radiusd
 # Should-Stop: radiusd
+# Default-Start: 2 3 4 5
 # Short-Description: start and stop radiusd
 # Description: radiusd is access provider service Daemon.
 ### END INIT INFO
@@ -215,7 +216,7 @@ if [ ! -d $logdir ] ; then
 fi
 
 if [ ! -f $logdir/radius.log ]; then
-        touch $logdir/radius.log
+    touch $logdir/radius.log
 fi
 
 chown ${RADIUS_USER}:${RADIUS_USER} $logdir/radius.log
