@@ -4,11 +4,11 @@
 #
 # Created By ABillS Team 2010-2023
 #
-# UPDATED: 20230515
+# UPDATED: 20230523
 #
 #**************************************************************
 
-VERSION=5.44
+VERSION=5.45
 
 ABILLS_VERSION="1.00"
 VERSION_PREFIX=".05"
@@ -1999,7 +1999,7 @@ fetch_distro(){
 
     echo "BASE_INSTALL_DIR: ${BASE_INSTALL_DIR} ";
 
-    ./update.sh -git ${KEY_DIR}
+    ./update.sh -git ${KEY_DIR} -skip_sql_update
   fi;
 
   echo "${COM_DISTRO} xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
