@@ -65,7 +65,8 @@ pre_install () {
 # Install mysql, set empty password for root in mysql
 #**********************************************************
 _install_mysql(){
-  _install mysql57-server
+
+  _install mysql80-server
   $RESTART_MYSQL onestart
   mysqladmin -u root --password=`tail -1 /root/.mysql_secret` -h localhost password ""
 
@@ -137,7 +138,9 @@ install_mail () {
 #
 #*******************************************
 _install_freeradius(){
-  cd /usr/ports/net/freeradius3 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
+  #cd /usr/ports/net/freeradius3 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
+
+  pkg install freeradius3
 
   AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
 
