@@ -8,7 +8,7 @@
 #
 #**************************************************************
 
-VERSION=5.43
+VERSION=5.44
 
 ABILLS_VERSION="1.00"
 VERSION_PREFIX=".05"
@@ -20,7 +20,11 @@ ${BASEDIR} ./alib.sh
 TMPOPTIONSFILE="/tmp/abills.tmp"
 CMD_LOG="/tmp/ports_builder_cmd.log"
 BILLING_DIR='/usr/abills';
-BASE_INSTALL_DIR=$(dirname $0) #${BILLING_DIR}
+
+if [ "${BASE_INSTALL_DIR}" = "" ]; then
+  BASE_INSTALL_DIR=$(dirname $0) #${BILLING_DIR}
+fi;
+
 BASE_PWD=`pwd`;
 COMMERCIAL_MODULES="Cards Paysys Maps Storage Iptv"
 SERVER_HOSTNAME=`hostname`
