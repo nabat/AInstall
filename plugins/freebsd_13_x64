@@ -138,9 +138,11 @@ install_mail () {
 #
 #*******************************************
 _install_freeradius(){
+  #Build port
   #cd /usr/ports/net/freeradius3 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
 
   pkg install freeradius3
+  pkg install freeradius3-mysql
 
   AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
 
