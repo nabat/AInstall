@@ -12,7 +12,7 @@
 #M FSbackup:FSbackup:_install_fsbackup
 #M Mail:Mail_server:install_mail
 # perl_speedy
-#M utils:Utils:_install vim tmux bash git tcpdump snmp socat
+#M utils:Utils:_install vim tmux bash git tcpdump snmp socat curl
 
 # Variable
 
@@ -30,7 +30,7 @@ PING=/bin/ping
 PATH="${PATH:+$PATH:}/usr/sbin:/sbin"
 
 #Services to check after installation
-PROCESS_LIST="mariadbd radiusd apache2 flow-capture"
+PROCESS_LIST="mariadbd radiusd apache2"
 
 #******************************************************************
 # PRE INSTALL SECTION. Installing required packages
@@ -38,16 +38,16 @@ PROCESS_LIST="mariadbd radiusd apache2 flow-capture"
 pre_install () {
 
   apt-get update
-	apt-get install -yq dialog nano gcc sudo
+  apt-get install -yq dialog nano gcc sudo
 
-	CURRENT_DIR=`pwd`
+  CURRENT_DIR=`pwd`
 }
 
 #*******************************************
 #  Update and upgrade
 #*******************************************
 _update() {
-	apt-get update && apt-get upgrade;
+  apt-get update && apt-get upgrade;
 }
 
 #*******************************************
