@@ -54,13 +54,17 @@ _update() {
 #  Radius
 #*******************************************
 _install_freeradius() {
-	apt-get -y install gcc make libtalloc-dev libmariadb-dev libmariadb-dev-compat
+  apt-get -y install gcc make libtalloc-dev libmariadb-dev libmariadb-dev-compat
 
-	if [ -d /usr/local/freeradius/ ]; then
-		echo "Radius exists: /usr/local/freeradius/";
-		return 0 ;
-	fi;
-  FREERADIUS_VERSION=3.2.0
+  if [ -d /usr/local/freeradius/ ]; then
+    echo "Radius exists: /usr/local/freeradius/";
+    return 0 ;
+  fi;
+
+  if [ "${FREERADIUS_VERSION}" != "" ]; then
+    FREERADIUS_VERSION=3.2.3
+  fi;
+
   PERL_LIB_DIRS="/usr/lib/ /usr/lib/i386-linux-gnu/ /usr/lib64/ /usr/lib/x86_64-linux-gnu/ /usr/lib64/perl5/CORE/ /usr/lib/perl5/5.10.0/x86_64-linux-thread-multi/CORE/ /usr/lib/perl5/CORE/"
 
 	for dir in ${PERL_LIB_DIRS}; do
@@ -95,16 +99,17 @@ _install_freeradius() {
 		exit;
 	fi;
 
-	tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
+  tar zxvf freeradius-server-${FREERADIUS_VERSION}.tar.gz
 
-	cd freeradius-server-${FREERADIUS_VERSION}
-	./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes > 1
-	echo "/configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes " > configure_abills
-	make && make install
+  cd freeradius-server-${FREERADIUS_VERSION}
+  ./configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes > 1
+  echo "/configure --prefix=/usr/local/freeradius --with-rlm-perl-lib-dir=${PERL_LIB_DIR} --with-openssl=no --with-dhcp=yes " > configure_abills
+  make && make install
 
-sleep 100;
-	ln -s /usr/local/freeradius/bin/* /usr/bin/
-	ln -s /usr/local/freeradius/sbin/* /usr/sbin/
+  sleep 100;
+
+  ln -s /usr/local/freeradius/bin/* /usr/bin/
+  ln -s /usr/local/freeradius/sbin/* /usr/sbin/
 
 	#Add user
 	groupadd ${RADIUS_SERVER_USER}

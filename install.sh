@@ -26,7 +26,7 @@ if [ "${BASE_INSTALL_DIR}" = "" ]; then
 fi;
 
 BASE_PWD=`pwd`;
-COMMERCIAL_MODULES="Cards Paysys Maps Storage Iptv"
+COMMERCIAL_MODULES="Cablecat Paysys Maps Storage Iptv"
 SERVER_HOSTNAME=`hostname`
 DEFAULT_HOSTNAME="aserver"
 DIALOG=dialog
@@ -37,7 +37,7 @@ OS=""
 OS_NAME=""
 OS_VERSION=""
 OS_NUM=""
-FREERADIUS_VERSION="3.2.0"
+FREERADIUS_VERSION="3.2.3"
 CURRENT_DIR=""
 PLUGIN_NAME=""
 TOTAL_ARGS=$*
@@ -64,7 +64,7 @@ GetVersionFromFile() {
 # run before install
 #************************************************
 pre_install () {
- echo "default pre_install"
+  echo "default pre_install"
 }
 
 
