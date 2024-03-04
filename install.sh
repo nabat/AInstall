@@ -4,13 +4,13 @@
 #
 # Created By ABillS Team 2010-2023
 #
-# UPDATED: 20230918
+# UPDATED: 20240229
 #
 #**************************************************************
 
-VERSION=5.47
+VERSION=5.48
 
-ABILLS_VERSION="1.10"
+ABILLS_VERSION="1.20"
 VERSION_PREFIX=".00"
 
 # LIB FUNCTION
