@@ -1,0 +1,222 @@
+#OS freebsd 14
+#COMMENTS Freebsd comments
+#M update:upgrade:pkg upgrade -y
+#M mysql:MySQL:_install_mysql
+#M apache:apache:_install_apache
+#M perl_modules:Perl_modules:_install p5-JSON p5-DBI p5-DBD-mysql p5-Digest-MD4 p5-Digest-MD5 p5-PDF-API2 p5-Time-HiRes p5-XML-Simple p5-Spreadsheet-WriteExcel
+#M freeradius:Freeradius_Server:_install_freeradius
+#M dhcp:Dhcp_server:_install isc-dhcp43-server
+#M flow-tools:Flow-tools,Ipcad:_install_ipn
+#M Mail:Mail_server:install_mail
+# MRTG=
+# IPN=
+#M fsbackup:FSBackup:_install_fsbackup
+#M build_kernel:Build_Kernel:freebsd_build_kernel
+# perl_speedy
+#M utils:Utils:_install vim tmux bash git sudo net-snmp socat
+
+# Variable
+
+YES="-y"
+BUILD_OPTIONS=" pkg install ${YES}"
+MYSQLDUMP=/usr/local/bin/mysqldump
+GZIP=/usr/bin/gzip
+
+WEB_SERVER_USER=www
+APACHE_CONF_DIR=/usr/local/etc/apache24/Includes/
+RESTART_MYSQL=/usr/local/etc/rc.d/mysql-server
+RESTART_RADIUS=/usr/local/etc/rc.d/radiusd
+RESTART_APACHE=/usr/local/etc/rc.d/apache24
+RESTART_DHCP=/usr/local/etc/rc.d/isc-dhcpd
+PING=/sbin/ping
+
+#Services to check after installation
+PROCESS_LIST="mysql radiusd httpd flow-capture"
+
+
+#******************************************************************
+# PRE INSTALL SECTION. Installing required packages
+#******************************************************************
+pre_install () {
+  if [ ! -f /usr/bin/perl ];then
+    ln -s /usr/local/bin/perl /usr/bin/perl;
+  fi;
+
+  if [ ! -f /etc/crontab ];then
+      touch /etc/crontab;
+  fi;
+
+  if [ ! -f /etc/make.conf ];then
+      touch /etc/make.conf;
+  fi;
+
+  WITHOUT_X11=`grep 'WITHOUT="X11"' /etc/make.conf`;
+  if [ x'${WITHOUT_X11}' = x'' ]; then
+    echo 'WITHOUT="X11"' >> /etc/make.conf
+    echo 'WITHOUT_GUI=yes' >> /etc/make.conf
+  fi;
+
+  echo >> /etc/rc.conf
+
+  CURRENT_DIR=`pwd`;
+}
+
+#**********************************************************
+# Install mysql, set empty password for root in mysql
+#**********************************************************
+_install_mysql(){
+
+  _install mysql80-server
+  $RESTART_MYSQL onestart
+  mysqladmin -u root --password=`tail -1 /root/.mysql_secret` -h localhost password ""
+
+  echo
+  echo "Set empty password for root in mysql"
+  echo
+
+  rm /root/.mysql_secret
+}
+
+#*******************************************
+# Install mailserver
+#*******************************************
+install_mail () {
+ echo "Install mail server"
+
+ BUILD_OPTIONS="&& make && make install"
+ PORTS_LOCATION="/usr/ports/"
+
+ cmd="cd ${PORTS_LOCATION}/security/cyrus-sasl2 ${BUILD_OPTIONS};";
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/postfix ${BUILD_OPTIONS};";
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/maildrop && make WITH_AUTHLIB=yes MAILDROP_TRUSTED_USERS=vmail MAILDROP_SUID=1005 MAILDROP_SGID=1005 && make install;";
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib-base ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/courier-authlib ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/courier-imap ${BUILD_OPTIONS} ;"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/spamassassin/ ${BUILD_OPTIONS} ;"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/clamav ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/security/amavisd-new ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/mail/squirrelmail ${BUILD_OPTIONS};"
+ cmd=${cmd}" cd ${PORTS_LOCATION}/www/mod_php56 ${BUILD_OPTIONS};"
+
+ if [ "${DEBUG}" != "" ]; then
+   echo "CMD: ${cmd}";
+ fi;
+
+ eval "${cmd}"
+
+ exit;
+
+ #Check apache php support
+ check_apache=`pkg info | grep apache22`
+ if [ "${check_apache}" = "" ]; then
+   APACHE_CONFIG='/usr/local/etc/apache24/httpd.conf'
+ else
+   APACHE_CONFIG='/usr/local/etc/apache22/httpd.conf'
+ fi;
+
+ check_php_conf=`grep 'x-httpd-php' ${APACHE_CONFIG}`
+ if [ w${check_php_conf} = w ]; then
+   echo -n "Can\'t find php in apache config add it? (y/n): "
+   read -p "" PHP_CONF
+   if [ w${PHP_CONF} = wy ]; then
+     echo "AddType application/x-httpd-php .php" >> ${APACHE_CONFIG}
+   fi;
+ fi;
+
+ PHP_INDEX=`grep index.php ${APACHE_CONFIG}`;
+ if [ "${PHP_INDEX}" = "" ]; then
+   cp ${APACHE_CONFIG} ${APACHE_CONFIG}_bak
+   cat ${APACHE_CONFIG}_bak | sed 's/DirectoryIndex index.html/DirectoryIndex index.html index.php/' > ${APACHE_CONFIG}
+ fi;
+
+ AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} postfix"
+ AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} AMAVIS=1 CLAMAV=1"
+}
+
+
+#*******************************************
+#
+#*******************************************
+_install_freeradius(){
+  #Build port
+  #cd /usr/ports/net/freeradius3 && make WITH="MYSQL USER DHCP" WITHOUT="" BATCH=yes install
+
+  pkg install freeradius3
+  pkg install freeradius3-mysql
+
+  AUTOCONF_PROGRAMS_FLAGS="${AUTOCONF_PROGRAMS_FLAGS} FREERADIUS=3"
+
+  cd ${CURRENT_DIR}
+}
+
+#*******************************************
+#
+#*******************************************
+_install_ipn(){
+  _install flow-tools;
+
+  mkdir -p /usr/abills/var/log/ipn/
+  chown -R flowtools /usr/abills/var/log/ipn/
+
+  service flow_capture start;
+}
+
+#*******************************************
+#
+#*******************************************
+_install_apache(){
+
+  _install apache24
+
+  cat << '[EOF_APACHE]' > /usr/local/etc/apache24/modules.d/000_abills_modules.conf
+
+  LoadModule ssl_module libexec/apache24/mod_ssl.so
+  LoadModule rewrite_module libexec/apache24/mod_rewrite.so
+  LoadModule cgi_module libexec/apache24/mod_cgi.so
+
+[EOF_APACHE]
+}
+
+#*******************************************
+#
+#*******************************************
+_install_fsbackup() {
+
+  cd ~ ;
+
+  FSBACKUP_DIR="fsbackup-1.2pl2"
+  FSBACKUP_FILE_NAME="${FSBACKUP_DIR}.tar.gz"
+
+  FSBACKUP_URL="http://www.opennet.ru/dev/fsbackup/src/${FSBACKUP_FILE_NAME}"
+
+  fetch "${FSBACKUP_URL}";
+
+  if [ !-f  ${FSBACKUP_FILE_NAME} ];then
+    echo "#############################################"
+    echo "#########     Can't load FSBackup      ######"
+    echo "#############################################"
+    return
+  fi
+
+  tar zxvf ${FSBACKUP_FILE_NAME};
+  cd ${FSBACKUP_DIR};
+  ./install.pl;
+  mkdir -p /usr/local/fsbackup/archive;
+
+  echo "!/usr/local/fsbackup" >> /usr/local/fsbackup/cfg_example
+  cp /usr/local/fsbackup/create_backup.sh /usr/local/fsbackup/create_backup.sh_back
+  cat /usr/local/fsbackup/create_backup.sh_back | sed 's/config_files=\".*\"/config_files=\"cfg_example\"/' > /usr/local/fsbackup/create_backup.sh
+
+  check_fsbackup_cron=`grep create_backup /etc/crontab`
+  if [ x"${check_fsbackup_cron}" = x ]; then
+    echo "18 4 * * * root /usr/local/fsbackup/create_backup.sh| mail -s \"`uname -n` backup report\" root" >> /etc/crontab
+  fi;
+
+}
+
+#*******************************************
+#
+#*******************************************
+post_install(){
+  cd /usr/abills/misc && perl perldeps.pl pkg -batch
+}
