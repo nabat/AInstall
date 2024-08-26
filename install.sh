@@ -2,15 +2,15 @@
 #**************************************************************
 # ABillS Auto Programs Building
 #
-# Created By ABillS Team 2010-2023
+# Created By ABillS Team 2010-2024
 #
-# UPDATED: 20240229
+# UPDATED: 20240824
 #
 #**************************************************************
 
-VERSION=5.49
+VERSION=5.50
 
-ABILLS_VERSION="1.20"
+ABILLS_VERSION="1.30"
 VERSION_PREFIX=".00"
 
 # LIB FUNCTION
