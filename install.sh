@@ -2,13 +2,13 @@
 #**************************************************************
 # ABillS Auto Programs Building
 #
-# Created By ABillS Team 2010-2024
+# Created By ABillS Team 2010-2025
 #
-# UPDATED: 20240824
+# UPDATED: 20250102
 #
 #**************************************************************
 
-VERSION=5.50
+VERSION=5.51
 
 ABILLS_VERSION="1.30"
 VERSION_PREFIX=".00"
@@ -363,9 +363,11 @@ WEB_SERVER_USER=${WEB_SERVER_USER}
 MYSQLDUMP=${MYSQLDUMP}
 GZIP=${GZIP}
 APACHE_CONF_DIR=${APACHE_CONF_DIR}
+NGINX_CONF_DIR=${NGINX_CONF_DIR}
 RESTART_MYSQL=${RESTART_MYSQL}
 RESTART_RADIUS=${RESTART_RADIUS}
 RESTART_APACHE=${RESTART_APACHE}
+RESTART_NGINX=${RESTART_NGINX}
 RESTART_DHCP=${RESTART_DHCP}
 PING=${PING}
 " > /usr/abills/Abills/programs
@@ -1400,8 +1402,10 @@ OPTIONS="update Update  on
   RESTART_MYSQL=/etc/init.d/mysqld
   RESTART_RADIUS=/etc/init.d/freeradius
   RESTART_APACHE=/etc/init.d/apache2
+  RESTART_NGINX=/etc/init.d/nginx
   RESTART_DHCP=/etc/init.d/isc-dhcp-server
   APACHE_CONF_DIR=/etc/apache2/sites-enabled/
+  NGINX_CONF_DIR=/etc/nginx/sites-enabled/
   FILE_PING='/bin/ping';
 
 case "${OS_NAME}" in
