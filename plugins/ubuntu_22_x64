@@ -23,15 +23,17 @@ MYSQLDUMP=/usr/bin/mysqldump
 GZIP=/bin/gzip
 WEB_SERVER_USER=www-data
 APACHE_CONF_DIR=/etc/apache2/sites-enabled/
+NGINX_CONF_DIR=/etc/nginx/sites-enabled/
 RESTART_MYSQL=/etc/init.d/mysql
 RESTART_RADIUS="service radiusd"
 RESTART_APACHE=/etc/init.d/apache2
+RESTART_NGINX=/etc/init.d/nginx
 #TODO check DHCP service script
 RESTART_DHCP=/etc/init.d/isc-dhcp
 PING=/bin/ping
 
 #Services to check after installation
-PROCESS_LIST="mysql radiusd apache2 flow-capture named"
+PROCESS_LIST="mysql radiusd apache2 flow-capture named nginx"
 
 
 #******************************************************************
@@ -73,6 +75,26 @@ _install_apache() {
   ${RESTART_APACHE} restart
 
   AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} apache "
+}
+
+
+#******************************************************************
+# Nginx Web Server
+#******************************************************************
+_install_nginx() {
+
+  _install fcgiwrap
+  _install nginx
+
+  chown -Rf www-data:www-data /usr/abills/cgi-bin
+  chown -Rf www-data:www-data /usr/abills/Abills/templates
+
+  update-rc.d nginx defaults
+  update-rc.d fcgiwrap defaults
+
+  ${RESTART_NGINX} restart
+
+  AUTOCONF_PROGRAMS="${AUTOCONF_PROGRAMS} nginx "
 }
 
 
