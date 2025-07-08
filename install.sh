@@ -4,14 +4,14 @@
 #
 # Created By ABillS Team 2010-2024
 #
-# UPDATED: 20240824
+# UPDATED: 20250824
 #
 #**************************************************************
 
-VERSION=5.50
+VERSION=5.51
 
-ABILLS_VERSION="1.40"
-VERSION_PREFIX=".03"
+ABILLS_VERSION="1.50"
+VERSION_PREFIX=".01"
 
 # LIB FUNCTION
 BASEDIR=$(dirname $0)
@@ -37,7 +37,7 @@ OS=""
 OS_NAME=""
 OS_VERSION=""
 OS_NUM=""
-FREERADIUS_VERSION="3.2.5"
+FREERADIUS_VERSION="3.2.7"
 CURRENT_DIR=""
 PLUGIN_NAME=""
 TOTAL_ARGS=$*
