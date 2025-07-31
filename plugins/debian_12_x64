@@ -92,7 +92,8 @@ _install_freeradius() {
 
 	RADIUS_SERVER_USER="freerad"
 
-	wget -O freeradius-server-${FREERADIUS_VERSION}.tar.gz ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz
+        FREERADIUS_DOWNLOAD="https://www.freeradius.org/ftp/pub/freeradius/freeradius-server-${FREERADIUS_VERSION}.tar.gz"
+	wget -O freeradius-server-${FREERADIUS_VERSION}.tar.gz ${FREERADIUS_DOWNLOAD}
 
 	if [ ! -f freeradius-server-${FREERADIUS_VERSION}.tar.gz ]; then
 		echo "Can\'t download freeradius. PLease download and install manual";
